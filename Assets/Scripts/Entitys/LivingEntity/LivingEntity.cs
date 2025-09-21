@@ -2,15 +2,11 @@ using UnityEngine;
 
 public class LivingEntity : MapEntity
 {
-    // Start is called once before the first execution of Update after the MonoBehaviour is created
-    void Start()
-    {
-        
-    }
+    EntityData myData;
+    public float attackRange;
 
-    // Update is called once per frame
-    void Update()
+    public EntityData Get_MyData()
     {
-        
+        return myData;
     }
 }

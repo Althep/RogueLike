@@ -12,7 +12,7 @@ public class MapMaker_Divide : MapMaker
         Set_MapSize();
         Dictionary<Vector2Int, Defines.TileType> mapData = new Dictionary<Vector2Int, Defines.TileType>();
         InitMap(mapData);
-        Dividing(0, 0, length, height, 0, mapData);
+        Dividing(0, 0, xSize, ySize, 0, mapData);
         return mapData;
     }
 

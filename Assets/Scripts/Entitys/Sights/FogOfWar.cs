@@ -7,17 +7,23 @@ public class FogOfWar
     Defines.VisibleState myState = Defines.VisibleState.Hidden;
     GameObject myObject;
 
-    FogOfWar(GameObject go)
+    public FogOfWar(GameObject go)
     {
         myObject = go;
+        if(spriteRenderer == null)
+        {
+            spriteRenderer = Utils.GetOrAddComponent<SpriteRenderer>(myObject);
+        }
     }
 
     public void ShotLayCast(GameObject target)
     {
-        
-        RaycastHit2D hit = Physics2D.Raycast(myObject.transform.position, target.transform.position);
+        Vector2 direction = target.transform.position - myObject.transform.position;
+        float dist = Vector2.Distance(myObject.transform.position, target.transform.position);
+        RaycastHit2D hit = Physics2D.Raycast(myObject.transform.position, direction,dist);
 
-        if(hit.transform.gameObject.tag == "Player")
+
+        if(hit.collider !=null && hit.transform.CompareTag("Player"))
         {
             myState = Defines.VisibleState.Visible;
             hasSeen = true;
@@ -27,10 +33,6 @@ public class FogOfWar
             if (hasSeen)
             {
                 myState = Defines.VisibleState.Discovered;
-            }
-            else
-            {
-                myState = Defines.VisibleState.Hidden;
             }
         }
         OnChangeState();

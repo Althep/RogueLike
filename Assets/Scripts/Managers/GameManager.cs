@@ -11,6 +11,7 @@ public class GameManager : MonoBehaviour
     ItemManager itemManager;
     ItemFactory itemFactory;
     PoolManager poolManager;
+    GameObject playerObj;
     void Init()
     {
         if(_instance == null)
@@ -42,7 +43,10 @@ public class GameManager : MonoBehaviour
     }
 
     
-
+    public GameObject Get_PlayerObj()
+    {
+        return playerObj;
+    }
     #region Get_Managers
 
     public DataManager Get_DataManager()

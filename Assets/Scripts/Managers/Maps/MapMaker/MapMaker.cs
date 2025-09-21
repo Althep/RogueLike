@@ -6,8 +6,8 @@ public class MapMaker
 {
     protected int minSize = 40;
     protected int maxSize = 60;
-    public int length;
-    public int height;
+    public int xSize;
+    public int ySize;
 
     public virtual Dictionary<Vector2Int, Defines.TileType> MapMake()
     {
@@ -17,9 +17,9 @@ public class MapMaker
     }
     protected Dictionary<Vector2Int,Defines.TileType> InitMap (Dictionary<Vector2Int,Defines.TileType> mapData)
     {
-        for(int i = 0; i<length; i++)
+        for(int i = 0; i< xSize; i++)
         {
-            for(int j = 0; j<height; j++)
+            for(int j = 0; j< ySize; j++)
             {
                 Vector2Int newKey = new Vector2Int(i, j);
                 mapData.Add(newKey, Defines.TileType.Tile);
@@ -34,17 +34,17 @@ public class MapMaker
 
     int Set_MapLength()
     {
-        length = 10;
-        length = UnityEngine.Random.Range(minSize, maxSize);
+        xSize = 10;
+        xSize = UnityEngine.Random.Range(minSize, maxSize);
 
 
-        return length;
+        return xSize;
     }
     int Set_MapHeight()
     {
-        height = 10;
-        height =  UnityEngine.Random.Range(minSize, maxSize);
-        return height;
+        ySize = 10;
+        ySize =  UnityEngine.Random.Range(minSize, maxSize);
+        return ySize;
     }
 
 

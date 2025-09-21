@@ -4,8 +4,8 @@ using System.Collections.Generic;
 using System.Linq;
 public class MapManager : MonoBehaviour
 {
-    public Dictionary<Defines.MapMakeType,MapMaker> mapMaker = new Dictionary<Defines.MapMakeType, MapMaker>();
-
+    Dictionary<Defines.MapMakeType,MapMaker> mapMaker = new Dictionary<Defines.MapMakeType, MapMaker>();
+    Defines.MapMakeType makerType;
     public Dictionary<Vector2Int, Defines.TileType> mapData = new Dictionary<Vector2Int, Defines.TileType>(); //타일과 벽, 문등을 포함한 맵데이터
     public Dictionary<Vector2Int, Defines.TileType> tileData = new Dictionary<Vector2Int, Defines.TileType>(); //몬스터등을 포함한 맵데이터
     // Start is called once before the first execution of Update after the MonoBehaviour is created
@@ -26,9 +26,9 @@ public class MapManager : MonoBehaviour
         
     }
     
-    MapMaker Get_MapMaker()
+    MapMaker Get_RandomMapMaker()
     {
-        Defines.MapMakeType makerType = Utils.Get_RandomType<Defines.MapMakeType>();
+        makerType = Utils.Get_RandomType<Defines.MapMakeType>();
 
         return mapMaker[makerType];
 
@@ -36,12 +36,12 @@ public class MapManager : MonoBehaviour
 
     void MapMake()
     {
-        mapData = Get_MapMaker().MapMake();
+        mapData = Get_RandomMapMaker().MapMake();
     }
 
     void Set_NewMapData()
     {
-        MapMaker maker = Get_MapMaker();
+        MapMaker maker = Get_RandomMapMaker();
         mapData = maker.MapMake();
     }
     
@@ -50,4 +50,10 @@ public class MapManager : MonoBehaviour
         tileData[originPos] = mapData[originPos];
         tileData[nextPos] = myType;
     }
+
+    public MapMaker Get_MapMaker()
+    {
+        return mapMaker[makerType];
+    }
+    
 }
