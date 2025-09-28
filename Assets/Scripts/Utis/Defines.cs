@@ -41,4 +41,20 @@ public static class Defines
         Hidden
     }
 
+    public enum MoveState
+    {
+        Idle,
+        Move,
+        Attack
+    }
+
+    public enum Language
+    {
+        Kr,
+        En
+    }
+    public enum UI_PrefabType
+    {
+        Confirm
+    }
 }

@@ -8,9 +8,11 @@ public class GameManager : MonoBehaviour
     DataManager dataManager;
     MapManager mapManager;
     MonsterManager monsterManager;
+    UIManager uiManager;
     ItemManager itemManager;
     ItemFactory itemFactory;
     PoolManager poolManager;
+    StringKeyManager stringKeyManager;
     GameObject playerObj;
     void Init()
     {
@@ -41,8 +43,6 @@ public class GameManager : MonoBehaviour
             itemFactory = itemManager.Get_ItemFactory();
         }
     }
-
-    
     public GameObject Get_PlayerObj()
     {
         return playerObj;
@@ -82,5 +82,39 @@ public class GameManager : MonoBehaviour
     {
         return monsterManager;
     }
+
+    public StringKeyManager Get_StringKeyManager()
+    {
+        return stringKeyManager;
+    }
+    #endregion
+    #region Maps
+    public void EntityMove(Vector2Int origin,Vector2Int target,Defines.TileType type)
+    {
+        mapManager.EntityMove(origin, target, type);
+    }
+    #endregion
+    #region UIs
+    public void Bind_UI_PopUp(UI_PopUpObj bindTarget)
+    {
+        uiManager.BindPopUp(bindTarget);
+    }
+    public void PopUpUI(string name)
+    {
+        uiManager.Pop_Up_UI(name);
+    }
+    #endregion
+    #region QuickKeys
+
+    public void Add_MoveKey()
+    {
+
+    }
+
+    public void Add_QuickKey()
+    {
+
+    }
+
     #endregion
 }

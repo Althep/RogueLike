@@ -2,7 +2,7 @@ using UnityEngine;
 
 public class MapEntity:MonoBehaviour
 {
-    Defines.TileType myType;
+    protected Defines.TileType myType;
 
     FogOfWar fogOfWar;
 
