@@ -94,4 +94,10 @@ public static class Utils
         int i = UnityEngine.Random.Range(0, values.Length);
         return (T)values.GetValue(i); // object ¡æ T Ä³½ºÆÃ
     }
+
+    public static T[] Get_Enums<T>(T type) where T : Enum
+    {
+        Array values = Enum.GetValues(typeof(T));
+        return (T[])values;
+    }
 }

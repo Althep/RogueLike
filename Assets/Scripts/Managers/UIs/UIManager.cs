@@ -13,7 +13,7 @@ public class UIManager : MonoBehaviour
 
     UI_ConfirmPanel confirmPanel;
 
-
+    UIPooler uiPooler;
     public void Pop_Up_UI(string button_Name)
     {
         Debug.Log($"Button Name {button_Name}, OpenUI Name {buttonBind[button_Name]}");
@@ -72,5 +72,10 @@ public class UIManager : MonoBehaviour
 
         }
         confirmPanel.Open(confirmAction);
+    }
+
+    public GameObject Get_PoolUI(Defines.UI_PrefabType type,GameObject parents)
+    {
+        return uiPooler.Get(type, parents);
     }
 }

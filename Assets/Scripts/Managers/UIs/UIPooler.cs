@@ -6,10 +6,11 @@ public class UIPooler : MonoBehaviour
 
     [SerializeField] GameObject confirmUIPrefab;
 
-    Dictionary<Defines.UI_PrefabType, GameObject> ui_Prefabs = new Dictionary<Defines.UI_PrefabType, GameObject>();
+    
     Dictionary<Defines.UI_PrefabType, Queue<IPoolUI>> ui_pool = new Dictionary<Defines.UI_PrefabType, Queue<IPoolUI>>();
     Dictionary<Defines.UI_PrefabType, List<IPoolUI>> ui_active = new Dictionary<Defines.UI_PrefabType, List<IPoolUI>>();
 
+    Dictionary<Defines.UI_PrefabType, GameObject> ui_Prefabs = new Dictionary<Defines.UI_PrefabType, GameObject>();
 
     private void Awake()
     {

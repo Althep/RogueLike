@@ -1,8 +1,9 @@
 using UnityEngine;
-
+using System.Collections.Generic;
 public class ItemManager 
 {
     ItemFactory itemFactory;
+
     public void Init()
     {
         if(itemFactory == null)
@@ -15,8 +16,11 @@ public class ItemManager
     {
         return itemFactory;
     }
+
     public ItemBase ItemMake(string id)
     {
         return itemFactory.ItemMake(id);
     }
+
+    
 }

@@ -6,7 +6,7 @@ public class LivingEntity : MapEntity
 {
     GameObject myObj;
     EntityData myData;
-
+    protected RaceData raceData;
     Astar pathFinder;
 
     Vector2Int destination;
@@ -15,6 +15,13 @@ public class LivingEntity : MapEntity
     Defines.MoveState moveState;
 
     [SerializeField]float animSpeed = 10f;
+
+
+    public RaceData Get_RaceData()
+    {
+        return raceData;
+    }
+
     public EntityData Get_MyData()
     {
         return myData;

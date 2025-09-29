@@ -87,6 +87,11 @@ public class GameManager : MonoBehaviour
     {
         return stringKeyManager;
     }
+
+    public UIManager Get_UIManager()
+    {
+        return uiManager;
+    }
     #endregion
     #region Maps
     public void EntityMove(Vector2Int origin,Vector2Int target,Defines.TileType type)
