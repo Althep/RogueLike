@@ -5,7 +5,7 @@ public class ItemBase
     public string id;
     public int itemCount;
     public int maxStack;
-
+    public Defines.ItemCategory category;
 
     public int AddStack(ItemBase item, int amount)
     {

@@ -5,7 +5,7 @@ public class ItemDataManager
 {
     Dictionary<string, ItemBase> itemDatas;
 
-
+    Dictionary<Defines.EquipmentType, Dictionary<int, string>> EquipToTire;
 
     public void Init()
     {
@@ -23,5 +23,10 @@ public class ItemDataManager
     public Dictionary<string,ItemBase> Get_ItemDatas()
     {
         return itemDatas;
+    }
+
+    public Dictionary<Defines.EquipmentType,Dictionary<int,string>> Get_EquipToTire()
+    {
+        return EquipToTire;
     }
 }

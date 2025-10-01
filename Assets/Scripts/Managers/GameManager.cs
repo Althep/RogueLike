@@ -14,6 +14,11 @@ public class GameManager : MonoBehaviour
     PoolManager poolManager;
     StringKeyManager stringKeyManager;
     GameObject playerObj;
+
+    private void Awake()
+    {
+        Init();
+    }
     void Init()
     {
         if(_instance == null)
@@ -42,6 +47,7 @@ public class GameManager : MonoBehaviour
         {
             itemFactory = itemManager.Get_ItemFactory();
         }
+        DontDestroyOnLoad(this);
     }
     public GameObject Get_PlayerObj()
     {

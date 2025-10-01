@@ -58,29 +58,28 @@ public static class Defines
         Confirm,
         MainSelect
     }
-
+    #region Race&Jobs
     public enum Races
     {
         Elf,
         Dwarf,
         Human,
-        Ork
+        Ork,
+        SpellBane,
+        DungeonBorn,
+        StoneBorn,
+        Rabbitfolk
     }
 
     public enum Jobs
     {
         Warrior,
-        Hunter
-    }
-
-    public enum WeaponType
-    {
-        ShortSword
-    }
-    
-    public enum EquipmentType
-    {
-
+        Hunter,
+        Rogue,
+        Mage,
+        BattleMaster,
+        Assassin,
+        Engineer
     }
 
     public enum PaneltyType
@@ -88,9 +87,10 @@ public static class Defines
 
     }
 
-    public enum PaneltyTarget
+    public enum PenaltyTargetType
     {
-
+        Category,
+        Specific
     }
 
     public enum AdvancedType
@@ -102,4 +102,35 @@ public static class Defines
     {
 
     }
+    #endregion
+    #region items
+    public enum WeaponType
+    {
+        ShortSword
+    }
+
+    public enum ItemCategory
+    {
+        Equipment,
+        Consumable,
+        Misc
+    }
+
+    public enum EquipmentType
+    {
+    }
+
+    public enum ConsumableType
+    {
+        Potion,
+        Scroll,
+        Food
+    }
+
+    public enum MiscType
+    {
+
+    }
+    #endregion
+    
 }

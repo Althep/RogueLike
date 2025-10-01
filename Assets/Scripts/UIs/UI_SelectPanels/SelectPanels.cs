@@ -16,8 +16,8 @@ public class SelectPanels : UI_Base
     Defines.Races selectRace = Defines.Races.Elf;
     Defines.Jobs selectJob;
     List<Defines.Jobs> jobList = new List<Defines.Jobs>();
-    List<string> initItems;
-
+    List<string> startItems;
+    string selectItem;
     UIManager uiManager;
 
     Dictionary<Type, Type> subCellBind = new Dictionary<Type, Type>()
@@ -45,6 +45,7 @@ public class SelectPanels : UI_Base
     void Set_My_Selects<T>(T[] array, GameObject parents) where T : Enum
     {
         Type enumType = typeof(T);
+        //T[] array = Utils.Get_Enums(type);
 
         if (subCellBind.TryGetValue(enumType, out Type cellType))
         {
@@ -54,11 +55,24 @@ public class SelectPanels : UI_Base
                 var cell = (SelectSubCell)go.AddComponent(cellType);
 
                 // Enum 값 전달
-                cell.SetMyType(value);
+                cell.SetMyType(value,this);
+                cell.AddButtonFunction();
             }
         }
     }
 
+    public void Set_Job(Defines.Jobs job)
+    {
+        selectJob = job;
+    }
+    public void Set_Race(Defines.Races race)
+    {
+        selectRace = race;
+    }
+    public void Set_Weapon(string value)
+    {
+        selectItem = value;
+    }
     void PanelUpdate()
     {
         
@@ -74,9 +88,28 @@ public class SelectPanels : UI_Base
         selectRace = sp;
         DataManager dm = GameManager.instance.Get_DataManager();
         jobList = dm.racesDataManager.raceJobList[selectRace];
+        Jobs[] jobs = jobList.ToArray();
+
+        Set_My_Selects<Jobs>(jobs, jobSelectPanel);
+        
+    }
+    #region 무기선택세팅
+    void SelectJob(Defines.Jobs job)
+    {
+        startItems.Clear();
+        List<string> selects = FilterWeapons(job);
+        Type enumType = typeof(Defines.WeaponType);
+
+        foreach(var key in selects)
+        {
+            GameObject go = uiManager.Get_PoolUI(Defines.UI_PrefabType.MainSelect, weaponSelectPanel);
+            WeaponSelectCell subcell = Utils.GetOrAddComponent<WeaponSelectCell>(go);
+            subcell.SetMyKey(key);
+            subcell.AddButtonFunction();
+        }
     }
 
-    void SelectJob(Defines.Jobs job)
+    List<string> FilterWeapons(Defines.Jobs job)
     {
         selectJob = job;
 
@@ -84,33 +117,36 @@ public class SelectPanels : UI_Base
         ItemDataManager im = dm.itemDataManager;
 
         // 1. 직업별 초기 지급 아이템 리스트 복사
-        List<string> itemKeys = new List<string>(dm.racesDataManager.jobEquipList[selectJob]);
-
+        List<string> jobItems = new List<string>(dm.racesDataManager.startItems[selectJob]);
+        List<string> selects = new List<string>();
         // 2. 전체 아이템 데이터 가져오기
         Dictionary<string, ItemBase> itemDatas = im.Get_ItemDatas();
 
         // 3. 현재 선택된 종족 데이터 가져오기
         RaceData raceData = dm.racesDataManager.raceDatas[selectRace];
 
-        // 4. 패널티 장비 HashSet 생성 (중복 제거 + 빠른 탐색)
-        HashSet<Defines.EquipmentType> restrictedEquipSet = new HashSet<Defines.EquipmentType>();
-
-        foreach (PaneltyType penalty in raceData.paneltys)
+        foreach(string key in jobItems)
         {
-            if (penalty.restrictEquipment)
-            {
-                restrictedEquipSet.Add(penalty.equipType);
+            if(itemDatas[key] is Weapon)
+            {//무기일경우 선택리스트에 추가
+                if (!raceData.CheckRestriction(itemDatas[key]))
+                {
+                    selects.Add(key);
+                }
             }
+            else
+            {//무기가 아닐경우 초기아이템 리스트에 추가
+                if (!raceData.CheckRestriction(itemDatas[key]))
+                {
+                    startItems.Add(key);
+                }
+            }
+
         }
 
-        // 5. 제한 장비 제거 (단일 루프)
-        itemKeys.RemoveAll(key =>
-            itemDatas.ContainsKey(key) &&
-            itemDatas[key] is EquipItem equipItem &&
-            restrictedEquipSet.Contains(equipItem.equipmentType)
-        );
-
+        return selects;
         // 6. 최종 아이템 리스트 저장
-        initItems = itemKeys;
+        //return startItems = itemKeys;
     }
+    #endregion
 }
