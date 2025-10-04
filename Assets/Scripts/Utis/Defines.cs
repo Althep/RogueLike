@@ -58,7 +58,45 @@ public static class Defines
         Confirm,
         MainSelect
     }
-    #region Race&Jobs
+    #region Modifiers
+    public enum ModifierType
+    {
+        Stat,
+        Item,
+        Action,
+        Enviroment,
+        Buff,
+        Debuff
+    }
+
+    public enum ActionType
+    {
+        None,
+        DamageDealt,
+        DamageTaken,
+        HealTaken,
+        ItemUse,
+        Equip,
+        Move,
+        CastSpell
+    }
+    public enum ItemTargetType
+    {
+        Category,
+        Specific
+    }
+    #endregion
+    public enum StatType
+    {
+        Str,
+        Dex,
+        Int,
+        Evasion,
+        Defense,
+        DamageReduce,
+        Damage
+    }
+
     public enum Races
     {
         Elf,
@@ -82,27 +120,7 @@ public static class Defines
         Engineer
     }
 
-    public enum PaneltyType
-    {
 
-    }
-
-    public enum PenaltyTargetType
-    {
-        Category,
-        Specific
-    }
-
-    public enum AdvancedType
-    {
-
-    }
-
-    public enum AdvancedTarget
-    {
-
-    }
-    #endregion
     #region items
     public enum WeaponType
     {
@@ -118,6 +136,7 @@ public static class Defines
 
     public enum EquipmentType
     {
+
     }
 
     public enum ConsumableType

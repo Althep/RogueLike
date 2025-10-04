@@ -7,15 +7,30 @@ using UnityEditorInternal.VersionControl;
 public class RaceData
 {
     Defines.Races race;
+
     public string disPlayName;
+
     public int bonusDice;
 
     public List<string> startItems;
 
-    public List<Penalty> penalties;
-    public List<AdvanceType> advances;
+    ModifierManager modifierManager = new ModifierManager();
+
+    public List<ModifierContext> modifireContext = new List<ModifierContext>();
+    public List<ModifireSource> modifierSources = new List<ModifireSource>();
 
 
+
+    public bool CanEquip()
+    {
+        foreach(ModifireSource source in modifierSources)
+        {
+            ActionType type = source.ActionType;
+        }
+        return true;
+    }
+
+    /*
     public float GetItemModifier(ItemBase item, List<Penalty> penalties)
     {
         float modifier = 1.0f;
@@ -103,5 +118,5 @@ public class RaceData
             }
         }
         return false;
-    }
+    }*/
 }
