@@ -68,7 +68,18 @@ public static class Defines
         Buff,
         Debuff
     }
-
+    public enum ModifierTriggerType
+    {
+        OnEquip,
+        OnUnequip,
+        OnAttack,
+        OnLevelUp,
+        OnHit,
+        OnActionStart,
+        OnTurnStart,
+        OnUseItem,
+        Passive
+    }
     public enum ActionType
     {
         None,

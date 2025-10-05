@@ -17,6 +17,7 @@ public class LivingEntity : MapEntity
     [SerializeField]float animSpeed = 10f;
 
 
+
     public RaceData Get_RaceData()
     {
         return raceData;
@@ -27,6 +28,17 @@ public class LivingEntity : MapEntity
         return myData;
     }
 
+    #region OnAttack
+    public bool IsEvasion(LivingEntity target)
+    {
+        bool isEvasion = false;
+
+        
+
+        return isEvasion;
+    }
+    #endregion
+    #region move
     protected virtual void Move_To(Vector2Int dest)
     {
         destination = dest;
@@ -83,4 +95,5 @@ public class LivingEntity : MapEntity
         }
         return maxDixtance;
     }
+    #endregion
 }
