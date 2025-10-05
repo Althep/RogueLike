@@ -4,11 +4,11 @@ using System.Linq;
 using static Defines;
 public class ModifierManager
 {
-    private Dictionary<ActionType, List<Modifier>> modifiers = new Dictionary<ActionType, List<Modifier>>();
+    private Dictionary<ModifierTriggerType, List<Modifier>> modifiers = new Dictionary<ModifierTriggerType, List<Modifier>>();
 
     private ModifierContext modifireContext;
 
-    public void AddModifier(ActionType type,Modifier modifier)
+    public void AddModifier(ModifierTriggerType type,Modifier modifier)
     {
         if (!modifiers.ContainsKey(type))
         {
@@ -27,7 +27,7 @@ public class ModifierManager
         
     }
 
-    public float ApplyModifiers(ActionType type, ModifierContext context)
+    public float ApplyModifiers(ModifierTriggerType type, ModifierContext context)
     {
         if(!modifiers.TryGetValue(type, out var list))
         {
@@ -45,7 +45,7 @@ public class ModifierManager
 
 
 
-    public float Calculate(ActionType type,ModifierContext context)
+    public float Calculate(ModifierTriggerType type,ModifierContext context)
     {
         context.ModifiedValue = context.BaseValue;
 

@@ -10,28 +10,40 @@ public class ContainerManager : MonoBehaviour
     public void Init()
     {
         ModifierTriggerType[] triggers = (ModifierTriggerType[])Enum.GetValues(typeof(ModifierTriggerType));
-
+        LivingEntity myEntity = this.gameObject.transform.GetComponent<LivingEntity>();
+        BattleData battleContainer = new BattleData(myEntity);
+        EntityContainer entityContainer = new EntityContainer(myEntity);
+        ItemUserContainer itemUseContainer = new ItemUserContainer(myEntity);
         foreach(ModifierTriggerType trigger in triggers)
         {
             switch (trigger)
             {
                 case ModifierTriggerType.OnEquip:
+                    dataContaners.Add(trigger, itemUseContainer);
                     break;
                 case ModifierTriggerType.OnUnequip:
+                    dataContaners.Add(trigger, itemUseContainer);
                     break;
                 case ModifierTriggerType.OnAttack:
+                    dataContaners.Add(ModifierTriggerType.OnAttack, battleContainer);
                     break;
                 case ModifierTriggerType.OnLevelUp:
+                    dataContaners.Add(trigger, entityContainer);
                     break;
                 case ModifierTriggerType.OnHit:
+                    dataContaners.Add(ModifierTriggerType.OnAttack, battleContainer);
                     break;
                 case ModifierTriggerType.OnActionStart:
+                    dataContaners.Add(trigger, entityContainer);
                     break;
                 case ModifierTriggerType.OnTurnStart:
+                    dataContaners.Add(trigger, entityContainer);
                     break;
                 case ModifierTriggerType.OnUseItem:
+                    dataContaners.Add(trigger, itemUseContainer);
                     break;
                 case ModifierTriggerType.Passive:
+                    dataContaners.Add(trigger, entityContainer);
                     break;
                 default:
                     break;
