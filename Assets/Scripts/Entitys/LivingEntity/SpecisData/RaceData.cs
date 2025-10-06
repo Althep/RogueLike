@@ -16,7 +16,7 @@ public class RaceData
 
     ModifierManager modifierManager = new ModifierManager();
 
-    public List<ModifierContext> modifireContext = new List<ModifierContext>();
+    public ModifierContext modifireContext;
     public List<ModifireSource> modifierSources = new List<ModifireSource>();
 
 
@@ -25,7 +25,7 @@ public class RaceData
     {
         foreach(ModifireSource source in modifierSources)
         {
-            ActionType type = source.ActionType;
+            ModifierTriggerType type = source.triggerType;
         }
         return true;
     }

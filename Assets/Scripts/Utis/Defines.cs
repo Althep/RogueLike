@@ -71,15 +71,17 @@ public static class Defines
     public enum ModifierTriggerType
     {
         OnEquip,
+        OnUseItem,
         OnUnequip,
         OnAttack,
         OnLevelUp,
         OnHit,
         OnActionStart,
         OnTurnStart,
-        OnUseItem,
+        OnSpellCast,
         Passive
     }
+    /*
     public enum ActionType
     {
         None,
@@ -90,7 +92,7 @@ public static class Defines
         Equip,
         Move,
         CastSpell
-    }
+    }*/
     public enum ItemTargetType
     {
         Category,

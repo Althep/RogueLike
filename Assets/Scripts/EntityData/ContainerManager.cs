@@ -42,6 +42,8 @@ public class ContainerManager : MonoBehaviour
                 case ModifierTriggerType.OnUseItem:
                     dataContaners.Add(trigger, itemUseContainer);
                     break;
+                case ModifierTriggerType.OnSpellCast:
+
                 case ModifierTriggerType.Passive:
                     dataContaners.Add(trigger, entityContainer);
                     break;

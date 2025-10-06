@@ -81,3 +81,24 @@ public class ItemUserContainer : IDataContainer
         return value;
     }
 }
+
+public class MagicContainer : IDataContainer
+{
+    public LivingEntity myData;
+    public MagicBase magic;
+    public float value;
+
+    public MagicContainer(LivingEntity livingEntity)
+    {
+        myData = livingEntity;
+    }
+
+    public void SetData(MagicBase magic)
+    {
+        this.magic = magic;
+    }
+    public float Get()
+    {
+        return value;
+    }
+}

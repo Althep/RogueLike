@@ -1,7 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-
+using static Defines;
 public class LivingEntity : MapEntity
 {
     GameObject myObj;
@@ -10,13 +10,12 @@ public class LivingEntity : MapEntity
     Astar pathFinder;
 
     Vector2Int destination;
-    
-
     Defines.MoveState moveState;
 
     [SerializeField]float animSpeed = 10f;
 
-
+    ModifierManager modifierManager;
+    public ModifierContext ModifierContext;
 
     public RaceData Get_RaceData()
     {
@@ -28,6 +27,10 @@ public class LivingEntity : MapEntity
         return myData;
     }
 
+    public void PlayerAction(ModifierTriggerType trigger)
+    {
+        modifierManager.ApplyModifiers(trigger, ModifierContext);
+    }
     #region OnAttack
     public bool IsEvasion(LivingEntity target)
     {
@@ -37,6 +40,14 @@ public class LivingEntity : MapEntity
 
         return isEvasion;
     }
+    #region OnItemUse
+
+    public void UseItem(ItemBase item)
+    {
+        
+    }
+    
+    #endregion
     #endregion
     #region move
     protected virtual void Move_To(Vector2Int dest)

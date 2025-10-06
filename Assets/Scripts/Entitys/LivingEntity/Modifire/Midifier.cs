@@ -5,7 +5,7 @@ public abstract class Modifier
     public string id;
     public string name;
     public Defines.ModifierType type;
-    public Defines.ActionType actionType; // <- ÇÙ½É
+    public Defines.ModifierTriggerType triggerType;
     public int priority;
     public float value;
     public bool isPositive;
@@ -29,16 +29,16 @@ public class StatModifier : Modifier
 
     public override void Apply(ModifierContext context)
     {
-        if (context.StatType == targetStat)
+        if (context.stats.ContainsKey(targetStat))
             context.ModifiedValue += value;
     }
 }
 
 public class ActionModifier : Modifier
 {
-    public ActionType targetAction;
+    public ModifierTriggerType targetAction;
 
-    public ActionModifier(string name, ActionType action, float value, int priority = 100)
+    public ActionModifier(string name, ModifierTriggerType action, float value, int priority = 100)
     {
         this.name = name;
         this.type = ModifierType.Action;
@@ -68,5 +68,16 @@ public class ItemModifier : Modifier
     public override void Apply(ModifierContext context)
     {
         
+    }
+}
+
+public class BuffModifier : Modifier
+{
+    int duration;
+    StatType stat;
+
+    public override void Apply(ModifierContext context)
+    {
+        throw new System.NotImplementedException();
     }
 }
