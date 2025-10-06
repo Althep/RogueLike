@@ -125,23 +125,26 @@ public class SelectPanels : UI_Base
         // 3. 현재 선택된 종족 데이터 가져오기
         RaceData raceData = dm.racesDataManager.raceDatas[selectRace];
 
+        LivingEntity playerEntity = GameManager.instance.Get_PlayerObj().GetComponent<LivingEntity>();
+
+        playerEntity.Set_RaceData(raceData);
+
         foreach(string key in jobItems)
         {
             if(itemDatas[key] is Weapon)
             {//무기일경우 선택리스트에 추가
-                if (!raceData.CheckRestriction(itemDatas[key]))
+                if (!playerEntity.IsRistricted(itemDatas[key]))
                 {
                     selects.Add(key);
                 }
             }
             else
             {//무기가 아닐경우 초기아이템 리스트에 추가
-                if (!raceData.CheckRestriction(itemDatas[key]))
+                if (!playerEntity.IsRistricted(itemDatas[key]))
                 {
                     startItems.Add(key);
                 }
             }
-
         }
 
         return selects;

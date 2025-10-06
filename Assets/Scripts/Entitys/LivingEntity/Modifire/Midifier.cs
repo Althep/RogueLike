@@ -3,78 +3,83 @@ using static Defines;
 public abstract class Modifier
 {
     public string id;
-    public string name;
-    public Defines.ModifierType type;
-    public Defines.ModifierTriggerType triggerType;
+    public ModifierTriggerType triggerType;
+    public StatType stat;
     public int priority;
+    public bool isMulti;
     public float value;
-    public bool isPositive;
-    public string targetTag;
 
     public abstract void Apply(ModifierContext context);
 }
 
 public class StatModifier : Modifier
 {
-    public StatType targetStat;
-
-    public StatModifier(string name, StatType stat, float value, int priority = 50)
+    public StatModifier(string id, StatType stat, int value, float multifle, bool isMulty, int priority = 50)
     {
-        this.name = name;
-        this.type = ModifierType.Stat;
-        targetStat = stat;
+        this.id = id;
+        this.stat = stat;
         this.value = value;
+        this.isMulti = isMulty;
         this.priority = priority;
     }
 
     public override void Apply(ModifierContext context)
     {
-        if (context.stats.ContainsKey(targetStat))
-            context.ModifiedValue += value;
+        if (isMulti)
+        {
+            if (!context.multifle.ContainsKey(stat))
+            {
+                context.multifle.Add(stat, 0f);
+            }
+            context.multifle[stat] += value;
+        }
+        else
+        {
+            if (!context.stats.ContainsKey(stat))
+            {
+                context.stats.Add(stat, 0);
+            }
+            context.stats[stat] += (int)value;
+        }
     }
-}
-
-public class ActionModifier : Modifier
-{
-    public ModifierTriggerType targetAction;
-
-    public ActionModifier(string name, ModifierTriggerType action, float value, int priority = 100)
-    {
-        this.name = name;
-        this.type = ModifierType.Action;
-        this.targetAction = action;
-        this.value = value;
-        this.priority = priority;
-    }
-
-    public override void Apply(ModifierContext context)
-    {
-        if (context.ActionType == targetAction)
-            context.ModifiedValue += value;
-    }
-
 }
 
 public class ItemModifier : Modifier
 {
-    ItemTargetType itemTargetType;
-    ItemCategory itemCategory;
-    
-    public ItemModifier(string name,ItemTargetType targetType,ItemCategory category,float value, int priority)
+    public ItemTargetType itemTargetType;
+    public ItemCategory itemCategory;
+    public bool unEquipable;
+    public ItemModifier(string name, ItemTargetType targetType, ItemCategory category, float value, int priority,bool unEquipable)
     {
-        this.name = name;
-        this.type = ModifierType.Item;
+        this.id = name;
+        this.itemTargetType = targetType;
+        itemCategory = category;
+        this.unEquipable = unEquipable;
     }
     public override void Apply(ModifierContext context)
     {
-        
+        if (isMulti)
+        {
+            if (!context.multifle.ContainsKey(stat))
+            {
+                context.multifle.Add(stat, 0f);
+            }
+            context.multifle[stat] += value;
+        }
+        else
+        {
+            if (!context.stats.ContainsKey(stat))
+            {
+                context.stats.Add(stat, 0);
+            }
+            context.stats[stat] += (int)value;
+        }
     }
 }
 
 public class BuffModifier : Modifier
 {
     int duration;
-    StatType stat;
 
     public override void Apply(ModifierContext context)
     {

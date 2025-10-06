@@ -6,7 +6,7 @@ public class ModifierManager
 {
     private Dictionary<ModifierTriggerType, List<Modifier>> modifiers = new Dictionary<ModifierTriggerType, List<Modifier>>();
 
-    private ModifierContext modifireContext;
+    
 
     public void AddModifier(ModifierTriggerType type,Modifier modifier)
     {
@@ -43,7 +43,10 @@ public class ModifierManager
         return result;
     }
 
-
+    public void ResetModifiers()
+    {
+        modifiers.Clear();
+    }
 
     public float Calculate(ModifierTriggerType type,ModifierContext context)
     {

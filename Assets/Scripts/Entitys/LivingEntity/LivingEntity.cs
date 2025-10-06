@@ -7,6 +7,9 @@ public class LivingEntity : MapEntity
     GameObject myObj;
     EntityData myData;
     protected RaceData raceData;
+
+    private Dictionary<ModifierTriggerType, ModifierContext> modifierContext = new Dictionary<ModifierTriggerType, ModifierContext>();
+
     Astar pathFinder;
 
     Vector2Int destination;
@@ -15,13 +18,29 @@ public class LivingEntity : MapEntity
     [SerializeField]float animSpeed = 10f;
 
     ModifierManager modifierManager;
-    public ModifierContext ModifierContext;
 
     public RaceData Get_RaceData()
     {
         return raceData;
     }
+    public void Set_RaceData(RaceData race)
+    {
+        raceData = null;
+        modifierContext.Clear();
+        modifierManager.ResetModifiers();
+        raceData = race;
 
+        List<Modifier> modifiers = raceData.modifiers;
+
+        for(int i = 0; i<modifiers.Count; i++)
+        {
+            ModifierTriggerType trigger = modifiers[i].triggerType;
+            modifierManager.AddModifier(trigger, modifiers[i]);
+            
+        }
+
+
+    }
     public EntityData Get_MyData()
     {
         return myData;
@@ -29,7 +48,7 @@ public class LivingEntity : MapEntity
 
     public void PlayerAction(ModifierTriggerType trigger)
     {
-        modifierManager.ApplyModifiers(trigger, ModifierContext);
+        modifierManager.ApplyModifiers(trigger, modifierContext[trigger]);
     }
     #region OnAttack
     public bool IsEvasion(LivingEntity target)
@@ -47,6 +66,11 @@ public class LivingEntity : MapEntity
         
     }
     
+    public bool IsRistricted(ItemBase item)
+    {
+        return raceData.IsRestricted(item, modifierContext[ModifierTriggerType.OnEquip]);
+    }
+
     #endregion
     #endregion
     #region move

@@ -27,17 +27,6 @@ public class ContainerManager : MonoBehaviour
                 case ModifierTriggerType.OnAttack:
                     dataContaners.Add(ModifierTriggerType.OnAttack, battleContainer);
                     break;
-                case ModifierTriggerType.OnLevelUp:
-                    dataContaners.Add(trigger, entityContainer);
-                    break;
-                case ModifierTriggerType.OnHit:
-                    dataContaners.Add(ModifierTriggerType.OnAttack, battleContainer);
-                    break;
-                case ModifierTriggerType.OnActionStart:
-                    dataContaners.Add(trigger, entityContainer);
-                    break;
-                case ModifierTriggerType.OnTurnStart:
-                    dataContaners.Add(trigger, entityContainer);
                     break;
                 case ModifierTriggerType.OnUseItem:
                     dataContaners.Add(trigger, itemUseContainer);

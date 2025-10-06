@@ -62,9 +62,6 @@ public static class Defines
     public enum ModifierType
     {
         Stat,
-        Item,
-        Action,
-        Enviroment,
         Buff,
         Debuff
     }
@@ -74,25 +71,10 @@ public static class Defines
         OnUseItem,
         OnUnequip,
         OnAttack,
-        OnLevelUp,
         OnHit,
-        OnActionStart,
-        OnTurnStart,
         OnSpellCast,
         Passive
     }
-    /*
-    public enum ActionType
-    {
-        None,
-        DamageDealt,
-        DamageTaken,
-        HealTaken,
-        ItemUse,
-        Equip,
-        Move,
-        CastSpell
-    }*/
     public enum ItemTargetType
     {
         Category,

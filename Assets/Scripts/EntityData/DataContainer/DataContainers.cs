@@ -101,4 +101,9 @@ public class MagicContainer : IDataContainer
     {
         return value;
     }
+
+    public void Reset()
+    {
+        throw new System.NotImplementedException();
+    }
 }
