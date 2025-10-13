@@ -73,6 +73,7 @@ public static class Defines
         OnAttack,
         OnHit,
         OnSpellCast,
+        OnLevelUp,
         Passive
     }
     public enum ItemTargetType
@@ -91,7 +92,15 @@ public static class Defines
         DamageReduce,
         Damage
     }
-
+    public enum DamageType
+    {
+        Physical,
+        Magic,
+        Fire,
+        Ice,
+        Thunder,
+        Earth
+    }
     public enum Races
     {
         Elf,
