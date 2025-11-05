@@ -12,38 +12,10 @@ public class RaceData
 
     public int bonusDice;
 
-    public List<string> startItems;
+    public List<string> startItems = new List<string>();
 
-    ModifierManager modifierManager = new ModifierManager();
-
-    public ModifierContext modifireContext;
     public List<Modifier> modifiers = new List<Modifier>();
 
-
-
-    public bool CanEquip()
-    {
-        foreach(Modifier modis in modifiers)
-        {
-            ModifierTriggerType type = modis.triggerType;
-        }
-        return true;
-    }
-
-
-    public bool IsRestricted(ItemBase item,ModifierContext context)
-    {
-        bool isRistriced = false;
-
-        float value = modifierManager.ApplyModifiers(ModifierTriggerType.OnEquip, context);
-
-        if (context.ModifiedValue>=0)
-        {
-            isRistriced = true;
-        }
-
-        return isRistriced;
-    }
 
 
 }

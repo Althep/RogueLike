@@ -27,7 +27,6 @@ public class ContainerManager : MonoBehaviour
                 case ModifierTriggerType.OnAttack:
                     dataContaners.Add(ModifierTriggerType.OnAttack, battleContainer);
                     break;
-                    break;
                 case ModifierTriggerType.OnUseItem:
                     dataContaners.Add(trigger, itemUseContainer);
                     break;

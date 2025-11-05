@@ -58,7 +58,7 @@ public static class Utils
         return null;
     }
 
-    public static bool TrySetValue<T>(Dictionary<string, string> data, string key, ref T target)
+    public static bool TrySetValue<T>(Dictionary<string, object> data, string key, ref T target)
     {
         if (data.ContainsKey(key) && data[key] != null)
         {
@@ -75,12 +75,12 @@ public static class Utils
         }
         return false;
     }
-    public static bool TryConvertEnum<T>(Dictionary<string, string> data, string key, ref T target) where T : struct, Enum
+    public static bool TryConvertEnum<T>(Dictionary<string, object> data, string key, ref T target) where T : struct, Enum
     {
         if (data.ContainsKey(key) && data[key] != null)
         {
 
-            if (Enum.TryParse(data[key], true, out target))
+            if (Enum.TryParse(data[key].ToString(), true, out target))
             {
                 return true;
             }
@@ -88,6 +88,9 @@ public static class Utils
         }
         return false;
     }
+
+
+
     public static T Get_RandomType<T>() where T : Enum
     {
         Array values = Enum.GetValues(typeof(T));
@@ -100,4 +103,34 @@ public static class Utils
         Array values = Enum.GetValues(typeof(T));
         return (T[])values;
     }
+
+    public static bool StringToEnum<T>(string data, ref T target) where T : struct, Enum
+    {
+        if (Enum.TryParse<T>(data, true, out target))
+        {
+            return true;
+        }
+        else
+        {
+            return false;
+        }
+    }
+
+    public static Enum Get_ItemSpecificType(string data)
+    {
+        Defines.EquipmentType equip = default;
+        Defines.ConsumableType consum = default;
+        Defines.MiscType misc = default;
+
+        if (StringToEnum(data, ref equip))
+            return equip;
+        else if (StringToEnum(data, ref consum))
+            return consum;
+        else if (StringToEnum(data, ref misc))
+            return misc;
+
+        return null; // 아무 enum에도 해당하지 않을 경우
+    }
+
+    
 }

@@ -10,6 +10,11 @@ public static class UIDefines
         Weapon
     }
 
-    
+    public enum UI_PrefabType
+    {
+        Confirm,
+        MainSelect,
+        ItemSelect
+    }
 
 }

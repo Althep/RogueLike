@@ -9,7 +9,13 @@ public static class Defines
         Drag,
         DragEnd
     }
-
+    public enum PoolScriptType
+    {
+        StatModifier,
+        ItemModifier,
+        BuffModifier,
+        DamageModifier
+    }
     public enum TileType
     {
         Tile,
@@ -53,17 +59,14 @@ public static class Defines
         Kr,
         En
     }
-    public enum UI_PrefabType
-    {
-        Confirm,
-        MainSelect
-    }
+    
     #region Modifiers
     public enum ModifierType
     {
-        Stat,
-        Buff,
-        Debuff
+        StatModifier,
+        ItemModifier,
+        BuffModifier,
+        DamageModifier
     }
     public enum ModifierTriggerType
     {
@@ -84,25 +87,37 @@ public static class Defines
     #endregion
     public enum StatType
     {
+        HP,
+        MaxHP,
         Str,
         Dex,
         Int,
         Evasion,
         Defense,
         DamageReduce,
-        Damage
+        ShieldDefense,
+        Damage,
+        Accuracy,
+        AttackRange,
+        SpellDamage,
+        SpellAccurancy,
+        Disruption,
+        FireResist,
+        IceResist,
+        MagicResist,
+        ThunderResist
     }
     public enum DamageType
     {
         Physical,
-        Magic,
         Fire,
         Ice,
-        Thunder,
-        Earth
+        Magic,
+        Thunder
     }
     public enum Races
     {
+        Default,
         Elf,
         Dwarf,
         Human,
@@ -115,20 +130,33 @@ public static class Defines
 
     public enum Jobs
     {
+        Default,
         Warrior,
         Hunter,
         Rogue,
         Mage,
         BattleMaster,
         Assassin,
+        Wonderer,
         Engineer
     }
 
 
     #region items
+    public enum ItemType
+    {
+        Weapon,
+        Armor,
+        Helm,
+        Glove,
+        Shoose,
+        Ring,
+        Consumable
+    }
     public enum WeaponType
     {
-        ShortSword
+        ShortSword,
+        Sword
     }
 
     public enum ItemCategory
@@ -140,7 +168,19 @@ public static class Defines
 
     public enum EquipmentType
     {
-
+        ShortSword,
+        Sword,
+        Axe,
+        Spear,
+        Blunt,
+        Bow,
+        LightArmour,
+        HeavyArmour,
+        Helmet,
+        Glove,
+        Boots,
+        Ring,
+        Amulet
     }
 
     public enum ConsumableType
@@ -152,7 +192,19 @@ public static class Defines
 
     public enum MiscType
     {
+        MagicWand,
+        EvokeItem
+    }
 
+    public enum SlotType
+    {
+        MainHand,
+        Head,
+        Neck,
+        Body,
+        Back,
+        Hand,
+        Foot
     }
     #endregion
     

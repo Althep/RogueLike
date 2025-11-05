@@ -110,7 +110,7 @@ public class Astar
     {
         while (LastNode.x != (int)myObj.transform.position.x || LastNode.y != (int)myObj.transform.position.y)
         {
-            if (Vector2.Distance(myObj.transform.position, GameManager.instance.Get_PlayerObj().transform.position) <= myEntity.Get_MyData().attackRange)
+            if (Vector2.Distance(myObj.transform.position, GameManager.instance.Get_PlayerObj().transform.position) <= myEntity.GetEntityStat(Defines.ModifierTriggerType.OnAttack)[Defines.StatType.AttackRange]);
             {
                 LastNode = parents[LastNode.y, LastNode.x];
                 path.Add(LastNode);

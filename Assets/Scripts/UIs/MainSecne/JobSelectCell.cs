@@ -1,24 +1,16 @@
 using UnityEngine;
 using UnityEngine.EventSystems;
+using static Defines;
 public class JobSelectCell : SelectSubCell
 {
-    Defines.Jobs selectJob;
+    public Defines.Jobs selectJob;
 
-
-    public override void SetMyType<T>(T type,SelectPanels selectPanels)
-    {
-        base.SetMyType<T>(type, selectPanels);
-        if(type is Defines.Jobs job)
-        {
-            selectJob = job;
-        }
-    }
     public override void AddButtonFunction()
     {
         AddUIEvent(this.gameObject, ButtonFunction, Defines.UIEvents.Click);
     }
     public override void ButtonFunction(PointerEventData evt)
     {
-        selectPanel.Set_Job(selectJob);
+        selectPanel.Select<Jobs>(selectJob,this.gameObject);
     }
 }

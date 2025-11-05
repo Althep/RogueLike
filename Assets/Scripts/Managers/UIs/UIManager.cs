@@ -14,6 +14,28 @@ public class UIManager : MonoBehaviour
     UI_ConfirmPanel confirmPanel;
 
     UIPooler uiPooler;
+
+    private void Awake()
+    {
+        Init();
+    }
+
+
+    private void Init()
+    {
+        if(uiPooler == null)
+        {
+            uiPooler = GameObject.Find("UIPooler").transform.GetComponent<UIPooler>();
+        }
+        if(uiPooler == null)
+        {
+            GameObject go = new GameObject();
+            uiPooler = Utils.GetOrAddComponent<UIPooler>(go);
+            go.name = "UIPooler";
+            GameObject Managers = GameObject.Find("Managers");
+            go.transform.SetParent(Managers.transform);
+        }
+    }
     public void Pop_Up_UI(string button_Name)
     {
         Debug.Log($"Button Name {button_Name}, OpenUI Name {buttonBind[button_Name]}");
@@ -74,8 +96,13 @@ public class UIManager : MonoBehaviour
         confirmPanel.Open(confirmAction);
     }
 
-    public GameObject Get_PoolUI(Defines.UI_PrefabType type,GameObject parents)
+    public GameObject Get_PoolUI(UIDefines.UI_PrefabType type,GameObject parents)
     {
         return uiPooler.Get(type, parents);
+    }
+
+    public void Return_PoolUI(UIDefines.UI_PrefabType type,IPoolUI ui)
+    {
+        uiPooler.Return(type, ui);
     }
 }

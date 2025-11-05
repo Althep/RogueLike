@@ -34,9 +34,26 @@ public class GameManager : MonoBehaviour
             dataManager = new DataManager();
             dataManager.Init();
         }
+        if(uiManager == null)
+        {
+            uiManager = GameObject.Find("UIManager").transform.GetComponent<UIManager>();
+            if(uiManager == null)
+            {
+                GameObject go = new GameObject();
+                go.name = "UIManager";
+                uiManager = Utils.GetOrAddComponent<UIManager>(go);
+
+            }
+        }
         if(poolManager == null)
         {
             poolManager = GameObject.Find("ObjectPooler").transform.GetComponent<PoolManager>();
+            if(poolManager == null)
+            {
+                GameObject go = new GameObject();
+                go.name = "ObjectPooler";
+                poolManager = Utils.GetOrAddComponent<PoolManager>(go);
+            }
         }
         if(itemManager == null)
         {
@@ -47,7 +64,11 @@ public class GameManager : MonoBehaviour
         {
             itemFactory = itemManager.Get_ItemFactory();
         }
-        DontDestroyOnLoad(this);
+        GameObject Managers = GameObject.Find("Managers");
+        if(Managers == this.gameObject.transform.parent)
+        {
+            DontDestroyOnLoad(Managers);
+        }
     }
     public GameObject Get_PlayerObj()
     {

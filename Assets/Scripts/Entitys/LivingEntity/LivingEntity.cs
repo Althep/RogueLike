@@ -5,50 +5,70 @@ using static Defines;
 public class LivingEntity : MapEntity
 {
     GameObject myObj;
-    EntityData myData;
-    protected RaceData raceData;
+    EntityStat myStat;
 
-    private Dictionary<ModifierTriggerType, ModifierContext> modifierContext = new Dictionary<ModifierTriggerType, ModifierContext>();
-
+    //private Dictionary<ModifierTriggerType, ModifierContext> modifierContext = new Dictionary<ModifierTriggerType, ModifierContext>();
+    private Dictionary<SlotType, EquipItem> equipments = new Dictionary<SlotType, EquipItem>();
+    
     Astar pathFinder;
 
     Vector2Int destination;
+
     Defines.MoveState moveState;
 
     [SerializeField]float animSpeed = 10f;
 
-    ModifierManager modifierManager;
+    ModifierController modifierController = new ModifierController();
 
-    public RaceData Get_RaceData()
-    {
-        return raceData;
-    }
+    ModifierContext context;
     public void Set_RaceData(RaceData race)
     {
-        raceData = null;
-        modifierContext.Clear();
-        modifierManager.ResetModifiers();
-        raceData = race;
-
-        List<Modifier> modifiers = raceData.modifiers;
-
-        for(int i = 0; i<modifiers.Count; i++)
+        List<Modifier> modifiers = race.modifiers;
+        foreach(Modifier modi in modifiers)
         {
-            ModifierTriggerType trigger = modifiers[i].triggerType;
-            modifierManager.AddModifier(trigger, modifiers[i]);
-            
+            modifierController.AddModifier(modi);
         }
-
-
     }
-    public EntityData Get_MyData()
+    public EntityStat Get_MyData()
     {
-        return myData;
+        return myStat;
     }
 
-    public void PlayerAction(ModifierTriggerType trigger)
+    public Dictionary<StatType,float> GetEntityStat(ModifierTriggerType trigger)
     {
-        modifierManager.ApplyModifiers(trigger, modifierContext[trigger]);
+        Dictionary<StatType, float> baseStat = myStat.GetBase();
+        Dictionary<StatType, float> finalStat = myStat.GetFinal();
+        finalStat.Clear();
+        ModifierContext context = modifierController.ApplyModifiers(trigger,this.context);
+        ModifierContext passive = modifierController.ApplyModifiers(ModifierTriggerType.Passive,this.context);
+        if(trigger == ModifierTriggerType.Passive)
+        {
+            foreach(var key in baseStat.Keys)
+            {
+                float finalValue = (baseStat[key]+ passive.stats[key])
+                * (1 + passive.multifle[key]);
+
+                if (!finalStat.ContainsKey(key))
+                {
+                    finalStat.Add(key, 0);
+                }
+                finalStat[key] = finalValue;
+            }
+            return finalStat;
+        }
+        foreach (var key in baseStat.Keys)
+        {
+            float finalValue = (baseStat[key] + context.stats[key] + passive.stats[key])
+                * (1 + context.multifle[key] + passive.multifle[key]);
+
+            if (!finalStat.ContainsKey(key))
+            {
+                finalStat.Add(key, 0);
+            }
+            finalStat[key] = finalValue;
+
+        }
+        return finalStat;
     }
     #region OnAttack
     public bool IsEvasion(LivingEntity target)
@@ -59,19 +79,66 @@ public class LivingEntity : MapEntity
 
         return isEvasion;
     }
-    #region OnItemUse
+    #endregion
+    #region Item
+
+    public Dictionary<SlotType, EquipItem> GetEquips()
+    {
+        return equipments;
+    }
+    public StatType Get_WeaponAttribueType()
+    {
+        if (equipments[SlotType.MainHand] != null)
+        {
+            if(equipments[SlotType.MainHand] is Weapon weapon)
+            {
+                return weapon.attributeStat;
+            }
+            return StatType.Str;
+        }
+        else
+        {
+            return StatType.Str;
+        }
+    }
 
     public void UseItem(ItemBase item)
     {
+        if(item is EquipItem equip)
+        {
+
+        }
+    }
+    
+    public bool IsRistricted(ItemBase item,ModifierTriggerType trigger)
+    {
+        return modifierController.IsRestricted(item, trigger);
+    }
+
+    public void ItemEquip(EquipItem target)
+    {
+        SlotType slot = target.slot;
+        
+        if (equipments[slot] != null)
+        {
+            EquipItem origin = equipments[slot];
+
+            List<Modifier> modis = origin.options;
+
+            foreach(Modifier modi in modis)
+            {
+                modifierController.RemoveModifier(modi);
+            }
+        }
+        equipments[slot] = target;
+
+        foreach(Modifier option in target.options)
+        {
+            modifierController.AddModifier(option);
+        }
         
     }
     
-    public bool IsRistricted(ItemBase item)
-    {
-        return raceData.IsRestricted(item, modifierContext[ModifierTriggerType.OnEquip]);
-    }
-
-    #endregion
     #endregion
     #region move
     protected virtual void Move_To(Vector2Int dest)
@@ -131,4 +198,21 @@ public class LivingEntity : MapEntity
         return maxDixtance;
     }
     #endregion
+
+    #region Battle
+    public Dictionary<StatType,float> GetAttackBonus()
+    {
+        return GetEntityStat(ModifierTriggerType.OnAttack);
+    }
+    public ModifierContext GetDefenseBonus()
+    {
+        return modifierController.ApplyModifiers(ModifierTriggerType.OnHit,this.context);
+    }
+
+    public ModifierContext Get_MeleeAttackContext()
+    {
+        return modifierController.ApplyModifiers(ModifierTriggerType.OnAttack, this.context);
+    }
+    #endregion
+
 }

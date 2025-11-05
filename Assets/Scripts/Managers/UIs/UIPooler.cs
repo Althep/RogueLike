@@ -5,12 +5,13 @@ public class UIPooler : MonoBehaviour
 {
 
     [SerializeField] GameObject confirmUIPrefab;
+    [SerializeField] GameObject mainSelectPrefab;
+    [SerializeField] GameObject itemSelectPrefab;
 
-    
-    Dictionary<Defines.UI_PrefabType, Queue<IPoolUI>> ui_pool = new Dictionary<Defines.UI_PrefabType, Queue<IPoolUI>>();
-    Dictionary<Defines.UI_PrefabType, List<IPoolUI>> ui_active = new Dictionary<Defines.UI_PrefabType, List<IPoolUI>>();
+    Dictionary<UIDefines.UI_PrefabType, Queue<IPoolUI>> ui_pool = new Dictionary<UIDefines.UI_PrefabType, Queue<IPoolUI>>();
+    Dictionary<UIDefines.UI_PrefabType, List<IPoolUI>> ui_active = new Dictionary<UIDefines.UI_PrefabType, List<IPoolUI>>();
 
-    Dictionary<Defines.UI_PrefabType, GameObject> ui_Prefabs = new Dictionary<Defines.UI_PrefabType, GameObject>();
+    Dictionary<UIDefines.UI_PrefabType, GameObject> ui_Prefabs = new Dictionary<UIDefines.UI_PrefabType, GameObject>();
 
     private void Awake()
     {
@@ -29,9 +30,17 @@ public class UIPooler : MonoBehaviour
 
     void Binding_Prefabs()
     {
-        if (!ui_Prefabs.ContainsKey(Defines.UI_PrefabType.Confirm) && confirmUIPrefab != null)
+        if (!ui_Prefabs.ContainsKey(UIDefines.UI_PrefabType.Confirm) && confirmUIPrefab != null)
         {
-            ui_Prefabs.Add(Defines.UI_PrefabType.Confirm, confirmUIPrefab);
+            ui_Prefabs.Add(UIDefines.UI_PrefabType.Confirm, confirmUIPrefab);
+        }
+        if(!ui_Prefabs.ContainsKey(UIDefines.UI_PrefabType.MainSelect) && mainSelectPrefab != null)
+        {
+            ui_Prefabs.Add(UIDefines.UI_PrefabType.MainSelect, mainSelectPrefab);
+        }
+        if (!ui_Prefabs.ContainsKey(UIDefines.UI_PrefabType.ItemSelect) && itemSelectPrefab!= null)
+        {
+            ui_Prefabs.Add(UIDefines.UI_PrefabType.ItemSelect, itemSelectPrefab);
         }
         foreach (var key in ui_Prefabs.Keys)
         {
@@ -51,11 +60,11 @@ public class UIPooler : MonoBehaviour
         }
 
     }
-    public Dictionary<Defines.UI_PrefabType, Queue<IPoolUI>> Get_Pool()
+    public Dictionary<UIDefines.UI_PrefabType, Queue<IPoolUI>> Get_Pool()
     {
         return ui_pool;
     }
-    public GameObject Get(Defines.UI_PrefabType type, GameObject parents)
+    public GameObject Get(UIDefines.UI_PrefabType type, GameObject parents)
     {
         if (ui_pool[type].Count > 0)
         {
@@ -77,7 +86,7 @@ public class UIPooler : MonoBehaviour
 
     }
 
-    public void Return(Defines.UI_PrefabType type, IPoolUI ui)
+    public void Return(UIDefines.UI_PrefabType type, IPoolUI ui)
     {
         if (ui_active[type].Contains(ui))
         {
@@ -90,7 +99,7 @@ public class UIPooler : MonoBehaviour
         }
     }
 
-    public void ReturnAll(Defines.UI_PrefabType type)
+    public void ReturnAll(UIDefines.UI_PrefabType type)
     {
         if (!ui_active.ContainsKey(type))
         {
@@ -111,15 +120,21 @@ public class UIPooler : MonoBehaviour
 
     }
 
-    public GameObject CreateNew(Defines.UI_PrefabType type)
+    public GameObject CreateNew(UIDefines.UI_PrefabType type)
     {
 
         GameObject go = null;
 
         switch (type)
         {
-            case Defines.UI_PrefabType.Confirm:
+            case UIDefines.UI_PrefabType.Confirm:
                 go = Instantiate(confirmUIPrefab);
+                break;
+            case UIDefines.UI_PrefabType.MainSelect:
+                go = Instantiate(mainSelectPrefab);
+                break;
+            case UIDefines.UI_PrefabType.ItemSelect:
+                go = Instantiate(itemSelectPrefab);
                 break;
             default:
                 break;

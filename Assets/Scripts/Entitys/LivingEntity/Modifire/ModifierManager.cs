@@ -1,63 +1,140 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using UnityEngine;
 using static Defines;
 public class ModifierManager
 {
-    private Dictionary<ModifierTriggerType, List<Modifier>> modifiers = new Dictionary<ModifierTriggerType, List<Modifier>>();
-
     
+    public Dictionary<Races,List<StatModifier>> raceTrait_Stat = new Dictionary<Races,List<StatModifier>>();
+    public Dictionary<Races, List<ItemModifier>> raceTrait_Item = new Dictionary<Races, List<ItemModifier>>();
+    public Dictionary<Races, List<Jobs>> bandJobDatas = new Dictionary<Races, List<Jobs>>();
+    CSVReader reader;
+    [SerializeField]string dataPath = "StartingData\\";
+    [SerializeField] string jobPath = "BanedJob";
+    [SerializeField] string statTraitPath = "RaceTrait_Stat";
+    [SerializeField] string ItemTraitPath = "RaceTrait_Item";
 
-    public void AddModifier(ModifierTriggerType type,Modifier modifier)
+    public ModifierManager()
     {
-        if (!modifiers.ContainsKey(type))
-        {
-            modifiers.Add(type, new List<Modifier>());
-        }
-        modifiers[type].Add(modifier);
-        modifiers[type].Sort((a,b)=>a.priority.CompareTo(b.priority));
+        Init();
     }
 
-    public void RemoveModifier(Modifier modifier)
+    public void Init()
     {
-        foreach(var type in modifiers.Keys)
+        ReadDatas();
+    }
+    public void SetCSVReader()
+    {
+        if(reader == null)
         {
-            modifiers[type].Remove(modifier);
+            reader = GameManager.instance.Get_DataManager().csvReader;
         }
-        
     }
 
-    public float ApplyModifiers(ModifierTriggerType type, ModifierContext context)
+    public void ReadDatas()
     {
-        if(!modifiers.TryGetValue(type, out var list))
-        {
-            return context.ModifiedValue;
-        }
-        float result = context.ModifiedValue;
-
-        foreach(var modifier in list)
-        {
-            modifier.Apply(context);
-            result = context.ModifiedValue;
-        }
-        return result;
+        SetCSVReader();
+        ReadJobDatas();
+        ReadStatTrait();
+        ReadItemTrait();
     }
 
-    public void ResetModifiers()
+    public void ReadJobDatas()
     {
-        modifiers.Clear();
-    }
-
-    public float Calculate(ModifierTriggerType type,ModifierContext context)
-    {
-        context.ModifiedValue = context.BaseValue;
-
-        // 우선순위 기준으로 정렬 후 순차적 적용
-        foreach(var mod in modifiers[type])
+        string path = dataPath + "BanedJob";
+        var temp = reader.Read(path);
+        for(int i = 0; i < temp.Count; i++)
         {
-            mod.Apply(context);
+            string groupKey = temp[i]["groupKey"].ToString();
+            string data = temp[i]["value"].ToString();
+            Jobs value = Jobs.Default;
+            Races race = Races.Default;
+            Utils.TryConvertEnum<Races>(temp[i],"groupKey", ref race);
+            Utils.TryConvertEnum<Jobs>(temp[i],"value",ref value);
+            if(value == Jobs.Default) // 변환 실패 했을 경우
+            {
+                Debug.Log("JobError");
+            }
+            if(race == Races.Default)
+            {
+                Debug.Log("Race Error");
+            }
+            if (!bandJobDatas.ContainsKey(race))
+            {
+                bandJobDatas.Add(race, new List<Jobs>());
+                bandJobDatas[race].Add(Jobs.Default);
+            }
+            if (!bandJobDatas[race].Contains(value))
+            {
+                bandJobDatas[race].Add(value);
+            }
         }
 
-        return context.ModifiedValue;
     }
+
+    public void ReadStatTrait()
+    {
+        string path = dataPath + "RaceTrait_Stat";
+        var temp = reader.Read(path);
+        for(int i = 0; i < temp.Count; i++)
+        {
+            StatModifier stat = new StatModifier();
+            Races race = Races.Default;
+            Utils.TryConvertEnum<Races>(temp[i],"Race", ref race);
+            if(race == Races.Default)
+            {
+                Debug.Log($"Race Convert Error {temp[i]["Race"]}");
+                return;
+            }
+            if (!raceTrait_Stat.ContainsKey(race))
+            {
+                raceTrait_Stat.Add(race, new List<StatModifier>());
+            }
+            raceTrait_Stat[race].Add(stat);
+            stat.id = temp[i]["ID"].ToString();
+            Utils.TryConvertEnum<ModifierTriggerType>(temp[i], "ModifierTrigger", ref stat.triggerType);
+            Utils.TryConvertEnum<StatType>(temp[i],"StatType", ref stat.stat);
+            Utils.TrySetValue<int>(temp[i], "Priority",ref stat.priority);
+            Utils.TrySetValue<bool>(temp[i], "isMulti", ref stat.isMulti);
+            Utils.TrySetValue<float>(temp[i], "Value", ref stat.value);
+        }
+    }
+
+    public void ReadItemTrait()
+    {
+        string path = dataPath + "RaceTrait_Item";
+        var temp = reader.Read(path);
+        for(int i = 0; i < temp.Count; i++)
+        {
+            ItemModifier im = new ItemModifier();
+            Races race = Races.Default;
+            Utils.TryConvertEnum<Races>(temp[i], "Race", ref race);
+            if (race == Races.Default)
+            {
+                Debug.Log("Race Convert Error");
+                return;
+            }
+            if (!raceTrait_Item.ContainsKey(race))
+            {
+                raceTrait_Item.Add(race, new List<ItemModifier>());
+            }
+            raceTrait_Item[race].Add(im);
+            Utils.TrySetValue<string>(temp[i],"ID",ref im.id);
+            Utils.TrySetValue<bool>(temp[i],"isMulti", ref im.isMulti);
+            Utils.TrySetValue<float>(temp[i],"Value", ref im.value);
+            Utils.TrySetValue<bool>(temp[i],"UnEquipable", ref im.unEquipable);
+            Utils.TrySetValue<int>(temp[i],"Priority", ref im.priority);
+            Utils.TryConvertEnum<StatType>(temp[i],"StatType", ref im.stat);
+            Utils.TryConvertEnum<ItemTargetType>(temp[i],"ItemTargetType", ref im.itemTargetType);
+            Utils.TryConvertEnum<ModifierTriggerType>(temp[i],"ModifierTrigger", ref im.triggerType);
+            Utils.TryConvertEnum<ItemCategory>(temp[i],"ItemCategory", ref im.itemCategory);
+            im.specificType = Utils.Get_ItemSpecificType(temp[i]["SpecificType"].ToString());
+            if(im.specificType == null)
+            {
+                Debug.Log($"Scpecific Type Error! {temp[i]["SpecificType"].ToString()}");
+            }
+        }
+    }
+
 }

@@ -2,14 +2,13 @@ using UnityEngine;
 using UnityEngine.EventSystems;
 public class RaceSelectCell : SelectSubCell
 {
-    Defines.Races selectRace;
-
-    public override void SetMyType<T>(T type,SelectPanels selectPanels)
+    public Defines.Races race;
+    public override void SetMyType<T>(T type,SelectSubPanel subpanel)
     {
-        base.SetMyType<T>(type, selectPanels);
+        base.SetMyType<T>(type,subpanel);
         if(type is Defines.Races race)
         {
-            selectRace = race;
+            this.race = race;
         }
     }
     public override void AddButtonFunction()
@@ -18,6 +17,10 @@ public class RaceSelectCell : SelectSubCell
     }
     public override void ButtonFunction(PointerEventData pev)
     {
-        selectPanel.Set_Race(selectRace);
+        selectPanel.Select(race,this.gameObject);
+    }
+    public override void Return()
+    {
+        base.Return();
     }
 }

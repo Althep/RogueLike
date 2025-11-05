@@ -5,20 +5,28 @@ using System.Linq;
 public class DataManager 
 {
     Dictionary<string, ItemBase> itemDatas = new Dictionary<string, ItemBase>();
-
+    public CSVReader csvReader = new CSVReader();
     
-    
-
-    public RacesDataManager racesDataManager { get; private set; }
-
+    public StartDataManager startDataManager { get; private set; }
+    public ModifierManager modifierManager;
     public ItemDataManager itemDataManager; 
     public void Init()
     {
-        if(racesDataManager == null)
+        if(itemDataManager == null)
         {
-            racesDataManager = new RacesDataManager();
-            racesDataManager.Init();
+            itemDataManager = new ItemDataManager();
         }
+        if(startDataManager == null)
+        {
+            startDataManager = new StartDataManager();
+        }
+        if(modifierManager == null)
+        {
+            modifierManager = new();
+        }
+        itemDataManager.Init();
+        modifierManager.Init();
+        startDataManager.Init();
     }
 
 

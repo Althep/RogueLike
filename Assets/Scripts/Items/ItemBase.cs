@@ -1,12 +1,14 @@
 using UnityEngine;
-
-public class ItemBase 
+using System;
+using System.Collections.Generic;
+public abstract class ItemBase 
 {
     public string id;
+    public string name;
     public int itemCount;
     public int maxStack;
     public Defines.ItemCategory category;
-
+    public List<Modifier> options;
     public int AddStack(ItemBase item, int amount)
     {
         int overflow = 0;
@@ -29,7 +31,7 @@ public class ItemBase
 
     public bool CanStack(int amount)
     {
-        return itemCount + amount < maxStack;
+        return category == Defines.ItemCategory.Consumable;
     }
 
     public int ReturnRest(int amount)
@@ -43,4 +45,5 @@ public class ItemBase
 
         return rest;
     }
+    public abstract Enum GetSpecificType();
 }
