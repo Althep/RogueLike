@@ -97,6 +97,7 @@ public class UIPooler : MonoBehaviour
             ui_pool[type].Enqueue(ui);
             ui.Return();
         }
+        ui.Get().SetActive(false);
     }
 
     public void ReturnAll(UIDefines.UI_PrefabType type)

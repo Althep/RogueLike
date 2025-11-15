@@ -15,6 +15,11 @@ public class ModifierManager
     [SerializeField] string statTraitPath = "RaceTrait_Stat";
     [SerializeField] string ItemTraitPath = "RaceTrait_Item";
 
+    public ModifierFactory modifierFactory;
+
+    public ModifierPooler modifierPooler;
+
+    public StartDataManager startDataManager;
     public ModifierManager()
     {
         Init();
@@ -23,6 +28,21 @@ public class ModifierManager
     public void Init()
     {
         ReadDatas();
+        if(modifierFactory == null)
+        {
+            modifierFactory = new ModifierFactory();
+            
+        }
+        if(modifierPooler == null)
+        {
+            modifierPooler = new ModifierPooler();
+            modifierPooler.Set_ModifierManager(this);
+        }
+        if(startDataManager == null)
+        {
+            startDataManager = new StartDataManager();
+            startDataManager.Init();
+        }
     }
     public void SetCSVReader()
     {

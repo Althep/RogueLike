@@ -4,7 +4,7 @@ using static Defines;
 public class ItemFactory 
 {
     ItemDataManager itemDataManager;
-    ScriptPoolManager scpool;
+     ModifierPooler pooler;
 
     public ItemBase ItemMake(string name)
     {
@@ -14,6 +14,10 @@ public class ItemFactory
         {
             case Defines.ItemCategory.Equipment:
                 item = new EquipItem();
+                if(origin is EquipItem)
+                {
+                    
+                }
                 break;
             case Defines.ItemCategory.Consumable:
                 item = new ConsumableItem();
@@ -24,7 +28,6 @@ public class ItemFactory
             default:
                 Debug.Log("ItemCategoryError");
                 return null;
-                break;
         }
         foreach (Modifier modi in origin.options)
         {
@@ -32,7 +35,7 @@ public class ItemFactory
 
             // Pool에서 해당 타입 객체 가져오기
             PoolScriptType poolType = (PoolScriptType)Enum.Parse(typeof(PoolScriptType), modType.ToString());
-            IPoolScript pooled = scpool.Get(poolType);
+            IPoolScript pooled = pooler.GetModifier(modType,origin.id);
 
             if (pooled is Modifier newOne)
             {
@@ -44,6 +47,7 @@ public class ItemFactory
                 Debug.LogError($"Pool returned wrong type for {modType}");
             }
         }
+        
         return item;
     }
 }

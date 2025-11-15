@@ -3,8 +3,8 @@ RTS_1,Passive,Dex,50,FALSE,1,Elf
 RTS_2,Passive,Str,50,FALSE,-1,Elf
 RTS_3,Passive,Int,50,FALSE,1,Elf
 RTS_4,Passive,Str,50,FALSE,1,Dwarf
-RTS_5,Passive,Str,50,FALSE,2,Ork
-RTS_6,Passive,Int,50,FALSE,-1,Ork
+RTS_5,Passive,Str,50,FALSE,2,Orc
+RTS_6,Passive,Int,50,FALSE,-1,Orc
 RTS_7,Passive,Str,50,FALSE,-1,DungeonBorn
 RTS_8,Passive,Dex,50,FALSE,-1,DungeonBorn
 RTS_9,Passive,Int,50,FALSE,-1,DungeonBorn

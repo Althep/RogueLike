@@ -6,6 +6,7 @@ using static Defines;
 public class ItemSelectCell : SelectSubCell
 {
     [SerializeField] string itemKey;
+    ItemSlotListCell myParents;
     SlotType slot;
     public override void SetMyType<T>(T type, SelectSubPanel panel)
     {
@@ -20,19 +21,28 @@ public class ItemSelectCell : SelectSubCell
     {
         itemKey = key;
     }
-
-    public override void AddButtonFunction()
+    public void SetMyParents(ItemSlotListCell myParents)
     {
-        base.AddButtonFunction();
+        this.myParents = myParents;
+        Debug.Log("SetParents");
     }
+    
 
     public override void ButtonFunction(PointerEventData pev)
     {
-        if(selectPanel is ItemSelectPanel panel)
-        {
-            panel.SelectItem(itemKey, slot,this.gameObject);
-        }
-        
-    }
+        Debug.Log($"[ItemSelectCell] selectPanel Type = {selectPanel?.GetType().Name}");
+        Function();
 
+
+
+    }
+    public void Function()
+    {
+        if (selectPanel is ItemSelectPanel panel)
+        {
+            panel.SelectItem(itemKey, slot, this.gameObject);
+            myParents.Select(itemKey, this.gameObject);
+            Debug.Log("111");
+        }
+    }
 }

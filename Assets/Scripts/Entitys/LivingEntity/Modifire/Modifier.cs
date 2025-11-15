@@ -27,7 +27,6 @@ public class Modifier : IPoolScript
     }
     public virtual void Copy(Modifier newOne)
     {
-        
         newOne.poolType = this.poolType;
         newOne.id = this.id;
         newOne.triggerType = this.triggerType;
@@ -172,7 +171,7 @@ public class ItemModifier : Modifier
 
 public class BuffModifier : Modifier
 {
-    int duration;
+    public int duration;
     public BuffModifier()
     {
         modifierType = ModifierType.BuffModifier;

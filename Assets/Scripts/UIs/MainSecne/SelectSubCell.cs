@@ -4,10 +4,10 @@ using System;
 using System.Collections.Generic;
 public class SelectSubCell : UI_Base,IPoolUI
 {
-    protected SelectSubPanel selectPanel;
+    [SerializeField] protected SelectSubPanel selectPanel;
 
     protected UI_StringKeyController myTextController;
-    UIManager uiManager;
+    protected UIManager uiManager;
 
     private void Awake()
     {
@@ -57,7 +57,7 @@ public class SelectSubCell : UI_Base,IPoolUI
 
     public GameObject Get()
     {
-        throw new NotImplementedException();
+        return this.gameObject;
     }
 
     public virtual void Return()

@@ -32,6 +32,7 @@ public class ItemDataManager
             Utils.TrySetValue<string>(temp[i], "ID", ref ID);
             string Name = null;
             Utils.TrySetValue<string>(temp[i], "Name", ref Name);
+            Debug.Log($"Item Name {Name} ID : {ID}");
             if (!itemDatas.ContainsKey(Name))
             {
                 EquipItem equip = new EquipItem();

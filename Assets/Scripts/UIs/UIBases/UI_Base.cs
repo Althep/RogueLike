@@ -60,7 +60,7 @@ public class UI_Base : MonoBehaviour
     {
 
         UI_EventController evt = Utils.GetOrAddComponent<UI_EventController>(go);
-        
+        evt.OnClickHandler = null;
         switch (type)
         {
             case Defines.UIEvents.Click:

@@ -4,13 +4,12 @@ using System;
 using TMPro;
 public class UI_ConfirmPanel : UI_Base
 {
-    [SerializeField] GameObject confirmButton;
-    [SerializeField] GameObject cancelButton;
+    [SerializeField] protected GameObject confirmButton;
+    [SerializeField] protected GameObject cancelButton;
 
-    [SerializeField]UI_StringKeyController confirmText;
+    [SerializeField] protected UI_StringKeyController confirmText;
 
-    Action myAction;
-
+    protected Action myAction;
     private void Awake()
     {
         AddUIEvent(confirmButton, OnClickConfirm, Defines.UIEvents.Click);
@@ -27,19 +26,19 @@ public class UI_ConfirmPanel : UI_Base
     }
 
     // 패널 닫기
-    public void Close()
+    public virtual void Close()
     {
-        myAction = null;   // 리셋
+        myAction = null;   // 리셋 
         gameObject.SetActive(false);
     }
 
-    private void OnClickConfirm(PointerEventData evt)
+    protected virtual void OnClickConfirm(PointerEventData evt)
     {
         myAction?.Invoke();
         Close(); // 확인 후 닫기 (원하면 유지도 가능)
     }
 
-    private void OnClickCancel(PointerEventData evt)
+    protected virtual void OnClickCancel(PointerEventData evt)
     {
         Close(); // 취소는 단순 닫기
     }

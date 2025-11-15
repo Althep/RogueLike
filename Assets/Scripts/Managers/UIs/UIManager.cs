@@ -13,7 +13,7 @@ public class UIManager : MonoBehaviour
 
     UI_ConfirmPanel confirmPanel;
 
-    UIPooler uiPooler;
+    [SerializeField]UIPooler uiPooler;
 
     private void Awake()
     {

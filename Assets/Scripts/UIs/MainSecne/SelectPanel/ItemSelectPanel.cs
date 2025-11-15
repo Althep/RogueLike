@@ -13,10 +13,11 @@ public class ItemSelectPanel : SelectSubPanel
     Dictionary<SlotType, ItemSlotListCell> itemScrolls = new Dictionary<SlotType, ItemSlotListCell>();
     JobSelectPanel jobSelectPanel;
     RaceSelectPanel raceSelectPanel;
+    
     public override void OnAwake()
     {
         base.OnAwake();
-        InitMenu();
+        //InitMenu();
     }
 
     public void OnEnable()
@@ -25,9 +26,13 @@ public class ItemSelectPanel : SelectSubPanel
     }
     public void OnDisable()
     {
-        
+        ReturnMyPools();
     }
-
+    public void Init()
+    {
+        OnAwake();
+        InitMenu();
+    }
     protected override void InitMenu()
     {
         base.InitMenu();
@@ -46,7 +51,13 @@ public class ItemSelectPanel : SelectSubPanel
     public void MakePanels()
     {
         startEquips = FilterItems();
-
+        foreach(SlotType slot in startEquips.Keys)
+        {
+            foreach(string value in startEquips[slot])
+            {
+                Debug.Log($"Start Item Keys {value}");
+            }
+        }
         foreach (SlotType slot in startEquips.Keys)
         {
             AddItemSlotList(slot);
@@ -67,6 +78,8 @@ public class ItemSelectPanel : SelectSubPanel
             {
                 Debug.Log("ItemSlotListCell IPoolUI 아님");
             }
+            cell.Init(slot, startEquips[slot]);
+            cell.SetMyType(slot, this);
         }
         else
         {
@@ -76,6 +89,7 @@ public class ItemSelectPanel : SelectSubPanel
                 myPools.Add(cell);
             }
             cell.Init(slot, startEquips[slot]);
+            cell.SetMyType(slot, this);
         }
         if (!itemScrolls.ContainsKey(slot))
         {
@@ -102,6 +116,12 @@ public class ItemSelectPanel : SelectSubPanel
         Dictionary<string, ItemBase> itemDatas = im.Get_ItemDatas();
 
         // 3. 현재 선택된 종족 데이터 가져오기
+        if(selectJob == Jobs.Default)
+        {
+            Debug.Log("JobInit Error Change To Warrior");
+            selectJob = Jobs.Warrior;
+        }
+        
         RaceData raceData = dm.startDataManager.raceDatas[selectRace];
 
         List<Modifier> modifiers = raceData.modifiers;
@@ -151,6 +171,7 @@ public class ItemSelectPanel : SelectSubPanel
     }
     public void SelectItem(string key, SlotType slot,GameObject go)
     {
+        
         if (!selectItems.ContainsKey(slot))
         {
             selectItems.Add(slot, key);
@@ -158,14 +179,6 @@ public class ItemSelectPanel : SelectSubPanel
         else
         {
             selectItems[slot] = key;
-        }
-        if (itemScrolls.ContainsKey(slot))
-        {
-            itemScrolls[slot].Select(key, go);
-        }
-        else
-        {
-            Debug.Log($"ItemScroll null Key {slot}");
         }
     }
     public override void ReturnMyPools()

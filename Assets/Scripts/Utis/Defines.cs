@@ -9,6 +9,12 @@ public static class Defines
         Drag,
         DragEnd
     }
+    public enum Scenes
+    {
+        MainScene,
+        DungeonScene,
+        EndingScene
+    }
     public enum PoolScriptType
     {
         StatModifier,
@@ -121,7 +127,7 @@ public static class Defines
         Elf,
         Dwarf,
         Human,
-        Ork,
+        Orc,
         SpellBane,
         DungeonBorn,
         StoneBorn,

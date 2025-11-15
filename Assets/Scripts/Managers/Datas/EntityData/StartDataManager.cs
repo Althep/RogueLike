@@ -134,8 +134,15 @@ public class StartDataManager
                 bannedJobs = new List<Jobs>();
             }
             var bannedSet = new HashSet<Jobs>(bannedJobs);
+            bannedSet.Add(Jobs.Default);
             raceJobList[race] = jobs.Where(job => !bannedSet.Contains(job))
                 .ToList();
+
+            foreach(var bandJ in bannedSet)
+            {
+                Debug.Log($"Race :{race} Baned Job :{bandJ}");
+            }
+            
         }
 
     }
@@ -174,7 +181,7 @@ public class StartDataManager
             }
             else
             {
-                Debug.Log("Slot Convert Error");
+                Debug.Log($"Slot Convert Error ID : {temp[i]["Item"].ToString()} {temp[i]["Slot"].ToString()}");
                 continue;
             }
             if (Utils.TrySetValue<string>(temp[i], "Item", ref item))

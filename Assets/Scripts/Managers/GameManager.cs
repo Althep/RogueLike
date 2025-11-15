@@ -5,14 +5,16 @@ public class GameManager : MonoBehaviour
 
     GameManager _instance;
     public static GameManager instance;
-    DataManager dataManager;
-    MapManager mapManager;
-    MonsterManager monsterManager;
-    UIManager uiManager;
-    ItemManager itemManager;
-    ItemFactory itemFactory;
-    PoolManager poolManager;
-    StringKeyManager stringKeyManager;
+    [SerializeField] DataManager dataManager;
+    [SerializeField] MapManager mapManager;
+    [SerializeField] MonsterManager monsterManager;
+    [SerializeField] UIManager uiManager;
+    [SerializeField] ItemManager itemManager;
+    [SerializeField] ItemFactory itemFactory;
+    [SerializeField] PoolManager poolManager;
+    [SerializeField] StringKeyManager stringKeyManager;
+    [SerializeField] SceneController sceneController;
+    [SerializeField] GameObject playerPrefab;
     GameObject playerObj;
 
     private void Awake()
@@ -64,6 +66,10 @@ public class GameManager : MonoBehaviour
         {
             itemFactory = itemManager.Get_ItemFactory();
         }
+        if(sceneController == null)
+        {
+            sceneController = new SceneController();
+        }
         GameObject Managers = GameObject.Find("Managers");
         if(Managers == this.gameObject.transform.parent)
         {
@@ -72,6 +78,10 @@ public class GameManager : MonoBehaviour
     }
     public GameObject Get_PlayerObj()
     {
+        if(playerObj == null)
+        {
+            playerObj = Instantiate(playerPrefab);
+        }
         return playerObj;
     }
     #region Get_Managers
