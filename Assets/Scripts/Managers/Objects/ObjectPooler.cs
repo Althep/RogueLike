@@ -1,6 +1,7 @@
 using UnityEngine;
 using System;
 using System.Collections.Generic;
+using Cysharp.Threading.Tasks;
 public class ObjectPooler 
 {
     Dictionary<Defines.TileType, List<GameObject>> activePool = new Dictionary<Defines.TileType, List<GameObject>>();
@@ -17,6 +18,7 @@ public class ObjectPooler
     GameObject monsterPrefab;
     GameObject itemPrefab;
 
+    Transform mapObjParentTr;
     public ObjectPooler
         (
         GameObject tilePrepab,
@@ -44,6 +46,11 @@ public class ObjectPooler
 
     }
 
+    public void SetObjectParent(GameObject go)
+    {
+        mapObjParentTr = go.transform;
+    }
+
     public void Return(Defines.TileType type, GameObject target)
     {
         DictionaryCheck(type);
@@ -52,9 +59,36 @@ public class ObjectPooler
         {
             inactivePool[type].Enqueue(target);
         }
+        target.SetActive(false);
 
     }
+    public async UniTask PreWarmObjects()
+    {
+        int countFrame = 50;
+        // 직접 CreateNew를 호출하여 inactivePool에 바로 삽입
+        await WarmUp(Defines.TileType.Tile, 1500, countFrame);
+        await WarmUp(Defines.TileType.Wall, 500, countFrame);
+    }
 
+    private async UniTask WarmUp(Defines.TileType type, int amount, int batchSize)
+    {
+        DictionaryCheck(type);
+        for (int i = 0; i < amount; i++)
+        {
+            GameObject go = CreateNew(type);
+            go.SetActive(false); // 미리 꺼둠
+            if (inactivePool.ContainsKey(type))
+            {
+                inactivePool[type].Enqueue(go);
+            }
+            else
+            {
+                inactivePool.Add(type, new Queue<GameObject>());
+            }
+
+            if (i % batchSize == 0) await UniTask.Yield();
+        }
+    }
     public GameObject Get(Defines.TileType type)
     {
         DictionaryCheck(type);
@@ -69,6 +103,7 @@ public class ObjectPooler
         }
 
         activePool[type].Add(go);
+        go.SetActive(true);
         return go;
     }
     GameObject CreateNew(Defines.TileType type)
@@ -111,6 +146,7 @@ public class ObjectPooler
                 go = new GameObject();
                 break;
         }
+        go.transform.SetParent(mapObjParentTr);
         return go;
     }
 

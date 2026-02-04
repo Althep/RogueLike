@@ -4,25 +4,27 @@ using System.Collections.Generic;
 using static Defines;
 public class ModifierPooler
 {
-    Dictionary<ModifierType, Dictionary<string,Queue<IPoolScript>>> inactiveModifiers = new Dictionary<ModifierType, Dictionary<string, Queue<IPoolScript>>>();
+    public Dictionary<ModifierType, Dictionary<string, Queue<IPoolScript>>> inactiveModifiers = new Dictionary<ModifierType, Dictionary<string, Queue<IPoolScript>>>();
 
-    Dictionary<ModifierType, Dictionary<string, List<IPoolScript>>> activeModifiers = new Dictionary<ModifierType, Dictionary<string, List<IPoolScript>>>();
+    public Dictionary<ModifierType, Dictionary<string, List<IPoolScript>>> activeModifiers = new Dictionary<ModifierType, Dictionary<string, List<IPoolScript>>>();
 
     ModifierManager modifierManager;
+    ModifierFactory modifierFactory;
 
-
-    public void Set_ModifierManager(ModifierManager MM)
+    public void Set_ModifierManager(ModifierManager MM,ModifierFactory MF)
     {
         modifierManager = MM;
+        modifierFactory = MF;
+        modifierFactory = modifierManager.GetModifierFactory();
     }
 
-    public IPoolScript GetModifier(ModifierType type,string id)
+    public IPoolScript GetModifier(ModifierType type, string id)
     {
 
         IPoolScript value;
         if (!inactiveModifiers.ContainsKey(type))
         {
-            inactiveModifiers[type] = new Dictionary<string,Queue<IPoolScript>>();
+            inactiveModifiers.Add(type, new Dictionary<string, Queue<IPoolScript>>());
             if (!inactiveModifiers[type].ContainsKey(id))
             {
                 inactiveModifiers[type].Add(id, new Queue<IPoolScript>());
@@ -30,67 +32,87 @@ public class ModifierPooler
         }
         if (!activeModifiers.ContainsKey(type))
         {
-            activeModifiers[type] = new Dictionary<string, List<IPoolScript>>();
+            activeModifiers.Add(type, new Dictionary<string, List<IPoolScript>>());
             if (!activeModifiers[type].ContainsKey(id))
             {
                 activeModifiers[type].Add(id, new List<IPoolScript>());
             }
+        }
+        if (!inactiveModifiers.ContainsKey(type))
+        {
+            inactiveModifiers.Add(type, new Dictionary<string, Queue<IPoolScript>>());
+        }
+        if (!inactiveModifiers[type].ContainsKey(id))
+        {
+            inactiveModifiers[type].Add(id, new Queue<IPoolScript>());
         }
         if (inactiveModifiers[type][id].Count < 1)
         {
-            CreateNew(type,id);
+            CreateNew(type, id);
         }
         value = inactiveModifiers[type][id].Dequeue();
-        if(activeModifiers[type] == null)
+        if (activeModifiers[type] == null)
         {
-            activeModifiers[type] = new Dictionary<string, List<IPoolScript>>();
-            if (!activeModifiers[type].ContainsKey(id))
-            {
-                activeModifiers[type].Add(id, new List<IPoolScript>());
-            }
+            activeModifiers[type] = new Dictionary<string, List<IPoolScript>>();   
+        }
+        if (!activeModifiers[type].ContainsKey(id))
+        {
+            activeModifiers[type].Add(id, new List<IPoolScript>());
         }
         activeModifiers[type][id].Add(value);
         return value;
     }
 
-    public IPoolScript CreateNew(ModifierType type,string id)
+    public IPoolScript CreateNew(ModifierType type, string id)
     {
         IPoolScript modifier = null;
+        if(modifierFactory == null)
+        {
+            Debug.Log("모디파이어 팩토리 널!");
+            modifierFactory = modifierManager.GetModifierFactory();
+        }
         switch (type)
         {
             case ModifierType.StatModifier:
                 modifier = new StatModifier();
                 if (modifier is StatModifier)
                 {
-                    modifierManager.modifierFactory.Modifiers[id].Copy((StatModifier)modifier);
+                    modifierFactory.CreateModifier(id).Copy((StatModifier)modifier);
                 }
-                
+
                 break;
             case ModifierType.ItemModifier:
                 modifier = new ItemModifier();
                 if (modifier is ItemModifier)
                 {
-                    modifierManager.modifierFactory.Modifiers[id].Copy((ItemModifier)modifier);
+                    modifierFactory.CreateModifier(id).Copy((ItemModifier)modifier);
                 }
                 break;
             case ModifierType.BuffModifier:
                 modifier = new BuffModifier();
                 if (modifier is BuffModifier)
                 {
-                    modifierManager.modifierFactory.Modifiers[id].Copy((BuffModifier)modifier);
+                    modifierFactory.CreateModifier(id).Copy((BuffModifier)modifier);
                 }
                 break;
             case ModifierType.DamageModifier:
                 modifier = new DamageModifier();
-                if(modifier is DamageModifier)
+                if (modifier is DamageModifier)
                 {
-                    modifierManager.modifierFactory.Modifiers[id].Copy((DamageModifier)modifier);
+                    modifierFactory.CreateModifier(id).Copy((DamageModifier)modifier);
+                }
+                break;
+            case ModifierType.ActionModifier:
+                modifier = new ActionModifier();
+                if(modifier is ActionModifier)
+                {
+                    modifierFactory.CreateModifier(id).Copy((ActionModifier)modifier);
                 }
                 break;
             default:
                 break;
         }
-        
+
         //modifier.SetScriptType(type);
         if (!inactiveModifiers.ContainsKey(type))
         {
@@ -115,14 +137,14 @@ public class ModifierPooler
         if (!inactiveModifiers.ContainsKey(type))
         {
             inactiveModifiers.Add(type, new Dictionary<string, Queue<IPoolScript>>());
-            if(!inactiveModifiers[type].ContainsKey(id))
+            if (!inactiveModifiers[type].ContainsKey(id))
             {
                 inactiveModifiers[type].Add(id, new Queue<IPoolScript>());
             }
-            
+
         }
         inactiveModifiers[type][id].Enqueue(script);
-        
+
     }
 
 }

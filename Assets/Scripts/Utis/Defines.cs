@@ -1,4 +1,52 @@
 using UnityEngine;
+using System;
+#region classes
+public class BuffInstance : IPoolScript
+{
+    public LivingEntity target;
+    public int endTurn;
+    public Modifier modifier;
+    public Action removalAction;
+    Defines.PoolScriptType poolType;
+    public BuffInstance(LivingEntity target,Modifier modifier, int duration, int currentTurn, Action removal)
+    {
+        this.target = target;
+        this.modifier = modifier;
+        this.endTurn = currentTurn + duration;
+        this.removalAction = removal;
+    }
+    public BuffInstance()
+    {
+
+    }
+    public void SetMyData(LivingEntity target, Modifier modifier, int duration, int currentTurn, Action removal)
+    {
+        this.target = target;
+        this.modifier = modifier;
+        this.endTurn = currentTurn + duration;
+        this.removalAction = removal;
+    }
+    public Defines.PoolScriptType GetScriptType()
+    {
+        return poolType;
+    }
+
+    public void Reset()
+    {
+        target = null;
+        endTurn = 0;
+        modifier = null;
+        removalAction = null;
+    }
+
+    public void SetScriptType(Defines.PoolScriptType type)
+    {
+        poolType = type;
+    }
+}
+
+
+#endregion
 
 public static class Defines
 {
@@ -20,7 +68,10 @@ public static class Defines
         StatModifier,
         ItemModifier,
         BuffModifier,
-        DamageModifier
+        DamageModifier,
+        BuffInstance,
+        StatAddEffect,
+        StatBuffEffect
     }
     public enum TileType
     {
@@ -38,7 +89,11 @@ public static class Defines
     
     public enum MapMakeType
     {
-        Divide
+        Divide,
+        Saved,
+        CellularAutomata,
+        Prim,
+        BSP
     }
 
     public enum DungeonTheme
@@ -65,14 +120,21 @@ public static class Defines
         Kr,
         En
     }
-    
+    #region
+    public enum EntityForm
+    {
+        Humanoid, 
+        Animal
+    }
+    #endregion
     #region Modifiers
     public enum ModifierType
     {
         StatModifier,
         ItemModifier,
         BuffModifier,
-        DamageModifier
+        DamageModifier,
+        ActionModifier
     }
     public enum ModifierTriggerType
     {
@@ -80,10 +142,14 @@ public static class Defines
         OnUseItem,
         OnUnequip,
         OnAttack,
-        OnHit,
+        OnHited,
         OnSpellCast,
         OnLevelUp,
-        Passive
+        Passive,
+        OnMove,
+        AfterAttack,
+        OnTurnEnd,
+        StartMove
     }
     public enum ItemTargetType
     {
@@ -91,10 +157,13 @@ public static class Defines
         Specific
     }
     #endregion
+    #region Ä³¸¯ÅÍ
     public enum StatType
     {
         HP,
         MaxHP,
+        MP,
+        MaxMP,
         Str,
         Dex,
         Int,
@@ -103,15 +172,23 @@ public static class Defines
         DamageReduce,
         ShieldDefense,
         Damage,
-        Accuracy,
+        Accurancy,
         AttackRange,
         SpellDamage,
         SpellAccurancy,
+        SpellSpeed,
         Disruption,
-        FireResist,
+        FireResist, 
         IceResist,
         MagicResist,
-        ThunderResist
+        ThunderResist,
+        Vision,
+        Sound,
+        MoveSpeed,
+        AttackSpeed,
+        Exp,
+        Regeneration,
+        Tir
     }
     public enum DamageType
     {
@@ -146,8 +223,27 @@ public static class Defines
         Wonderer,
         Engineer
     }
-
-
+    public enum ActionEffectType
+    {
+        StatAdd,
+        BuffEffect,
+        SlotBlock
+    }
+    public enum EStatusEffect
+    {
+        Poison,
+        Confuse,
+        Slow,
+        Haste,
+        Petrification
+    }
+    
+    public enum StatuseType
+    {
+        Buff,
+        Debuff
+    }
+    #endregion
     #region items
     public enum ItemType
     {
@@ -210,8 +306,15 @@ public static class Defines
         Body,
         Back,
         Hand,
-        Foot
+        Foot,
+        SubHand
     }
     #endregion
-    
+    #region Monster
+    public enum SpawnType
+    {
+        Solo,
+        Group
+    }
+    #endregion
 }

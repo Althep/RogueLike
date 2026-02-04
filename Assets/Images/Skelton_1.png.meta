@@ -197,7 +197,10 @@ TextureImporter:
     secondaryTextures: []
     spriteCustomMetadata:
       entries: []
-    nameFileIdTable: {}
+    nameFileIdTable:
+      Skelton_1_0: -2684662799446805830
+      Skelton_1_1: 2937410462147611819
+      Skelton_1_2: -6145027692936222975
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 

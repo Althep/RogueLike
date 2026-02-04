@@ -8,23 +8,32 @@ public class InventoryData
     [SerializeField]
     public List<ItemBase> inventory = new List<ItemBase>();
     public int maxInventory = 40;
-    ItemManager itemManager;
+    private ItemManager itemManager;
     //public InventoryItemPanel inventoryUI;
     int gold;
 
-
+    
 
     public void AddinInventory(ItemBase item)
     {
         Debug.Log("Added Item Invoke");
+        if(itemManager == null)
+        {
+            itemManager = GameManager.instance.Get_ItemManager();
+        }
         DataManager dataManager = GameManager.instance.Get_DataManager();
         Dictionary<string, ItemBase> itemData = dataManager.Get_ItemData();
-        if (item == null || !itemData.ContainsKey(item.id))
+        if(itemData == null)
         {
-            
+            Debug.Log("ItemData Null");
+        }
+        Debug.Log($"item name : {item.name}");
+        /*
+        if (item == null || !itemData.ContainsKey(item.name))
+        {
             Debug.Log("Item Id isn't Contain or item is Null");
             return;
-        }
+        }*/
         ItemBase addedItem = OnGetCountCheck(item);
         if (addedItem == null)
         {

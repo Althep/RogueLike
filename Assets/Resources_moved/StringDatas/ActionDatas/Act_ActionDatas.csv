@@ -1,0 +1,2 @@
+ID,ActionType,StringValue,IsMuti,ModifierTrigger,ModifierType,Priority
+Weapon_TwoHand,SlotBlock,SubHand,FALSE,Passive,ActionModifier,50

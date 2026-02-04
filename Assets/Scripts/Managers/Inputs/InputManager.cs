@@ -6,5 +6,13 @@ public class InputManager:MonoBehaviour
 
     InputController inputController;
 
+    private void Start()
+    {
+        
+    }
 
+    private void Update()
+    {
+        
+    }
 }

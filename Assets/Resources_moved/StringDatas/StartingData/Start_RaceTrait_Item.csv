@@ -1,0 +1,25 @@
+ID,ModifierTigger,StatType,Priority,isMulti,Value,ItemTargetType,ItemCategory,UnEquipable,SpecificType,Race
+RTI_1,OnEquip,Def,50,FALSE,1,Specific,Equipment,TRUE,Light Armour,Elf
+RTI_2,OnEquip,Atk,50,FALSE,1,Specific,Equipment,TRUE,Sword,Elf
+RTI_3,OnEquip,Acc,50,FALSE,1,Specific,Equipment,TRUE,Sword,Elf
+RTI_4,OnEquip,Def,100,TRUE,0.1,Specific,Equipment,TRUE,Light Armour,Elf
+RTI_5,OnEquip,Atk,100,TRUE,0.1,Specific,Equipment,TRUE,Sword,Elf
+RTI_6,OnEquip,Atk,50,FALSE,1,Specific,Equipment,TRUE,Bow,Elf
+RTI_7,OnEquip,Acc,50,FALSE,1,Specific,Equipment,TRUE,Bow,Elf
+RTI_8,OnEquip,Atk,100,TRUE,0.1,Specific,Equipment,TRUE,Bow,Elf
+RTI_9,OnEquip,Acc,100,TRUE,0.1,Specific,Equipment,TRUE,Bow,Elf
+RTI_10,OnEquip,Atk,50,FALSE,1,Specific,Equipment,TRUE,Axe,Dwarf
+RTI_11,OnEquip,Atk,100,TRUE,0.1,Specific,Equipment,TRUE,Axe,Dwarf
+RTI_12,OnEquip,Acc,50,FALSE,1,Specific,Equipment,TRUE,Axe,Dwarf
+RTI_13,OnEquip,Def,50,FALSE,1,Specific,Equipment,TRUE,HeavyArmour,Dwarf
+RTI_14,OnEquip,Def,50,FALSE,0.1,Specific,Equipment,TRUE,HeavyArmour,Dwarf
+RTI_15,OnEquip,DamageReduce,50,FALSE,1,Specific,Equipment,TRUE,HeavyArmour,Dwarf
+RTI_16,OnEquip,Atk,50,FALSE,2,Specific,Equipment,TRUE,Axe,Ork
+RTI_17,OnEquip,Atk,50,FALSE,2,Specific,Equipment,TRUE,Blunt,Ork
+RTI_18,OnEquip,Atk,50,FALSE,1,Specific,Equipment,TRUE,Blunt,StoneBorn
+RTI_19,OnEquip,Def,50,TRUE,-1,Specific,Equipment,TRUE,HeavyArmour,Rabbitfolk
+RTI_20,OnEquip,Atk,50,FALSE,1,Specific,Equipment,TRUE,ShortSword,Rabbitfolk
+RTI_21,OnEquip,Acc,50,TRUE,0.1,Specific,Equipment,TRUE,ShortSword,Rabbitfolk
+RTI_22,OnEquip,Acc,50,FALSE,1,Specific,Equipment,TRUE,ShortSword,Rabbitfolk
+RTI_23,OnEquip,Atk,50,TRUE,0.1,Specific,Equipment,TRUE,ShortSword,Rabbitfolk
+RTI_24,OnItemUse,Value,0,TRUE,-0.1,Specific,Consumable,TRUE,Potion,StoneBorn

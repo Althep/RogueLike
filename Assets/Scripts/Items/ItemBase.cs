@@ -7,8 +7,10 @@ public abstract class ItemBase
     public string name;
     public int itemCount;
     public int maxStack;
+    public int tier;
     public Defines.ItemCategory category;
-    public List<Modifier> options;
+    public float weight;
+    public List<Modifier> options = new List<Modifier>();
     public int AddStack(ItemBase item, int amount)
     {
         int overflow = 0;

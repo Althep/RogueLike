@@ -197,7 +197,10 @@ TextureImporter:
     secondaryTextures: []
     spriteCustomMetadata:
       entries: []
-    nameFileIdTable: {}
+    nameFileIdTable:
+      Devil_1_0: 7361893253669169354
+      Devil_1_1: -7353738299516173498
+      Devil_1_2: -5270012114556193762
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 

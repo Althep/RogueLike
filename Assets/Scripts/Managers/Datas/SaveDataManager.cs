@@ -12,6 +12,8 @@ public class SaveDataManager : MonoBehaviour
     MonsterManager monsterManager;
     ItemManager itemManager;
     // Start is called once before the first execution of Update after the MonoBehaviour is created
+
+    
     List<string> fileNames = new List<string>();
 
     public void JsonSave<T>(T saveClass, string fileName)

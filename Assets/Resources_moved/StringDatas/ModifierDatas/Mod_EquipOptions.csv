@@ -1,0 +1,17 @@
+ID,ModifierType,StringValue,IsMuti,ModifierTrigger,Priority,ActionName
+Weapon_Damage,StatModifier,Damage,FALSE,Passive,50,null
+Weapon_DamageMuti,StatModifier,Damage,TRUE,Passive,100,null
+Weapon_Accurancy,StatModifier,Accurancy,FALSE,Passive,50,null
+Weapon_AccurancyMuti,StatModifier,Accurancy,TRUE,Passive,100,null
+Weapon_Inchant,StatModifier,Damage,FALSE,Passive,50,null
+Weapon_Inchant,StatModifier,Accurancy,FALSE,Passive,50,null
+Weapon_AttackSpeed,StatModifier,AttackSpeed,FALSE,Passive,50,null
+Weapon_MagicDamage,StatModifier,MagicDamage,FALSE,Passive,50,null
+Weapon_MagicAccurancy,StatModifier,MagicAccurancy,FALSE,Passive,50,null
+Weapon_AttackRange,StatModifier,AttackRange,FALSE,Passive,50,null
+Weapon_TwoHand,ActionModifier,SubHand,FALSE,Passive,50,Weapon_TwoHand
+Weapon_SpellSpeed,StatModifier,SpellSpeed,FALSE,Passive,50,null
+Armor_Def,StatModifier,Def,FALSE,Passive,50,null
+Armor_Ev,StatModifier,Ev,FALSE,Passive,50,null
+Armor_DamageReduce,StatModifier,DamageReduce,FALSE,Passive,50,null
+Armor_Disruption,StatModifier,Disruption,FALSE,Passive,50,null

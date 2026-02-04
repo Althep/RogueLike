@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using UnityEngine;
+using Cysharp.Threading.Tasks;
 using static Defines;
 
 public class MapMaker_Divide : MapMaker
@@ -7,13 +8,25 @@ public class MapMaker_Divide : MapMaker
     int maxCount = 5;
     int dividingMin = 80;
     int dividingMax = 120;
-    public override Dictionary<Vector2Int, Defines.TileType> MapMake()
+
+    public MapMaker_Divide(MapManager mapManager)
     {
+        makerType = MapMakeType.Divide;
+        this.mapManager = mapManager;
+    }
+    public async override UniTask<Dictionary<Vector2Int, Defines.TileType>> MapMake()
+    {
+        Debug.Log("디바이딩 맵생성 실행 ! ");
         Set_MapSize();
-        Dictionary<Vector2Int, Defines.TileType> mapData = new Dictionary<Vector2Int, Defines.TileType>();
+        Debug.Log($"맵사이즈 세팅 X : {xSize} Y : {ySize}");
+        TileType[,] mapData = new TileType[xSize,ySize];
         InitMap(mapData);
-        Dividing(0, 0, xSize, ySize, 0, mapData);
-        return mapData;
+        await Dividing(0, 0, xSize, ySize, 0, mapData);
+        TwistDungeon(mapData);
+        MapBorder(mapData);
+        
+        MakeRandomStair(mapData);
+        return ArrayToDictionary(mapData);
     }
 
     int Get_AroumdHalf(int target)
@@ -26,128 +39,119 @@ public class MapMaker_Divide : MapMaker
         return value; 
     }
 
-    public void Dividing(int startX, int startY,int endX,int endY,int count,Dictionary<Vector2Int,Defines.TileType> mapData)
+    public async UniTask Dividing(int startX, int startY,int endX,int endY,int count,TileType[,] mapData)
     {
-        if(count < maxCount && endX - startX>5 && endY-startY>5)
+        int intervalCount = 500;
+        if (count < maxCount && endX - startX>5 && endY-startY>5)
         {
             if((endX - startX) > (endY-startY))
             {
-                count++;
+                //count++;
                 int divided = ((startX+endX)*UnityEngine.Random.Range(dividingMin, dividingMax)) / 200;
-                divided = RerollDivied(startX,endX,divided);
+                
+                divided = RerollDivide(startX,endX,divided);
+                
                 for(int y = startY; y<endY; y++)
                 {
-                    Vector2Int pos = new Vector2Int(divided, y);
-                    if (mapData.ContainsKey(pos))
+                    mapData[divided, y] = TileType.Wall;
+                    if(y%intervalCount == 0)
                     {
-                        mapData[pos] = Defines.TileType.Wall;
-                    }
-                    else
-                    {
-                        mapData.Add(pos, Defines.TileType.Wall);
+                        await UniTask.Yield();
                     }
                 }
+
                 int door = UnityEngine.Random.Range(startY, endY);
                 Vector2Int doorPos = new Vector2Int(divided, door);
-                if (mapData.ContainsKey(doorPos))
+                mapData[doorPos.x, doorPos.y] = TileType.Door;
+
+                
+
+                if (divided - startX > 3)
                 {
-                    mapData[doorPos] = Defines.TileType.Door;
-                }
-                else
-                {
-                    mapData.Add(doorPos, Defines.TileType.Door);
-                }
-                if(divided - startX > 3)
-                {
-                    Dividing(startX, startY, divided, endY, count,mapData);
+                    await Dividing(startX, startY, divided, endY, count+1,mapData);
                 }
                 if(endX - divided > 3)
                 {
-                    Dividing(divided, startY, endX, endY, count,mapData);
+                    await Dividing(divided, startY, endX, endY, count+1,mapData);
                 }
             }
             else
             {
-                count++;
+                //count++;
                 int divided = ((startY + endY) * UnityEngine.Random.Range(dividingMin, dividingMax)) / 200;
-                divided = RerollDivied(startY, endY, divided);
+                divided = RerollDivide(startY, endY, divided);
                 for (int x = startX; x < endX; x++)
                 {
-                    Vector2Int pos = new Vector2Int(x, divided);
-                    if (mapData.ContainsKey(pos))
+                    mapData[x, divided] = TileType.Wall;
+                    if (x % intervalCount == 0)
                     {
-                        mapData[pos] = Defines.TileType.Wall;
-                    }
-                    else
-                    {
-                        mapData.Add(pos, Defines.TileType.Wall);
+                        await UniTask.Yield();
                     }
                 }
                 int door = UnityEngine.Random.Range(startX, endX);
                 Vector2Int doorPos = new Vector2Int(door, divided);
-                if (mapData.ContainsKey(doorPos))
-                {
-                    mapData[doorPos] =  TileType.Door;
-                }
-                else
-                {
-                    mapData.Add(doorPos, TileType.Door);
-                }
+                mapData[doorPos.x, doorPos.y] = TileType.Door;
                 
+                await UniTask.Yield();
                 if (divided - startY > 3)
                 {
-                    Dividing(startX, startY, endX, divided, count,mapData);
+                    await Dividing(startX, startY, endX, divided, count+1,mapData);
                 }
                 if (endY - divided > 3)
                 {
-                    Dividing(startX, divided, endX, endY, count,mapData);
+                    await Dividing(startX, divided, endX, endY, count+1,mapData);
                 }
             }
         }
     }
-    void TwistDungeon(Dictionary<Vector2Int,Defines.TileType> mapData)
+    void TwistDungeon(TileType[,] mapData)
     {
         int constant;
-        foreach(Vector2Int key in mapData.Keys)
+
+        for(int x = 0; x < mapData.GetLength(0); x++)
         {
-            switch (mapData[key])
+            for(int y =0; y < mapData.GetLength(1); y++)
             {
-                case TileType.Tile:
-                    constant = 10;
-                    if (UnityEngine.Random.Range(0, 100)<constant)
-                    {
-                        mapData[key] = TileType.Wall;
-                    }
-                    break;
-                case TileType.Wall:
-                    constant = 30;
-                    if(UnityEngine.Random.Range(0, 100)<constant)
-                    {
-                        mapData[key] = TileType.Tile;
-                    }
-                    break;
-                case TileType.Door:
-                    break;
-                case TileType.ShallowWater:
-                    break;
-                case TileType.DeepWater:
-                    break;
-                case TileType.Upstair:
-                    break;
-                case TileType.DownStair:
-                    break;
-                case TileType.Player:
-                    break;
-                case TileType.Monster:
-                    break;
-                case TileType.Item:
-                    break;
-                default:
-                    break;
+                switch (mapData[x,y])
+                {
+                    case TileType.Tile:
+                        constant = 10;
+                        if (UnityEngine.Random.Range(0, 100) < constant)
+                        {
+                            mapData[x, y] = TileType.Wall;
+                        }
+                        break;
+                    case TileType.Wall:
+                        constant = 30;
+                        if (UnityEngine.Random.Range(0, 100) < constant)
+                        {
+                            mapData[x, y] = TileType.Tile;
+                        }
+                        break;
+                    case TileType.Door:
+                        break;
+                    case TileType.ShallowWater:
+                        break;
+                    case TileType.DeepWater:
+                        break;
+                    case TileType.Upstair:
+                        break;
+                    case TileType.DownStair:
+                        break;
+                    case TileType.Player:
+                        break;
+                    case TileType.Monster:
+                        break;
+                    case TileType.Item:
+                        break;
+                    default:
+                        break;
+                }
+
             }
         }
     }
-    int RerollDivied(int start, int end, int divide)
+    int RerollDivide(int start, int end, int divide)
     {
         if(start>=divide || end<=divide|| start+1 == divide || end-1 == divide)
         {

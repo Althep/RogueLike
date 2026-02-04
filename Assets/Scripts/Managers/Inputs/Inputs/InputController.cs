@@ -8,6 +8,8 @@ public class InputController
     {
 
     }
+
+
     public virtual Vector2Int OnMoveKey(KeyCode key)
     {
         return Vector2Int.zero;
@@ -16,5 +18,10 @@ public class InputController
     public virtual void OnQuickKey(KeyCode key)
     {
         
+    }
+
+    public virtual void OnKey()
+    {
+
     }
 }

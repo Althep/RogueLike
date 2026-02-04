@@ -15,7 +15,7 @@ public class InGameInput : InputController
     {
         Init();
     }
-
+   
     public override void Init()
     {
         if (playerEntity == null)

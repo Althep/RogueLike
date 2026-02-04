@@ -1,10 +1,17 @@
 using UnityEngine;
-
+using Cysharp.Threading.Tasks;
 public class GameManager : MonoBehaviour
 {
 
-    GameManager _instance;
-    public static GameManager instance;
+    private static GameManager _instance;
+    public static GameManager instance
+    {
+        get
+        {
+            if (_instance == null) return null;
+            return _instance;
+        }
+    }
     [SerializeField] DataManager dataManager;
     [SerializeField] MapManager mapManager;
     [SerializeField] MonsterManager monsterManager;
@@ -14,27 +21,36 @@ public class GameManager : MonoBehaviour
     [SerializeField] PoolManager poolManager;
     [SerializeField] StringKeyManager stringKeyManager;
     [SerializeField] SceneController sceneController;
+    [SerializeField] SpriteManager spriteManager;
+    [SerializeField] DungeonManager dungeonManager;
     [SerializeField] GameObject playerPrefab;
-    GameObject playerObj;
-
-    private void Awake()
+    [SerializeField] GameObject playerObj;
+    [SerializeField] EventManager eventManager;
+    [SerializeField] PlayerEntity playerEntity;
+    [SerializeField] EffectManager effectManager;
+    [SerializeField] ModifierManager modifierManager;
+    private async UniTask Awake()
     {
-        Init();
+        await Init();
     }
-    void Init()
+    async UniTask Init()
     {
-        if(_instance == null)
+        GameObject Managers = GameObject.Find("Managers");
+        if (_instance != null && _instance != this)
         {
-            _instance = transform.GetComponent<GameManager>();
+            Destroy(this.gameObject);
+            return;
         }
-        if(instance == null)
-        {
-            instance = _instance;
-        }
+        _instance = this;
         if (dataManager == null)
         {
             dataManager = new DataManager();
-            dataManager.Init();
+            await dataManager.Init();
+        }
+        if(modifierManager == null)
+        {
+            modifierManager = GameObject.Find("ModifierManager").transform.GetComponent<ModifierManager>();
+            await modifierManager.Init();
         }
         if(uiManager == null)
         {
@@ -59,7 +75,8 @@ public class GameManager : MonoBehaviour
         }
         if(itemManager == null)
         {
-            itemManager = new ItemManager();
+            GameObject go = GameObject.Find("ItemManager");
+            itemManager = Utils.GetOrAddComponent<ItemManager>(go);
             itemFactory = itemManager.Get_ItemFactory();
         }
         if(itemFactory == null)
@@ -70,11 +87,44 @@ public class GameManager : MonoBehaviour
         {
             sceneController = new SceneController();
         }
-        GameObject Managers = GameObject.Find("Managers");
-        if(Managers == this.gameObject.transform.parent)
+        if (spriteManager == null)
         {
-            DontDestroyOnLoad(Managers);
+            spriteManager = GameObject.Find("SpriteManager").transform.GetComponent<SpriteManager>();
         }
+        if(playerObj == null)
+        {
+            playerObj = Instantiate(playerPrefab);
+            playerObj.transform.SetParent(Managers.transform);
+            playerEntity = playerObj.transform.GetComponent<PlayerEntity>();
+        }
+        if(monsterManager == null)
+        {
+            monsterManager = GameObject.Find("MonsterManager").transform.GetComponent<MonsterManager>();
+            
+        }
+        if(dungeonManager == null)
+        {
+            dungeonManager = GameObject.Find("DungeonManager").transform.GetComponent<DungeonManager>();
+        }
+        if (eventManager == null)
+        {
+            eventManager = GameObject.Find("EventManager").transform.GetComponent<EventManager>();
+        }
+        if(effectManager == null)
+        {
+            effectManager = GameObject.Find("EffectManager").transform.GetComponent<EffectManager>();
+        }
+        await monsterManager.Init();
+        DontDestroyOnLoad(Managers);
+        
+    }
+    public EffectManager Get_EffectManager()
+    {
+        if(effectManager == null)
+        {
+            effectManager = GameObject.Find("EffectManager").transform.GetComponent<EffectManager>();
+        }
+        return effectManager;
     }
     public GameObject Get_PlayerObj()
     {
@@ -84,8 +134,19 @@ public class GameManager : MonoBehaviour
         }
         return playerObj;
     }
+    public PlayerEntity Get_PlayerEntity()
+    {
+        if(playerEntity == null)
+        {
+            Get_PlayerObj().transform.GetComponent<PlayerEntity>();
+        }
+        return playerEntity;
+    }
     #region Get_Managers
-
+    public EventManager Get_EventManager()
+    {
+        return eventManager;
+    }
     public DataManager Get_DataManager()
     {
         if(dataManager == null)
@@ -95,6 +156,15 @@ public class GameManager : MonoBehaviour
         }
         
         return dataManager;
+    }
+    public ModifierManager Get_ModifierManager()
+    {
+        if(modifierManager == null)
+        {
+            modifierManager = GameObject.Find("ModifierManager").transform.GetComponent<ModifierManager>();
+        }
+
+        return modifierManager;
     }
     public ItemManager Get_ItemManager()
     {
@@ -128,6 +198,29 @@ public class GameManager : MonoBehaviour
     public UIManager Get_UIManager()
     {
         return uiManager;
+    }
+
+    public PoolManager Get_PoolManager()
+    {
+        if (poolManager == null)
+        {
+            poolManager = GameObject.Find("ObjectPooler").transform.GetComponent<PoolManager>();
+            if (poolManager == null)
+            {
+                GameObject go = new GameObject();
+                go.name = "ObjectPooler";
+                poolManager = Utils.GetOrAddComponent<PoolManager>(go);
+            }
+        }
+        return poolManager;
+    }
+    public SceneController Get_SceneController()
+    {
+        return sceneController;
+    }
+    public DungeonManager GetDungeonManager()
+    {
+        return dungeonManager;
     }
     #endregion
     #region Maps

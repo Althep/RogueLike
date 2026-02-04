@@ -2,10 +2,7 @@ using UnityEngine;
 
 public class TileEntity : MapEntity
 {
-    FogOfWar fow;
-
-
-
+    public GameObject upperObj;
     private void Awake()
     {
         
@@ -14,15 +11,16 @@ public class TileEntity : MapEntity
 
     void Init()
     {
-        if(fow == null)
-        {
-            fow = new FogOfWar(this.gameObject);
-        }
+
     }
-
-
-    public FogOfWar Get_FOW()
+    public override MapEntity CopyToEmpty()
     {
-        return fow;
+        return new TileEntity();
     }
+
+    public override void ResetData()
+    {
+        upperObj = null;
+    }
+
 }

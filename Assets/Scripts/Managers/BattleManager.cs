@@ -33,12 +33,12 @@ public class CombatManager : MonoBehaviour
     {
         int roll = UnityEngine.Random.Range(1, 21);
         var atk = attacker.GetEntityStat(ModifierTriggerType.OnAttack);
-        var def = target.GetEntityStat(ModifierTriggerType.OnHit);
+        var def = target.GetEntityStat(ModifierTriggerType.OnHited);
 
         float levelFactor = 1f + attacker.Get_MyData().GetLevel() * 0.06f;
 
         // 공격자의 명중력
-        int acc = Mathf.Max(1, (int)((atk[StatType.Accuracy] + atk[StatType.Dex] / 4 + atk[StatType.Str] / 5) * levelFactor));
+        int acc = Mathf.Max(1, (int)((atk[StatType.Accurancy] + atk[StatType.Dex] / 4 + atk[StatType.Str] / 5) * levelFactor));
 
         // 방어자의 회피력
         int ev = (int)(def[StatType.Defense] + def[StatType.Dex] / 3 + def[StatType.Evasion]);
@@ -66,7 +66,7 @@ public class CombatManager : MonoBehaviour
     {
 
         Dictionary<StatType, float> attackerData = attacker.GetEntityStat(ModifierTriggerType.OnAttack);
-        Dictionary<StatType, float> targetData = target.GetEntityStat(ModifierTriggerType.OnHit);
+        Dictionary<StatType, float> targetData = target.GetEntityStat(ModifierTriggerType.OnHited);
         ModifierContext attackerContext = attacker.Get_MeleeAttackContext();
         
         DamageType damageType = attackerContext.damageType;
@@ -118,16 +118,16 @@ public class CombatManager : MonoBehaviour
                 resist = 0;
                 break;
             case DamageType.Fire:
-                resist = (int)target.GetEntityStat(ModifierTriggerType.OnHit)[StatType.FireResist];
+                resist = (int)target.GetEntityStat(ModifierTriggerType.OnHited)[StatType.FireResist];
                 break;
             case DamageType.Ice:
-                resist = (int)target.GetEntityStat(ModifierTriggerType.OnHit)[StatType.IceResist];
+                resist = (int)target.GetEntityStat(ModifierTriggerType.OnHited)[StatType.IceResist];
                 break;
             case DamageType.Magic:
-                resist = (int)target.GetEntityStat(ModifierTriggerType.OnHit)[StatType.MagicResist];
+                resist = (int)target.GetEntityStat(ModifierTriggerType.OnHited)[StatType.MagicResist];
                 return resist * magicReduce;
             case DamageType.Thunder:
-                resist = (int)target.GetEntityStat(ModifierTriggerType.OnHit)[StatType.ThunderResist];
+                resist = (int)target.GetEntityStat(ModifierTriggerType.OnHited)[StatType.ThunderResist];
                 break;
             default:
                 break;

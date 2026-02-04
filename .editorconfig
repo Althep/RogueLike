@@ -1,0 +1,7 @@
+﻿[*.{cs,vb}]
+
+# IDE0044: 읽기 전용 한정자 추가
+dotnet_diagnostic.IDE0044.severity = none
+
+# IDE0040: 접근성 한정자 추가
+dotnet_style_require_accessibility_modifiers = never

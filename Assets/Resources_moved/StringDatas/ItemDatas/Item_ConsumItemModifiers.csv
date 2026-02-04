@@ -1,0 +1,34 @@
+ID,Name,ModifierType,IsMulti,Value,EffectName,ModifierTrigger,StringValue,
+PoisonPotion_0,PoisonPotion,BuffModifier,FALSE,2,Posion,Passive,,독포션
+ConfusePotion_0,DizzyPotion,BuffModifier,FALSE,0,Confuse,Passive,,혼란포션
+StrengthPotion_0,StrengthPotion,BuffModifier,FALSE,3,StatBuff,Passive,Str,힘포션
+AgilityPotion_0,AgilityPotion,BuffModifier,FALSE,3,StatBuff,Passive,Dex,민첩포션
+IntelligencePotion_0,IntelligencePotion,BuffModifier,FALSE,3,StatBuff,Passive,Int,지능포션
+WarriorPotion_0,WarriorPotion,BuffModifier,FALSE,2,StatBuff,Passive,Str,전사포션
+WarriorPotion_1,WarriorPotion,BuffModifier,FALSE,10,StatBuff,Passive,MaxHp,전사포션
+InvisiblePotion_0,InvisiblePotion,BuffModifier,FALSE,0,Invisible,Passive,,투명화포션
+QuicknessPotion_0,QuicknessPotion,BuffModifier,TRUE,0.75,StatBuff,Passive,MoveSpeed,속도포션
+QuicknessPotion_1,QuicknessPotion,BuffModifier,TRUE,0.75,StatBuff,Passive,AttackSpeed,속도포션
+QuicknessPotion_2,QuicknessPotion,BuffModifier,TRUE,0.75,StatBuff,Passive,SpellSpeed,속도포션
+EagleEyePotion_0,EagleEyePotion,BuffModifier,TRUE,1.5,vision,Passive,Vision,시야범위포션
+FireResistPotion_0,FierResistPotion,BuffModifier,FALSE,2,StatBuff,Passive,FierResist,화염저항포션
+FierResistPotion_1,FierResistPotion,BuffModifier,FALSE,-1,StatBuff,Passive,IceResist,화염저항포션
+IceResistPotion_0,IceResistPotion,BuffModifier,FALSE,2,StatBuff,Passive,IceResist,냉기저항포션
+IceResistPotion_1,IceResistPotion,BuffModifier,FALSE,-1,StatBuff,Passive,FierResist,냉기저항포션
+RegeneratePotion_0,RegenerationPotion,BuffModifier,FALSE,2,regeneration,Passive,,재생포션
+GhostPotion_0,GhostPotion,BuffModifier,FALSE,1,ghost,Passive,,유령화포션
+GhostPotion_0,GhostPotion,BuffModifier,FALSE,5,evasion,Passive,Evasion,유령화포션
+TrollsBlood_0,TrollsBlood,BuffModifier,FALSE,5,regeneration,Passive,,재생포션
+VamfierBlood_0,VamfierBlood,BuffModifier,FALSE,1,lifeSteel,OnAttack,,뱀피릭포션
+VamfierBlood_1,vamfierBlood,BuffModifier,TRUE,-1,StatAdd,Passive,,뱀피릭포션(회복제한
+PhoenixTears_0,PhoenixTears,BuffModifier,FALSE,0,Extralife,Passive,,추가목숨포션
+ElixirOfApex_0,ElixirOfApex,StatModifier,FALSE,5,StatAdd,Passive,Str,종합스탯포션
+ElixirOfApex_1,ElixirOfApex,StatModifier,FALSE,5,StatAdd,Passive,Dex,종합스탯포션
+ElixirOfApex_2,ElixirOfApex,StatModifier,FALSE,5,StatAdd,Passive,Int,종합스탯포션
+ElixirOfAccelerate_0,ElixirOfAccelerate,BuffModifier,TRUE,0.25,StatBuff,Passive,MoveSpeed,속도포션
+ElixirOfAccelerate_1,ElixirOfAccelerate,BuffModifier,TRUE,0.25,StatBuff,Passive,AttackSpeed,속도포션
+ElixirOfAccelerate_2,ElixirOfAccelerate,BuffModifier,TRUE,0.25,StatBuff,Passive,SpellCast,속도포션
+LongScroll_0,LongScroll,BuffModifier,FALSE,1,standing,Passive,,duration만큼 턴 낭비
+ParchmentOfNagging_0,ParchmentOfNagging,BuffModifier,FALSE,20,nagging,Passive,,나불거리기
+BlinkScroll_0,BlinkScroll,BuffModifier,FALSE,20,blink,Passive,,버프가 끝난후 랜덤순간이동
+XrayScroll_0,XrayScroll,BuffModifier,TRUE,0,xray,Passive,,벽뚫고 보는 시야
