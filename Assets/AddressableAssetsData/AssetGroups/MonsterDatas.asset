@@ -15,12 +15,6 @@ MonoBehaviour:
   m_GroupName: MonsterDatas
   m_GUID: 258b98dd309372d4e8b9e14f945b7643
   m_SerializeEntries:
-  - m_GUID: 3651e45d30120db47b90e0f8af6e48d9
-    m_Address: Item_Equipments
-    m_ReadOnly: 0
-    m_SerializedLabels:
-    - GameData
-    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 7ef968cd664cb534f8c9bd17f56e1b98
     m_Address: Monster_MonsterSpawnData
     m_ReadOnly: 0

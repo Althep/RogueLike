@@ -60,7 +60,6 @@ public class EffectManager : MonoBehaviour
         return action;
     }
 
-
     public void ReturnItemEffectScript(ModifierAction effect)
     {
         ActionEffectType type = effect.actionEffectType;

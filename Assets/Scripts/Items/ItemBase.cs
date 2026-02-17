@@ -1,5 +1,6 @@
 using UnityEngine;
 using System;
+using System.Linq;
 using System.Collections.Generic;
 public abstract class ItemBase 
 {
@@ -11,9 +12,9 @@ public abstract class ItemBase
     public Defines.ItemCategory category;
     public float weight;
     public List<Modifier> options = new List<Modifier>();
+    LivingEntity entity;
     public int AddStack(ItemBase item, int amount)
-    {
-        int overflow = 0;
+    {        int overflow = 0;
         if (!CanStack(amount))
         {
             overflow = itemCount + amount - maxStack;
@@ -30,7 +31,23 @@ public abstract class ItemBase
         Debug.Log("1111111111111111111111111");
         return overflow;
     }
-
+    public void OnUse()
+    {
+        List<BuffModifier> buffs = options.OfType<BuffModifier>().ToList();
+        
+        if(buffs.Count>1)
+        {
+            int duration = UnityEngine.Random.Range(buffs[0].minTime, buffs[0].maxTime+1);
+            foreach(var buff in buffs)
+            {
+                buff.duration = duration;
+            }
+        }
+        foreach(var option in options)
+        {
+            option.Apply(entity);
+        }
+    }
     public bool CanStack(int amount)
     {
         return category == Defines.ItemCategory.Consumable;

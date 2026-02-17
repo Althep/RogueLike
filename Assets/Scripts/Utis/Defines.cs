@@ -66,12 +66,12 @@ public static class Defines
     public enum PoolScriptType
     {
         StatModifier,
-        ItemModifier,
         BuffModifier,
         DamageModifier,
         BuffInstance,
         StatAddEffect,
-        StatBuffEffect
+        StatBuffEffect,
+        ItemModifier,
     }
     public enum TileType
     {
@@ -128,6 +128,31 @@ public static class Defines
     }
     #endregion
     #region Modifiers
+    public enum BuffCategory
+    {
+        None,
+        Buff,
+        Debuff
+    }
+    public enum BuffType
+    {
+        StatBuff,
+        ActionBuff
+    }
+    public enum ActionEffectType
+    {
+        StatAdd, 
+        StatBuff,
+        SlotBlock,
+        SlotAdd,
+        Cure,
+        GetDamage,
+        Confuse,
+        Invisible,
+        Ghost,
+        LifeSteel,
+        Stun
+    }
     public enum ModifierType
     {
         StatModifier,
@@ -158,6 +183,7 @@ public static class Defines
     }
     #endregion
     #region Ä³¸¯ÅÍ
+    
     public enum StatType
     {
         HP,
@@ -186,9 +212,11 @@ public static class Defines
         Sound,
         MoveSpeed,
         AttackSpeed,
+        MaxExp,
         Exp,
         Regeneration,
-        Tir
+        Tir,
+        ExtraLife
     }
     public enum DamageType
     {
@@ -196,7 +224,8 @@ public static class Defines
         Fire,
         Ice,
         Magic,
-        Thunder
+        Thunder,
+        Poison
     }
     public enum Races
     {
@@ -223,12 +252,7 @@ public static class Defines
         Wonderer,
         Engineer
     }
-    public enum ActionEffectType
-    {
-        StatAdd,
-        BuffEffect,
-        SlotBlock
-    }
+    
     public enum EStatusEffect
     {
         Poison,

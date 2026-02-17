@@ -1,0 +1,29 @@
+ID,ModifierType,EffectID,EffectName,Value,MinTime,MaxTime,BuffType,StringValue,BuffType,IsMulti,ModifierTrigger,Priority,주석
+PoisonPotion_0,BuffModifier,PoisonPotion_0,GetDamage,3,5,10,StatBuff,Poison,Debuff,FALSE,Passive,100,독포션
+ConfusePotion_0,BuffModifier,ConfusePotion_0,Confuse,0,3,7,ActionBuff,Confuse,Debuff,FALSE,OnMove,100,혼란포션
+StrengthPotion_0,BuffModifier,StrengthPotion_0,StatBuff,3,7,12,StatBuff,Str,Buff,FALSE,Passive,50,힘포션
+AgilityPotion_0,BuffModifier,AgilityPotion_0,StatBuff,3,7,12,StatBuff,Dex,Buff,FALSE,Passive,50,민첩포션
+IntelligencePotion_0,BuffModifier,IntelligencePotion_0,StatBuff,3,7,12,StatBuff,Int,Buff,FALSE,PAssive,50,지능포션
+WarriorPotion_0,BuffModifier,WarriorPotion_0,StatBuff,3,7,12,StatBuff,Str,Buff,FALSE,Passive,50,전사포션
+WarriorPotion_1,BuffModifier,WarriorPotion_1,StatBuff,10,7,12,StatBuff,MaxHp,Buff,FALSE,Passive,50,전사포션
+InvisiblePotion_0,BuffModifier,InvisiblePotion_0,Invisible,0,7,12,ActionBuff,Invisible,Buff,FALSE,Passive,50,투명화포션
+QuicknessPotion_0,BuffModifier,QuicknessPotion_0,StatBuff,-0.3,7,12,StatBuff,MoveSpeed,Buff,FALSE,Passive,50,속도포션
+QuicknessPotion_1,BuffModifier,QuicknessPotion_1,StatBuff,-0.3,7,12,StatBuff,AttackSpeed,Buff,FALSE,Passive,50,속도포션
+QuicknessPotion_2,BuffModifier,QuicknessPotion_2,StatBuff,-0.3,7,12,StatBuff,SepllSpeed,Buff,FALSE,Passive,50,속도포션
+EagleEyePotion_0,BuffModifier,EagleEyePotion_0,StatBuff,1,10,15,StatBuff,Vision,Buff,FALSE,Passive,50,시야범위포션
+FireResistPotion_0,BuffModifier,FireResistPotion_0,StatBuff,1,20,25,StatBuff,FierResist,Buff,FALSE,Passive,50,화염저항포션
+FierResistPotion_1,BuffModifier,FierResistPotion_1,StatBuff,-1,20,25,StatBuff,IceResist,Buff,FALSE,Passive,50,화염저항포션
+IceResistPotion_0,BuffModifier,IceResistPotion_0,StatBuff,1,20,25,StatBuff,IceResist,Buff,FALSE,Passive,50,냉기저항포션
+IceResistPotion_1,BuffModifier,IceResistPotion_1,StatBuff,-1,20,25,StatBuff,FierResist,Buff,FALSE,Passive,50,냉기저항포션
+RegeneratePotion_0,BuffModifier,RegeneratePotion_0,StatAdd,1,10,15,StatBuff,Regeneration,Buff,FALSE,Passive,50,재생포션
+GhostPotion_0,BuffModifier,GhostPotion_0,Ghost,0,7,20,ActionBuff,Invisible,Buff,FALSE,Passive,50,유령화포션
+GhostPotion_0,BuffModifier,GhostPotion_0,StatAdd,5,7,20,StatBuff,Evasion,Buff,FALSE,Passive,50,유령화포션
+TrollsBlood_0,BuffModifier,TrollsBlood_0,StatAdd,1,10,15,StatBuff,Regeneration,Buff,FALSE,Passive,50,재생포션
+VamfierBlood_0,BuffModifier,VamfierBlood_0,LifeSteel,0.1,20,30,StatBuff,Vafiric,Buff,FALSE,OnAttack,50,뱀피릭포션
+VamfierBlood_1,BuffModifier,VamfierBlood_1,StatAdd,0,20,30,StatBuff,BanRegen,Buff,FALSE,Passive,50,뱀피릭포션(회복제한
+ElixirOfAccelerate_0,BuffModifier,ElixirOfAccelerate_0,StatBuff,0.5,5,7,StatBuff,Buff,Buff,FALSE,Passive,50,속도포션
+ElixirOfAccelerate_1,BuffModifier,ElixirOfAccelerate_1,StatBuff,0.5,5,7,StatBuff,Buff,Buff,FALSE,Passive,50,속도포션
+ElixirOfAccelerate_2,BuffModifier,ElixirOfAccelerate_2,StatBuff,0.5,5,7,StatBuff,Buff,Buff,FALSE,Passive,50,속도포션
+BlinkScroll_0,BuffModifier,BlinkScroll_0,Blink,1,3,4,StatBuff,Buff,Buff,FALSE,OnRemoved,50,버프가 끝난후 랜덤순간이동
+TelleportScroll_0,BuffModifier,TelleportScroll_0,Telleport,1,0,0,StatBuff,Buff,Buff,FALSE,Passive,50,플레이어의 선택 순간이동
+XrayScroll_0,BuffModifier,XrayScroll_0,Xray,1,3,5,ActionBuff,None,Buff,TRUE,Passive,50,벽뚫고 보는 시야

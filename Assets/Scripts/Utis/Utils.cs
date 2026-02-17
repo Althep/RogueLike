@@ -138,7 +138,6 @@ public static class Utils
     {
         if (data.ContainsKey(key) && data[key] != null)
         {
-
             if (Enum.TryParse(data[key].ToString(), true, out target))
             {
                 return true;

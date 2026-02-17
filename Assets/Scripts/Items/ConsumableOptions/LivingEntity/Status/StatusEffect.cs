@@ -3,21 +3,12 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using static Defines;
-public abstract class StatusEffect:IPoolScript
+public abstract class StatusEffect:ModifierAction
 {
     public ModifierTriggerType trigger;
     public EStatusEffect effect;
     public StatuseType stType;
-    public string id;
-    public virtual void Excute(LivingEntity target)
-    {
 
-    }
-
-    public abstract PoolScriptType GetScriptType();
-    public abstract void Reset();
-    public abstract void SetScriptType(PoolScriptType type);
-    
 }
 
 public class Confuse : StatusEffect
@@ -36,25 +27,21 @@ public class Confuse : StatusEffect
         target.SetDestination(randomPos);
     }
 
-    public override PoolScriptType GetScriptType()
-    {
-        throw new NotImplementedException();
-    }
-
     public override void Reset()
     {
         throw new NotImplementedException();
     }
 
-    public override void SetScriptType(PoolScriptType type)
+    public override void SetValueToString()
     {
         throw new NotImplementedException();
     }
 }
 
-public class Poison : StatusEffect
+public class GetDamage : StatusEffect
 {
-    public Poison()
+    DamageType damageType;
+    public GetDamage()
     {
         trigger = ModifierTriggerType.OnTurnEnd;
         effect = EStatusEffect.Poison;
@@ -62,14 +49,9 @@ public class Poison : StatusEffect
     }
     public override void Excute(LivingEntity target)
     {
+        SetValueToString();
         base.Excute(target);
-
-        //재생속도- 혹은 대미지
-    }
-
-    public override PoolScriptType GetScriptType()
-    {
-        throw new NotImplementedException();
+        target.GetResistDamage(DamageType.Poison, (int)value);
     }
 
     public override void Reset()
@@ -77,55 +59,11 @@ public class Poison : StatusEffect
         throw new NotImplementedException();
     }
 
-    public override void SetScriptType(PoolScriptType type)
-    {
-        throw new NotImplementedException();
-    }
-}
 
-public class StatEffect : StatusEffect
-{
-    public StatModifier modifier;
 
-    public override PoolScriptType GetScriptType()
+    public override void SetValueToString()
     {
-        throw new NotImplementedException();
-    }
-
-    public override void Reset()
-    {
-        throw new NotImplementedException();
-    }
-
-    public override void SetScriptType(PoolScriptType type)
-    {
-        throw new NotImplementedException();
-    }
-
-    public void Setting()
-    {
-        if((modifier.stat == StatType.AttackSpeed || modifier.stat == StatType.MoveSpeed || modifier.stat == StatType.SpellSpeed))
-        {
-            if (modifier.value <0)
-            {
-                stType = StatuseType.Buff;
-            }
-            else
-            {
-                stType = StatuseType.Debuff;
-            }
-        }
-        else
-        {
-            if (modifier.value > 0)
-            {
-                stType = StatuseType.Buff;
-            }
-            else
-            {
-                stType = StatuseType.Debuff;
-            }
-        }
+        Utils.StringToEnum<DamageType>(stringValue, ref damageType);
     }
 }
 
@@ -143,17 +81,12 @@ public class Petrification : StatusEffect
         target.SetDestination(pos);
     }
 
-    public override PoolScriptType GetScriptType()
-    {
-        throw new NotImplementedException();
-    }
-
     public override void Reset()
     {
         throw new NotImplementedException();
     }
 
-    public override void SetScriptType(PoolScriptType type)
+    public override void SetValueToString()
     {
         throw new NotImplementedException();
     }

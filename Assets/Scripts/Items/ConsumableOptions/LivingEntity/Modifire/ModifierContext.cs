@@ -14,15 +14,25 @@ public class ModifierContext
     public ModifierType ModifierType;
     public DamageType damageType = DamageType.Physical;
     public bool isDirty;
+
     public ModifierContext()
     {
-        foreach(StatType types in Enum.GetValues(typeof(StatType)))
+        StatType[] types = Utils.Get_Enums<StatType>((StatType.Int));
+        if(stats == null)
         {
-            stats.Add(types, 0);
+            stats = new Dictionary<StatType, float>();
         }
-        foreach (StatType types in Enum.GetValues(typeof(StatType)))
+        if(multifle == null)
         {
-            multifle.Add(types, 0);
+            multifle = new Dictionary<StatType, float>();
+        }
+        foreach (StatType type in types)
+        {
+            stats.Add(type, 0);
+        }
+        foreach (StatType type in types)
+        {
+            multifle.Add(type, 0);
         }
     }
     public void Clear()

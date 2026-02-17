@@ -36,6 +36,10 @@ public class DungeonManager : MonoBehaviour
         {
             poolManager = GameManager.instance.Get_PoolManager();
         }
+        if(itemManager == null)
+        {
+            itemManager = GameManager.instance.Get_ItemManager();
+        }
     }
 
     public TierCalculator GetTierCalculator()
@@ -61,6 +65,8 @@ public class DungeonManager : MonoBehaviour
         await mapManager.MapMake();
         Debug.Log($"[Profile] 오브젝트 배치 시간: {Time.realtimeSinceStartup - spawnStart}s");
 
+
+        //await itemManager.ItemMake();
 
         await monsterManager.MonsterSpawn();
         Debug.Log($"[Profile] 총 소요 시간: {Time.realtimeSinceStartup - startTime}s");

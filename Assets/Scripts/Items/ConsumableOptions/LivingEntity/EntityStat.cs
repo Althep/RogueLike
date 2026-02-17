@@ -77,4 +77,30 @@ public class EntityStat
         newStat.SetTileType(tileType);
         return newStat;
     }
+
+    public int GetDamageToResist(DamageType type,int damage)
+    {
+        switch (type)
+        {
+            case DamageType.Physical:
+                break;
+            case DamageType.Fire:
+                damage = (int)(damage* (1/ GetFinal()[StatType.FireResist]));
+                break;
+            case DamageType.Ice:
+                damage = (int)(damage* (1/ GetFinal()[StatType.IceResist]));
+                break;
+            case DamageType.Magic:
+                damage = (int)(damage* (1/ GetFinal()[StatType.MagicResist]));
+                break;
+            case DamageType.Thunder:
+                damage = (int)(damage* (1/ GetFinal()[StatType.ThunderResist]));
+                break;
+            case DamageType.Poison:
+                break;
+            default:
+                break;
+        }
+        return damage;
+    }
 }

@@ -18,9 +18,8 @@ public class ModifierPooler
         modifierFactory = modifierManager.GetModifierFactory();
     }
 
-    public IPoolScript GetModifier(ModifierType type, string id)
+    public Modifier GetModifier(ModifierType type, string id)
     {
-
         IPoolScript value;
         if (!inactiveModifiers.ContainsKey(type))
         {
@@ -60,7 +59,7 @@ public class ModifierPooler
             activeModifiers[type].Add(id, new List<IPoolScript>());
         }
         activeModifiers[type][id].Add(value);
-        return value;
+        return value as Modifier;
     }
 
     public IPoolScript CreateNew(ModifierType type, string id)

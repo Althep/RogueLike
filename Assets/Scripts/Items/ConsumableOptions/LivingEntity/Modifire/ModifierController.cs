@@ -3,15 +3,19 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using static Defines;
-using System.Linq;
+
 public class ModifierController
 {
+    
+
     private Dictionary<ModifierTriggerType, List<Modifier>> modifiers = new Dictionary<ModifierTriggerType, List<Modifier>>();
 
     private Dictionary<ModifierTriggerType, ModifierContext> contexts = new Dictionary<ModifierTriggerType, ModifierContext>();
 
+    LivingEntity myEntity;
+
     bool isDirty;
-    public void InitContext()
+    public void InitContext(LivingEntity entity)
     {
         foreach (ModifierTriggerType type in Enum.GetValues(typeof(ModifierTriggerType)))
         {
@@ -22,6 +26,12 @@ public class ModifierController
                 multifle = new Dictionary<StatType, float>()
             };
         }
+        SetMyEntity(entity);
+    }
+
+    public void SetMyEntity(LivingEntity entity)
+    {
+        myEntity = entity;
     }
 
     public void AddModifier(Modifier modifier)
@@ -31,6 +41,7 @@ public class ModifierController
         {
             modifiers.Add(type, new List<Modifier>());
         }
+        
         modifiers[type].Add(modifier);
         modifiers[type].Sort((a, b) => a.priority.CompareTo(b.priority));
         if(type == ModifierTriggerType.Passive)
@@ -42,13 +53,17 @@ public class ModifierController
 
     public void RemoveModifier(Modifier modifier)
     {
-        
+        if (modifier == null) return;
 
-        foreach (var type in modifiers.Keys)
+        string id = modifier.id;
+
+        foreach (var key in modifiers.Keys)
         {
-            modifiers[type].Remove(modifier);
+            // RemoveAll은 내부적으로 최적화되어 있으며 추가 할당이 없습니다.
+            modifiers[key].RemoveAll(m => m.id == id);
         }
-        if(modifier.triggerType == ModifierTriggerType.Passive)
+
+        if (modifier.triggerType == ModifierTriggerType.Passive)
         {
             contexts[ModifierTriggerType.Passive].Clear();
             ApplyPassiveModifiers();
@@ -63,7 +78,7 @@ public class ModifierController
         }
         foreach(var modifier in list)
         {
-            modifier.Apply(contexts[ModifierTriggerType.Passive]);
+            modifier.Apply(myEntity);
         }
         
     }
@@ -82,7 +97,7 @@ public class ModifierController
         
         foreach (var modifier in list)
         {
-            modifier.Apply(contexts[type]);
+            modifier.Apply(myEntity);
             //result = context.ModifiedValue;
         }
         List<Modifier> actionModifiers = modifiers[type].Where(m => m is ActionModifier).ToList();
@@ -112,7 +127,10 @@ public class ModifierController
         return context.ModifiedValue;
     }
     */
-
+    public Dictionary<ModifierTriggerType, List<Modifier>> GetModifiers()
+    {
+        return modifiers;
+    }
     public bool CanEquip(ModifierTriggerType trigger)
     {
         foreach (Modifier modis in modifiers[trigger])
@@ -139,7 +157,7 @@ public class ModifierController
                     case ItemTargetType.Category:
                         if(itemModi.itemCategory == item.category)
                         {
-                            modifier.Apply(context);
+                            modifier.Apply(myEntity);
                         }
                         break;
                     case ItemTargetType.Specific:
@@ -147,7 +165,7 @@ public class ModifierController
                         if (itemModi.itemCategory == item.category &&
                             itemModi.specificType.Equals(item.GetSpecificType()))
                         {
-                            modifier.Apply(context);
+                            modifier.Apply(myEntity);
                         }
                         break;
                     default:

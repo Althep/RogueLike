@@ -23,12 +23,12 @@ public class LivingEntity : MapEntity
 
     ModifierContext context;
 
-    List<BuffModifier> buffs = new List<BuffModifier>();
+    List<Modifier> buffs = new List<Modifier>();
 
     protected Races race;
     private void Awake()
     {
-
+        modifierController.InitContext(this);
     }
 
     protected virtual void OnAwake()
@@ -68,14 +68,7 @@ public class LivingEntity : MapEntity
     {
         return myStat;
     }
-    public void AddModifier(Modifier modifier)
-    {
-        modifierController.AddModifier(modifier);
-    }
-    public void RemoveModifier(Modifier modifier)
-    {
-        modifierController.RemoveModifier(modifier);
-    }
+ 
     public void Set_MyStat(EntityStat stat)
     {
         myStat = stat;
@@ -277,7 +270,10 @@ public class LivingEntity : MapEntity
         return modifierController.ApplyModifiers(ModifierTriggerType.OnAttack, this.context);
     }
 
-
+    public int GetResistDamage(DamageType type, int damage)
+    {
+        return myStat.GetDamageToResist(type, damage);
+    }
     #endregion
     public override MapEntity CopyToEmpty()
     {
@@ -291,4 +287,24 @@ public class LivingEntity : MapEntity
         id = null;
         equipments.Clear();
     }
+
+
+    #region Modifier
+    public ModifierContext GetContext()
+    {
+        return context;
+    }
+    public void AddModifier(Modifier modifier)
+    {
+        modifierController.AddModifier(modifier);
+    }
+    public void RemoveModifier(Modifier modifier)
+    {
+        modifierController.RemoveModifier(modifier);
+    }
+    public Dictionary<ModifierTriggerType, List<Modifier>> GetModifiers()
+    {
+        return modifierController.GetModifiers();
+    }
+    #endregion
 }

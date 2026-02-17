@@ -53,13 +53,7 @@ public class ModifierFactory
                     modifier.Copy(newStat);
                 }
                 return newStat;
-            case ModifierType.ItemModifier:
-                ItemModifier newItem = new ItemModifier();
-                if (modifier is ItemModifier)
-                {
-                    modifier.Copy(newItem);
-                }
-                return newItem;
+            
             case ModifierType.BuffModifier:
                 BuffModifier newBuff = new BuffModifier();
                 if (modifier is BuffModifier)
@@ -81,6 +75,13 @@ public class ModifierFactory
                     modifier.Copy(newAction);
                 }
                 return newAction;
+            /*case ModifierType.ItemModifier:
+                ItemModifier newItem = new ItemModifier();
+                if (modifier is ItemModifier)
+                {
+                    modifier.Copy(newItem);
+                }
+                return newItem;*/
             default:
                 Debug.Log("StatType Error in GetEmptyModifier_ModifierFactory");
                 return null;

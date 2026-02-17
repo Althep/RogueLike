@@ -13,7 +13,7 @@ public class Modifier : IPoolScript
     public bool isMulti;
     public float value;
     public ModifierType modifierType;
-    public virtual void Apply(ModifierContext context)
+    public virtual void Apply(LivingEntity entity)
     {
 
     }
@@ -72,8 +72,9 @@ public class StatModifier : Modifier
         this.isMulti = isMulty;
         this.priority = priority;
     }
-   public override void Apply( ModifierContext context)
+   public override void Apply(LivingEntity entity)
     {
+        ModifierContext context = entity.GetContext();
         if (isMulti)
         {
             if (!context.multifle.ContainsKey(this.stat))
@@ -107,107 +108,68 @@ public class StatModifier : Modifier
 
 }
 
-public class ItemModifier : Modifier 
-{
-    public ItemTargetType itemTargetType;
-    public ItemCategory itemCategory;
-    public Enum specificType;
-    public bool unEquipable;
-    public ItemModifier(string name, ItemTargetType targetType, ItemCategory category, float value, int priority,bool unEquipable)
-    {
-        this.id = name;
-        this.itemTargetType = targetType;
-        itemCategory = category;
-        this.unEquipable = unEquipable;
-        modifierType = ModifierType.ItemModifier;
-    }
-    public ItemModifier()
-    {
-        modifierType = ModifierType.ItemModifier;
-    }
-    public void Set(string name, ItemTargetType targetType, ItemCategory category, float value, int priority, bool unEquipable)
-    {
-        this.id = name;
-        this.itemTargetType = targetType;
-        itemCategory = category;
-        this.unEquipable = unEquipable;
-    }
-    public override void Apply(ModifierContext context)
-    {
-        if (isMulti)
-        {
-            if (!context.multifle.ContainsKey(stat))
-            {
-                context.multifle.Add(stat, 0f);
-            }
-            context.multifle[stat] += value;
-        }
-        else
-        {
-            if (!context.stats.ContainsKey(stat))
-            {
-                context.stats.Add(stat, 0);
-            }
-            context.stats[stat] += (int)value;
-        }
-    }
-    public override void Copy(Modifier newOne)
-    {
-        base.Copy(newOne);
-        if(newOne is ItemModifier item)
-        {
-            item.itemTargetType = itemTargetType;
-            item.itemCategory = itemCategory;
-            item.specificType = specificType;
-            item.unEquipable = unEquipable;
-        }
-    }
-    public override void Reset()
-    {
-        base.Reset();
-        itemTargetType = ItemTargetType.Category;
-        itemCategory = ItemCategory.Consumable;
-    }
-
-}
-
 public class BuffModifier : Modifier
 {
     public int duration;
-    public StatusEffect statusEffect;
+    public int minTime;
+    public int maxTime;
+    public string stringValue;
+    public string effectName;
+    public ActionEffectType actionType;
+    public BuffCategory buffCategory;
+    public BuffType buffType;
+    ModifierAction myAction;
     public BuffModifier()
     {
         modifierType = ModifierType.BuffModifier;
     }
-    public override void Apply(ModifierContext context)
+    public override void Apply(LivingEntity entity)
     {
-        if(statusEffect != null)
-        {
-            if (context.statusEffect.Contains(statusEffect))
-            {
 
-            }
-            else
-            {
-                context.statusEffect.Add(statusEffect);
-            }
-        }
+        duration = UnityEngine.Random.Range(minTime, maxTime+1);
+        EventManager.instance.AddBuff(entity, this, duration);
+    }
+    void GetStats()
+    {
+
     }
     public override void Copy(Modifier newOne)
     {
         base.Copy(newOne);
+        
         if(newOne is BuffModifier buff)
         {
-            buff.duration = duration;
+            if(myAction != null)
+            {
+                buff.myAction = myAction;
+            }
+
+            buff.minTime = minTime;
+            buff.maxTime = maxTime;
+            buff.stringValue = stringValue;
+            buff.actionType = actionType;
+            buff.buffCategory = buffCategory;
         }
     }
     public override void Reset()
     {
         base.Reset();
+        myAction = null;
+        minTime = 0;
+        maxTime = 0;
+        stringValue = null;
+        actionType = 0 ;
+        buffCategory = 0;
         duration = 0;
     }
+    public void SetMyAction(ModifierAction modAction)
+    {
+        myAction = modAction;
+        myAction.value = value;
+        myAction.stringValue = stringValue;
+        myAction.SetValueToString();
+    }
 }
-
 public class DamageModifier : Modifier
 {
     public DamageType damageType;
@@ -217,8 +179,9 @@ public class DamageModifier : Modifier
     {
         modifierType = ModifierType.DamageModifier;
     }
-    public override void Apply(ModifierContext context)
+    public override void Apply(LivingEntity entity)
     {
+        ModifierContext context = entity.GetContext();
         if (CanEvoke())
         {
             if (isMulti)
@@ -265,13 +228,34 @@ public class DamageModifier : Modifier
         evokeRate = 0;
     }
 }
-public class ActionModifier:Modifier
+public class ActionModifier: Modifier
 {
     ModifierAction action;
-
-    public override void Apply(ModifierContext context)
+    public string effectName;
+    public string stringValue;
+    public int minValue;
+    public int maxValue;    
+    public override void Apply(LivingEntity entity)
     {
+        ModifierContext context = entity.GetContext();
         List<ModifierAction> effects = context.modifierActions;
+        int duration = 0;
+        for(int i = 0; i<effects.Count; i++)
+        {
+            if(effects[i] is BuffAction buff)
+            {
+                duration = UnityEngine.Random.Range(buff.minTime,buff.maxTime+1);
+                break;
+            }
+        }
+        
+        for(int i = 0; i<effects.Count; i++)
+        {
+            if (effects[i] is BuffAction buff)
+            {
+                buff.SetDuration(duration);
+            }
+        }
 
         if(!effects.Any(item => item.effectName == action.effectName))
         {
@@ -283,8 +267,75 @@ public class ActionModifier:Modifier
         }
     }
 
+    
     public void SetAction(ModifierAction action)
     {
         this.action = action;
+        action.stringValue = stringValue;
     }
+}
+
+public class ItemModifier : Modifier 
+{
+    public ItemTargetType itemTargetType;
+    public ItemCategory itemCategory;
+    public Enum specificType;
+    public bool unEquipable;
+    public ItemModifier(string name, ItemTargetType targetType, ItemCategory category, float value, int priority,bool unEquipable)
+    {
+        this.id = name;
+        this.itemTargetType = targetType;
+        itemCategory = category;
+        this.unEquipable = unEquipable;
+        modifierType = ModifierType.ItemModifier;
+    }
+    public ItemModifier()
+    {
+        modifierType = ModifierType.ItemModifier;
+    }
+    public void Set(string name, ItemTargetType targetType, ItemCategory category, float value, int priority, bool unEquipable)
+    {
+        this.id = name;
+        this.itemTargetType = targetType;
+        itemCategory = category;
+        this.unEquipable = unEquipable;
+    }
+    public override void Apply(LivingEntity entity)
+    {
+        ModifierContext context = entity.GetContext();
+        if (isMulti)
+        {
+            if (!context.multifle.ContainsKey(stat))
+            {
+                context.multifle.Add(stat, 0f);
+            }
+            context.multifle[stat] += value;
+        }
+        else
+        {
+            if (!context.stats.ContainsKey(stat))
+            {
+                context.stats.Add(stat, 0);
+            }
+            context.stats[stat] += (int)value;
+        }
+    }
+    public override void Copy(Modifier newOne)
+    {
+        base.Copy(newOne);
+        if(newOne is ItemModifier item)
+        {
+            item.itemTargetType = itemTargetType;
+            item.itemCategory = itemCategory;
+            item.specificType = specificType;
+            item.unEquipable = unEquipable;
+        }
+    }
+    public override void Reset()
+    {
+        base.Reset();
+        itemTargetType = ItemTargetType.Category;
+        itemCategory = ItemCategory.Consumable;
+    }
+
 }

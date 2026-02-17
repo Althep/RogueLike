@@ -16,6 +16,7 @@ public class ItemDataManager : AsyncDataManager<ItemDataManager>
     Dictionary<int, List<WeightKeyPair>> miscPair = new Dictionary<int, List<WeightKeyPair>>();
     ModifierFactory modifierFactory;
     ModifierPooler modifierPooler;
+    EffectDataManager effectDataManager;
     string equipMentsDataName = "EquipMents";
     #region DataInit
 
@@ -26,6 +27,10 @@ public class ItemDataManager : AsyncDataManager<ItemDataManager>
 
     public async UniTask SetUp(List<TextAsset> myAssets)
     {
+        if(effectDataManager == null)
+        {
+            effectDataManager = await EffectDataManager.CreateAsync();
+        }
         if(modifierFactory == null)
         {
 
@@ -186,11 +191,27 @@ public class ItemDataManager : AsyncDataManager<ItemDataManager>
 
     async UniTask ReadConsumData(List<Dictionary<string,object>> originData)
     {
-        for(int i = 0; i < originData.Count; i++)
+        for(int i = 0; i<originData.Count; i++)
         {
+            string id = originData[i]["ID"].ToString();
+            string name = originData[i]["Name"].ToString();
+            if (!itemDatas.ContainsKey(name))
+            {
+                ConsumableItem consum = new();
+                consum.id = id;
+                consum.name = name;
+                Utils.TryConvertEnum<ConsumableType>(originData[i], "ItemType", ref consum.consumableType);
+                Utils.TrySetValue(originData[i], "Tier", ref consum.tier);
+                Utils.TrySetValue(originData[i], "Weight", ref consum.weight);
+
+            }
+            ModifierType type = Utils.ConvertToEnum<ModifierType>(originData[i]["ModifierType"].ToString());
+            Modifier mod = modifierPooler.GetModifier(type,id);
+            itemDatas[name].options.Add(mod);
 
             await Utils.WaitYield(i);
         }
+        
     }
 
     async UniTask ReadMiscData(List<Dictionary<string,object>> originData)

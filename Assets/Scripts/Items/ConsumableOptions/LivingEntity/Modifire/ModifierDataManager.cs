@@ -29,14 +29,13 @@ public class ModifierDataManager : AsyncDataManager<ModifierDataManager>
             Debug.Log($"{asset.name} 에셋 리딩!");
             if (asset.name.Contains("Stat"))
             {
-                Debug.Log($"{asset.name }파일 읽음");
+                Debug.Log($"{asset.name}파일 읽음");
                 await ReadStatModifier(originData);
             }
-            /*
             else if (asset.name.Contains("Item"))
             {
                 await ReadItemModifier(originData);
-            }*/
+            }
             else if (asset.name.Contains("Damage"))
             {
                 await ReadDamageModifier(originData);
@@ -54,6 +53,11 @@ public class ModifierDataManager : AsyncDataManager<ModifierDataManager>
                 Debug.Log("ModifeirDataManager  장비 옵션 모디파이어 리딩 시작!");
                 await ReadEquipOptions(originData);
             }
+            else if (asset.name.Contains("ConsumOptions"))
+            {
+                Debug.Log("ModifierDataManager 소모품 모디파이어 리딩 시작");
+                await ReadConsumData(originData);
+            }
         }
     }
 
@@ -70,10 +74,7 @@ public class ModifierDataManager : AsyncDataManager<ModifierDataManager>
                 StatModifier newStat = new StatModifier();
                 Modifiers.Add(id, newStat);
                 return newStat;
-            case ModifierType.ItemModifier:
-                ItemModifier newItem = new ItemModifier();
-                Modifiers.Add(id, newItem);
-                return newItem;
+
             case ModifierType.BuffModifier:
                 BuffModifier newBuff = new BuffModifier();
                 Modifiers.Add(id, newBuff);
@@ -86,6 +87,10 @@ public class ModifierDataManager : AsyncDataManager<ModifierDataManager>
                 ActionModifier newAction = new ActionModifier();
                 Modifiers.Add(id, newAction);
                 return newAction;
+            case ModifierType.ItemModifier:
+                ItemModifier newItem = new ItemModifier();
+                Modifiers.Add(id, newItem);
+                return newItem;
             default:
                 Debug.Log("StatType Error in GetEmptyModifier_ModifierFactory");
                 return null;
@@ -94,6 +99,10 @@ public class ModifierDataManager : AsyncDataManager<ModifierDataManager>
 
     public Modifier Get_Modifier(string id)
     {
+        if (!Modifiers.ContainsKey(id))
+        {
+            Debug.Log($"ModifierData Don't Contain{id}");
+        }
         ModifierType type = Modifiers[id].modifierType;
 
         switch (type)
@@ -101,23 +110,23 @@ public class ModifierDataManager : AsyncDataManager<ModifierDataManager>
             case ModifierType.StatModifier:
                 StatModifier newStat = new StatModifier();
                 Modifiers[id].Copy(newStat);
-                return newStat;
+                return newStat as StatModifier;
             case ModifierType.ItemModifier:
                 ItemModifier newItem = new ItemModifier();
                 Modifiers[id].Copy(newItem);
-                return newItem;
+                return newItem as ItemModifier;
             case ModifierType.BuffModifier:
                 BuffModifier newBuff = new BuffModifier();
                 Modifiers[id].Copy(newBuff);
-                return newBuff;
+                return newBuff as BuffModifier;
             case ModifierType.DamageModifier:
                 DamageModifier newDamage = new DamageModifier();
                 Modifiers[id].Copy(newDamage);
-                return newDamage;
+                return newDamage as DamageModifier;
             case ModifierType.ActionModifier:
                 ActionModifier newAction = new ActionModifier();
                 Modifiers[id].Copy(newAction);
-                return newAction;
+                return newAction as ActionModifier;
             default:
                 Debug.Log("StatType Error in Get_Modifier_ModifierFactory");
                 return null;
@@ -146,9 +155,14 @@ public class ModifierDataManager : AsyncDataManager<ModifierDataManager>
         }
         else
         {
-            if (modifier is BuffModifier || modifier is ActionModifier)
+            if (modifier is BuffModifier buff)
             {
-                effectManager.GetActionEffectScript(data["StringValue"].ToString());
+                Utils.StringToEnum<BuffCategory>(data["BuffType"].ToString(), ref buff.buffCategory);
+                effectManager.GetActionEffectScript(data["EffectID"].ToString());
+            }
+            else if (modifier is ActionModifier action)
+            {
+                effectManager.GetActionEffectScript(data["EffectID"].ToString());
             }
         }
         Utils.TryConvertEnum<ModifierTriggerType>(data, "ModifierTrigger", ref modifier.triggerType);
@@ -261,9 +275,13 @@ public class ModifierDataManager : AsyncDataManager<ModifierDataManager>
                     Utils.TryConvertEnum<ModifierTriggerType>(originData[i], "ModifierTrigger", ref newAction.triggerType);
                     Utils.TrySetValue(originData[i], "Priority", ref newAction.priority);
                     ModifierAction action = effectManager.GetActionEffectScript(actionName);
-                    
+
                     Modifiers.Add(id, newAction);
                     Debug.Log($"{newAction.id} Modifier 등록!");
+                    break;
+                case ModifierType.ItemModifier:
+                    ItemModifier newItem = new ItemModifier();
+                    Utils.TrySetValue(originData[i], "ID", ref newItem.id);
                     break;
                 default:
                     break;
@@ -272,21 +290,105 @@ public class ModifierDataManager : AsyncDataManager<ModifierDataManager>
         }
     }
 
+    async UniTask ReadConsumData(List<Dictionary<string, object>> originData)
+    {
+        for (int i = 0; i < originData.Count; i++)
+        {
+            string id = originData[i]["ID"].ToString();
+            Debug.Log($"소모 아이템 모디파이어 {id} 리드");
+            string name = originData[i]["Name"].ToString();
+            ModifierType mod_Type = Utils.ConvertToEnum<ModifierType>(originData[i]["ModifierType"].ToString());
+            if (Modifiers.ContainsKey(id))
+            {
+                continue;
+            }
+            switch (mod_Type)
+            {
+                case ModifierType.StatModifier:
+                    break;
+                case ModifierType.ItemModifier:
+                    break;
+                case ModifierType.BuffModifier:
+                    BuffModifier buff = GetEmptyModifier(mod_Type, id)as BuffModifier;
+                    Utils.TrySetValue(originData[i], "Value", ref buff.value);
+                    Utils.TrySetValue(originData[i], "StringValue", ref buff.stringValue);
+                    Utils.TrySetValue(originData[i], "MinTime", ref buff.minTime);
+                    Utils.TrySetValue(originData[i], "MaxTime", ref buff.maxTime);
+                    Utils.TryConvertEnum<BuffType>(originData[i], "BuffType", ref buff.buffType);
+                    Utils.TrySetValue(originData[i], "EffectName", ref buff.effectName);
+                    if (Utils.TryConvertEnum<StatType>(originData[i], "StringValue", ref buff.stat))
+                    {
+
+                    }
+                    else
+                    {
+                        string effectName_ = buff.effectName;
+                        ModifierAction mod_Action = effectManager.GetActionEffectScript(effectName_);
+                        buff.SetMyAction(mod_Action);
+                    }
+                    
+                    break;
+                case ModifierType.DamageModifier:
+                    break;
+                case ModifierType.ActionModifier:
+                    ActionModifier action = GetEmptyModifier(mod_Type, id) as ActionModifier;
+                    Utils.TrySetValue(originData[i], "EffectName", ref action.effectName);
+                    Debug.Log($"EffectName : {action.effectName}");
+                    ActionEffectType effectType = Utils.ConvertToEnum<ActionEffectType>(originData[i]["EffectName"].ToString());
+                    string effectName = action.stringValue;
+                    ModifierAction modAction = effectManager.GetActionEffectScript(action.effectName);
+                    Utils.TrySetValue(originData[i], "StringValue", ref action.stringValue);
+                    Utils.TrySetValue(originData[i], "Value", ref action.value);
+                    Utils.TrySetValue(originData[i], "MinTime", ref action.minValue);
+                    Utils.TrySetValue(originData[i], "MaxTime", ref action.maxValue);
+                    action.SetAction(modAction);
+                    break;
+                default:
+                    break;
+            }
+
+            Debug.Log($"{id} 리드 완료");
+            await Utils.WaitYield(i);
+
+        }
+    }
     public async UniTask ReadBuffModifier(List<Dictionary<string, object>> originData)
     {
         for (int i = 0; i < originData.Count; i++)
         {
+
             string id = originData[i]["ID"].ToString();
             if (Modifiers.ContainsKey(id))
             {
                 continue;
             }
+            Debug.Log($"버프 모디파이어 {id} 등록중");
             BuffModifier buff = new BuffModifier();
-            buff.poolType = PoolScriptType.ItemModifier;
+            buff.poolType = PoolScriptType.BuffModifier;
             buff.id = id;
+            string effectName = originData[i]["EffectName"].ToString();
             ReadModifier(originData[i], buff);
-            Utils.TrySetValue<int>(originData[i], "Duration", ref buff.duration);
+            Utils.TrySetValue(originData[i], "StringValue", ref buff.stringValue);
+            Utils.TryConvertEnum(originData[i], "BuffType", ref buff.buffCategory);
+            Utils.TrySetValue(originData[i], "MinTime", ref buff.minTime);
+            Utils.TrySetValue(originData[i], "MaxTime", ref buff.maxTime);
+            Utils.TryConvertEnum(originData[i], "BuffType", ref buff.buffType);
+          
+            switch (buff.buffType)
+            {
+                case BuffType.StatBuff:
+                    Utils.TryConvertEnum<StatType>(originData[i], "StringValue", ref buff.stat);
+                    break;
+                case BuffType.ActionBuff:
+                    ModifierAction action = effectManager.GetActionEffectScript(effectName);
+                    action.stringValue = buff.stringValue;
+                    action.SetValueToString();
+                    break;
+                default:
+                    break;
+            }
             Modifiers.Add(id, buff);
+            Debug.Log($"버프 모디파이어 {id} 등록 완료");
             await Utils.WaitYield(i);
         }
     }
@@ -316,5 +418,5 @@ public class ModifierDataManager : AsyncDataManager<ModifierDataManager>
         return Modifiers.GetValueOrDefault(id);
     }
 
-    
+
 }

@@ -21,6 +21,12 @@ MonoBehaviour:
     m_SerializedLabels:
     - GameData
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 8fbfa7271312a714ea91c4bfdd56821a
+    m_Address: Mod_ConsumOptions
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - GameData
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: c6da72f3d2689854db7b5cde632ef884
     m_Address: Mod_JobStat.csv
     m_ReadOnly: 0
