@@ -75,3 +75,32 @@ public class DamageRange : ScrollEffects
 
 }
 
+public class Xray : ScrollEffects
+{
+
+}
+
+public class Sleep : ScrollEffects
+{
+
+}
+
+public class Silence : ScrollEffects
+{
+
+}
+public class Wish: ScrollEffects
+{
+
+}
+
+public class Void : ScrollEffects
+{
+
+    
+}
+
+public class EssenceExtract : ScrollEffects
+{
+
+}

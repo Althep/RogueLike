@@ -98,6 +98,60 @@ public class EffectDataManager : AsyncDataManager<EffectDataManager>
             case ActionEffectType.SlotBlock:
                 effect = new SlotBlock();
                 break;
+            case ActionEffectType.SlotAdd:
+                effect = new SlotAdd();
+                break;
+            case ActionEffectType.Cure:
+                effect = new Cure();
+                break;
+            case ActionEffectType.GetDamage:
+                effect = new GetDamage();
+                break;
+            case ActionEffectType.Confuse:
+                effect = new Confuse();
+                break;
+            case ActionEffectType.Invisible:
+                break;
+            case ActionEffectType.Ghost:
+                break;
+            case ActionEffectType.LifeSteel:
+                break;
+            case ActionEffectType.Stun:
+                break;
+            case ActionEffectType.TurnSkip:
+                break;
+            case ActionEffectType.Blink:
+                break;
+            case ActionEffectType.Telleport:
+                break;
+            case ActionEffectType.DamageRange:
+                break;
+            case ActionEffectType.Xray:
+                break;
+            case ActionEffectType.Sleep:
+                break;
+            case ActionEffectType.Silence:
+                break;
+            case ActionEffectType.Wish:
+                break;
+            case ActionEffectType.Void:
+                break;
+            case ActionEffectType.EssenceExtract:
+                break;
+            default:
+                break;
+        }
+        switch (type)
+        {
+            case ActionEffectType.StatAdd:
+                effect = new StatAdd();
+                break;
+            case ActionEffectType.StatBuff:
+                effect = new StatBuff();
+                break;
+            case ActionEffectType.SlotBlock:
+                effect = new SlotBlock();
+                break;
             case ActionEffectType.Cure:
                 effect = new Cure();
                 break;
