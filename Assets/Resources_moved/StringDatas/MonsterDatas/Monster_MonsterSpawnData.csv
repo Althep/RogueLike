@@ -1,4 +1,4 @@
-ID,MonsterID,SpawnCost,GroupType,MinCount,MaxCount,Tier,Weghit
+ID,MonsterID,SpawnCost,GroupType,MinCount,MaxCount,Tier,Weight
 Spawn_1,Clump,2,Group,3,4,1,1
 Spawn_2,Rat,1,Solo,1,1,1,1
 Spawn_31,Rat,2,Group,2,4,1,1

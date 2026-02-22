@@ -111,74 +111,67 @@ public class EffectDataManager : AsyncDataManager<EffectDataManager>
                 effect = new Confuse();
                 break;
             case ActionEffectType.Invisible:
-                break;
-            case ActionEffectType.Ghost:
-                break;
-            case ActionEffectType.LifeSteel:
-                break;
-            case ActionEffectType.Stun:
-                break;
-            case ActionEffectType.TurnSkip:
-                break;
-            case ActionEffectType.Blink:
-                break;
-            case ActionEffectType.Telleport:
-                break;
-            case ActionEffectType.DamageRange:
-                break;
-            case ActionEffectType.Xray:
-                break;
-            case ActionEffectType.Sleep:
-                break;
-            case ActionEffectType.Silence:
-                break;
-            case ActionEffectType.Wish:
-                break;
-            case ActionEffectType.Void:
-                break;
-            case ActionEffectType.EssenceExtract:
-                break;
-            default:
-                break;
-        }
-        switch (type)
-        {
-            case ActionEffectType.StatAdd:
-                effect = new StatAdd();
-                break;
-            case ActionEffectType.StatBuff:
-                effect = new StatBuff();
-                break;
-            case ActionEffectType.SlotBlock:
-                effect = new SlotBlock();
-                break;
-            case ActionEffectType.Cure:
-                effect = new Cure();
+                effect = new Invisible();
                 break;
             case ActionEffectType.Ghost:
                 effect = new Ghost();
                 break;
-            case ActionEffectType.GetDamage:
-                effect = new GetDamage();
-                break;
-            case ActionEffectType.Confuse:
-                effect = new Confuse();
-                break;
-            case ActionEffectType.Invisible:
-                effect = new Invisible();
-                break;
             case ActionEffectType.LifeSteel:
                 effect = new LifeSteel();
                 break;
-            case ActionEffectType.SlotAdd:
-                effect = new SlotAdd();
+            case ActionEffectType.TurnSkip:
+                effect = new TurnSkip();
+                break;
+            case ActionEffectType.Blink:
+                effect = new Blink();
+                break;
+            case ActionEffectType.Telleport:
+                effect = new Telleport();
+                break;
+            case ActionEffectType.DamageRange:
+                effect = new DamageRange();
+                break;
+            case ActionEffectType.Xray:
+                effect = new Xray();
+                break;
+            case ActionEffectType.Sleep:
+                effect = new Sleep();
+                break;
+            case ActionEffectType.Silence:
+                effect = new Silence();
+                break;
+            case ActionEffectType.Wish:
+                effect = new Wish();
+                break;
+            case ActionEffectType.Void:
+                effect = new Void();
+                break;
+            case ActionEffectType.EssenceExtract:
+                effect = new EssenceExtract();
+                break;
+            case ActionEffectType.Mutate:
+                effect = new Mutate();
+                break;
+            case ActionEffectType.Identify:
+                effect = new Identify();
+                break;
+            case ActionEffectType.UnEquipable:
+                effect = new UnEquipable();
+                break;
+            case ActionEffectType.Purification:
+                effect = new Purification();
+                break;
+            case ActionEffectType.TelleVision:
+                effect = new Tellevision();
+                break;
+            case ActionEffectType.ItemReinforce:
+                effect = new ItemReinforce();
                 break;
             default:
-                Debug.Log("Default! new StatAdd");
+                Debug.Log("DefaultAction ! ");
                 effect = new StatAdd();
                 break;
         }
-        
         return effect;
     }
 

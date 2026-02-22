@@ -52,6 +52,7 @@ public class ItemDataManager : AsyncDataManager<ItemDataManager>
             }
             
         }
+        ItemDataSort();
     }
     public override async UniTask Init()
     {
@@ -67,7 +68,7 @@ public class ItemDataManager : AsyncDataManager<ItemDataManager>
         {
             modifierPooler = GameManager.instance.Get_ModifierManager().GetModifierPooler();
         }
-        ItemDataSort();
+        
     }
     public int GetRandomTier(Dictionary<int,float> rates)
     {
@@ -105,22 +106,28 @@ public class ItemDataManager : AsyncDataManager<ItemDataManager>
     }
     void ItemDataSort()
     {
+        Debug.Log("아이템 데이터 정렬 시작!");
         foreach (var key in itemDatas.Keys)
         {
-            if(itemDatas[key] is EquipItem equip)
+            switch (itemDatas[key].category)
             {
-                AddToSorted(equip);
-            }
-            if(itemDatas[key] is ConsumableItem consum)
-            {
-                AddToSorted(consum);
-            }
-            if(itemDatas[key] is MiscItem misc)
-            {
-                AddToSorted(misc);
+                case ItemCategory.Equipment:
+                    EquipItem equip = itemDatas[key] as EquipItem;
+                    AddToSorted(equip);
+                    break;
+                case ItemCategory.Consumable:
+                    ConsumableItem consum = itemDatas[key] as ConsumableItem;
+                    AddToSorted(consum);
+                    break;
+                case ItemCategory.Misc:
+                    MiscItem misc = itemDatas[key] as MiscItem;
+                    AddToSorted(misc);
+                    break;
+                default:
+                    break;
             }
         }
-        
+        KeypairSort();
     }
     async UniTask Read_EquipDatas(List<Dictionary<string,object>> originData)
     {
@@ -203,7 +210,8 @@ public class ItemDataManager : AsyncDataManager<ItemDataManager>
                 Utils.TryConvertEnum<ConsumableType>(originData[i], "ItemType", ref consum.consumableType);
                 Utils.TrySetValue(originData[i], "Tier", ref consum.tier);
                 Utils.TrySetValue(originData[i], "Weight", ref consum.weight);
-
+                consum.category = ItemCategory.Consumable;
+                itemDatas.Add(name, consum);
             }
             ModifierType type = Utils.ConvertToEnum<ModifierType>(originData[i]["ModifierType"].ToString());
             Modifier mod = modifierPooler.GetModifier(type,id);
@@ -239,7 +247,7 @@ public class ItemDataManager : AsyncDataManager<ItemDataManager>
     #region Sort
     public void AddToSorted(EquipItem equip)
     {
-        string id = equip.id;
+        string name = equip.name;
         int tier = equip.tier;
         if (!equipToTier.ContainsKey(tier))
         {
@@ -249,45 +257,105 @@ public class ItemDataManager : AsyncDataManager<ItemDataManager>
         {
             equipPair.Add(tier, new List<WeightKeyPair>());
         }
-        if (!equipToTier[tier].Contains(id))
+        if (!equipToTier[tier].Contains(name))
         {
-            equipToTier[tier].Add(id);
-            WeightKeyPair pair = new WeightKeyPair() { key = id, cumulativeWeight = equip.weight};
-            equipPair[tier].Add(pair);
+            equipToTier[tier].Add(name);
+            Debug.Log($"티어 정렬 {tier}, 이름 {name} 등록 완료");
+            //WeightKeyPair pair = new WeightKeyPair() { key = id, cumulativeWeight = equip.weight};
+            //equipPair[tier].Add(pair);
         }
     }
     public void AddToSorted(ConsumableItem consum)
     {
-        string id = consum.id;
+        string name = consum.name;
         int tier = consum.tier;
         if (!ConsumToTiers.ContainsKey(tier))
         {
             ConsumToTiers.Add(tier, new List<string>());
         }
-        if (!ConsumToTiers[tier].Contains(id))
+        if (!ConsumToTiers[tier].Contains(name))
         {
-            ConsumToTiers[tier].Add(id);
-            WeightKeyPair pair = new WeightKeyPair() { key = id, cumulativeWeight = consum.weight };
-            consumPair[tier].Add(pair);
+            ConsumToTiers[tier].Add(name);
+            Debug.Log($"티어 정렬 {tier}, 이름 {name} 등록 완료");
+            //WeightKeyPair pair = new WeightKeyPair() { key = id, cumulativeWeight = consum.weight };
+            //consumPair[tier].Add(pair);
         }
     }
     public void AddToSorted(MiscItem misc)
     {
 
-        string id = misc.id;
+        string name = misc.name;
         int tier = misc.tier;
         if (!miscToTier.ContainsKey(tier))
         {
             miscToTier.Add(tier, new List<string>());
         }
-        if (!miscToTier[tier].Contains(id))
+        if (!miscToTier[tier].Contains(name))
         {
-            miscToTier[tier].Add(id);
-            WeightKeyPair pair = new WeightKeyPair() { key = id, cumulativeWeight = misc.weight };
-            miscPair[tier].Add(pair);
+            miscToTier[tier].Add(name);
+            //WeightKeyPair pair = new WeightKeyPair() { key = id, cumulativeWeight = misc.weight };
+            //miscPair[tier].Add(pair);
         }
 
     }
     #endregion
+    public void KeypairSort()
+    {
+        foreach(var tier in equipToTier.Keys)
+        {
+            float weightsum = 0;
+            foreach(var key in equipToTier[tier])
+            {
+                ItemBase item = itemDatas[key];
+                if (!equipPair.ContainsKey(tier))
+                {
+                    equipPair.Add(tier, new List<WeightKeyPair>());
+                }
+                WeightKeyPair keypair = new WeightKeyPair();
+                keypair.key = key;
+                weightsum+= item.weight;
+                keypair.cumulativeWeight = weightsum;
+                equipPair[tier].Add(keypair);
+                Debug.Log($"장비아이템  {tier} 키페어 키 {keypair.key} 등록");
+            }
+        }
 
+        foreach (var tier in ConsumToTiers.Keys)
+        {
+            float weightsum = 0;
+            foreach (var key in ConsumToTiers[tier])
+            {
+                ItemBase item = itemDatas[key];
+                if (!consumPair.ContainsKey(tier))
+                {
+                    consumPair.Add(tier, new List<WeightKeyPair>());
+                }
+                WeightKeyPair keypair = new WeightKeyPair();
+                keypair.key = key;
+                weightsum+= item.weight;
+                keypair.cumulativeWeight = weightsum;
+                consumPair[tier].Add(keypair);
+                Debug.Log($"소비아이템 {tier }키페어 키 : {keypair.key} 등록");
+            }
+        }
+
+        foreach (var tier in miscToTier.Keys)
+        {
+            float weightsum = 0;
+            foreach (var key in miscToTier[tier])
+            {
+                ItemBase item = itemDatas[key];
+                if (!miscPair.ContainsKey(tier))
+                {
+                    miscPair.Add(tier, new List<WeightKeyPair>());
+                }
+                WeightKeyPair keypair = new WeightKeyPair();
+                keypair.key = key;
+                weightsum+= item.weight;
+                keypair.cumulativeWeight = weightsum;
+                miscPair[tier].Add(keypair);
+
+            }
+        }
+    }
 }

@@ -1,57 +1,57 @@
-ID,Name,ModifierType,EffectName,StringValue,ItemType,Tier,Value,MinTime,MaxTime,BuffType,Weight,주석
-CurePotion_0,CurePotion,ActionModifier,StatAdd,HP,Potion,1,10,0,0,Buff,3,치료포션
-CurePotion_1,CurePotion,ActionModifier,Cure,Cure,Potion,1,0,0,0,Buff,0,치료포션
-HealingPotion_0,HealingPotion,ActionModifier,StatAdd,HP,Potion,1,20,0,0,Buff,1,힐링포션
-PoisonPotion_0,PoisonPotion,BuffModifier,GetDamage,Poison,Potion,1,0,5,10,Debuff,1,독포션
-ConfusePotion_0,DizzyPotion,BuffModifier,Confuse,Confuse,Potion,2,0,3,7,Debuff,1,혼란포션
-StrengthPotion_0,StrengthPotion,BuffModifier,StatBuff,Str,Potion,2,3,7,12,Buff,1,힘포션
-AgilityPotion_0,AgilityPotion,BuffModifier,StatBuff,Dex,Potion,2,3,7,12,Buff,1,민첩포션
-IntelligencePotion_0,IntelligencePotion,BuffModifier,StatBuff,Int,Potion,2,3,7,12,Buff,1,지능포션
-WarriorPotion_0,WarriorPotion,BuffModifier,StatBuff,Str,Potion,2,3,7,12,Buff,0.5,전사포션
-WarriorPotion_1,WarriorPotion,BuffModifier,StatBuff,MaxHp,Potion,2,10,7,12,Buff,0,전사포션
-MpHealingPotion_0,MpHealingPotion,ActionModifier,StatAdd,Mp,Potion,2,10,0,0,Buff,1,mp회복포션
-InvisiblePotion_0,InvisiblePotion,BuffModifier,Invisible,Invisible,Potion,2,0,7,12,Buff,1,투명화포션
-RamdomPotion_0,RandomPotion,ActionModifier,RandomEffect,RandomPotion,Potion,2,0,0,0,Buff,0.2,무작위포션효과
-MutatePotion,MutatePotion,ActionModifier,Mutate,RandomMutate,Potion,3,0,0,0,Buff,0.5,무작위변이효과
-QuicknessPotion_0,QuicknessPotion,ActionModifier,StatBuff,MoveSpeed,Potion,3,-0.3,7,12,Buff,1,속도포션
-QuicknessPotion_1,QuicknessPotion,ActionModifier,StatBuff,AttackSpeed,Potion,3,-0.3,7,12,Buff,0,속도포션
-QuicknessPotion_2,QuicknessPotion,ActionModifier,StatBuff,SepllSpeed,Potion,3,-0.3,7,12,Buff,0,속도포션
-EagleEyePotion_0,EagleEyePotion,BuffModifier,vision,Vision,Potion,3,1,10,15,Buff,0.1,시야범위포션
-FireResistPotion_0,FierResistPotion,BuffModifier,StatBuff,FierResist,Potion,3,1,20,25,Buff,0.5,화염저항포션
-FierResistPotion_1,FierResistPotion,BuffModifier,StatBuff,IceResist,Potion,3,-1,20,25,Buff,0,화염저항포션
-IceResistPotion_0,IceResistPotion,BuffModifier,StatBuff,IceResist,Potion,3,1,20,25,Buff,0.5,냉기저항포션
-IceResistPotion_1,IceResistPotion,BuffModifier,StatBuff,FierResist,Potion,3,-1,20,25,Buff,0,냉기저항포션
-RegeneratePotion_0,RegenerationPotion,BuffModifier,regeneration,Regeneration,Potion,3,1,10,15,Buff,0.5,재생포션
-GhostPotion_0,GhostPotion,ActionModifier,ghost,Invisible,Potion,3,0,7,20,Buff,0.1,유령화포션
-GhostPotion_0,GhostPotion,BuffModifier,evasion,Evasion,Potion,3,5,7,20,Buff,0,유령화포션
-TrollsBlood_0,TrollsBlood,BuffModifier,regeneration,Regeneration,Potion,4,1,10,15,Buff,1,재생포션
-VamfierBlood_0,VamfierBlood,BuffModifier,lifeSteel,Vafiric,Potion,4,0.1,20,30,Buff,0.5,뱀피릭포션
-VamfierBlood_1,vamfierBlood,ActionModifier,StatAdd,BanRegen,Potion,4,0,20,30,Buff,0,뱀피릭포션(회복제한
-PhoenixTears_0,PhoenixTears,ActionModifier,Extralife,ExtraLife,Potion,5,1,0,0,Buff,1,추가목숨포션
-ElixirOfApex_0,ElixirOfApex,ActionModifier,StatAdd,Str,Potion,5,3,0,0,Buff,1,종합스탯포션
-ElixirOfApex_1,ElixirOfApex,ActionModifier,StatAdd,Dex,Potion,5,3,0,0,Buff,0,종합스탯포션
-ElixirOfApex_2,ElixirOfApex,ActionModifier,StatAdd,Int,Potion,5,3,0,0,Buff,0,종합스탯포션
-ElixirOfSoul_0,ElixirOfSoul,ActionModifier,SlotAdd,Amulet,Potion,5,1,0,0,Buff,1,추가슬롯포션
-ElixirOfAccelerate_0,ElixirOfAccelerate,BuffModifier,StatBuff,Buff,Potion,5,0.5,5,7,Buff,1,속도포션
-ElixirOfAccelerate_1,ElixirOfAccelerate,BuffModifier,StatBuff,Buff,Potion,5,0.5,5,7,Buff,0,속도포션
-ElixirOfAccelerate_2,ElixirOfAccelerate,BuffModifier,StatBuff,Buff,Potion,5,0.5,5,7,Buff,0,속도포션
-IdentifyScroll_0,IdentifyScroll,ActionModifier,Identify,None,Scroll,1,1,0,0,,2,확인효과
-CurseScroll_0,CurseScroll,ActionModifier,UnEquipable,None,Scroll,1,1,0,0,,0.3,저주효과
-PurificationScroll_0,PurificationScroll,ActionModifier,Purification,None,Scroll,1,1,0,0,,1,정화효과
-LongScroll_0,LongScroll,BuffModifier,Standing,Debuff,Scroll,1,1,2,3,,0.3,duration만큼 턴 낭비
-TelleVisionScroll_0,TellevisionScroll,ActionModifier,Tellevision,None,Scroll,1,5,0,0,,0.5,먼곳확인
-ArmorrReinforceScroll_0,ArmorrReinforceScroll,ActionModifier,Defense,None,Scroll,2,1,0,0,,1,방어력상승
-ArmorrReinforceScroll_0,ArmorrReinforceScroll,ActionModifier,DamageReduce,None,Scroll,2,1,0,0,,0,회피력상승
-WeaponReinforceScroll_0,WeaponReinforceScroll,ActionModifier,Damage,None,Scroll,2,1,0,0,,1,공격력상승
-WeaponReinforceScroll_0,WeaponReinforceScroll,ActionModifier,Accurency,None,Scroll,2,1,0,0,,0,명중력상승
-ParchmentOfNagging_0,ParchmentOfNagging,ActionModifier,Nagging,Debuff,Scroll,2,0,10,20,,0.2,나불거리기
-BlinkScroll_0,BlinkScroll,BuffModifier,Blink,Buff,Scroll,3,1,3,4,,1,버프가 끝난후 랜덤순간이동
-TelleportScroll_0,TelleprtScroll,ActionModifier,Telleport,Buff,Scroll,4,1,0,0,,1,플레이어의 선택 순간이동
-InfernoScroll_0,InfernoScroll,ActionModifier,Inferno,,Scroll,2,15,4,5,,1,15의 화염대미지 duration범위
-XrayScroll_0,XrayScroll,BuffModifier,Xray,None,Scroll,3,1,3,5,,0.3,벽뚫고 보는 시야
-SleepScroll_0,SleepScroll,ActionModifier,Sleep,None,Scroll,4,0.5,5,7,,0.5,value확률만큼 duration범위의 적 슬립
-SilenceScroll_0,SilenceScroll,ActionModifier,Silence,Buff,Scroll,3,5,7,10,,0.5,value범위를 사일런스
-WishScroll,WishScroll,ActionModifier,Wish,,Scroll,4,1,4,5,,0.5,duration티어범위의 아이템 획득
-GorgonScroll,GorgonScroll,ActionModifier,Pertrify,Buff,Scroll,5,5,3,3,,0.5,주변value 범위 석화
-VoidScroll,VoidScroll,ActionModifier,Void,None,Scroll,5,5,0,0,,0.5,벽제거
-Scroll of Essence Extraction,Scroll of Essence Extraction,ActionModifier,Essence Extraction,None,Scroll,5,1,0,0,,0.3,아이템의 옵션 추출
+ID,Name,ModifierType,EffectName,StringValue,ItemType,Tier,Value,MinTime,MaxTime,IsMulti,Priority,BuffType,Weight,주석
+CurePotion_0,CurePotion,ActionModifier,StatAdd,HP,Potion,1,10,0,0,FALSE,50,None,3,치료포션
+CurePotion_1,CurePotion,ActionModifier,Cure,Cure,Potion,1,0,0,0,FALSE,50,None,0,치료포션
+HealingPotion_0,HealingPotion,ActionModifier,StatAdd,HP,Potion,1,20,0,0,FALSE,50,None,1,힐링포션
+PoisonPotion_0,PoisonPotion,BuffModifier,GetDamage,Poison,Potion,1,0,5,10,FALSE,50,Debuff,1,독포션
+ConfusePotion_0,DizzyPotion,BuffModifier,Confuse,Confuse,Potion,2,0,3,7,FALSE,50,Debuff,1,혼란포션
+StrengthPotion_0,StrengthPotion,BuffModifier,StatBuff,Str,Potion,2,3,7,12,FALSE,50,Buff,1,힘포션
+AgilityPotion_0,AgilityPotion,BuffModifier,StatBuff,Dex,Potion,2,3,7,12,FALSE,50,Buff,1,민첩포션
+IntelligencePotion_0,IntelligencePotion,BuffModifier,StatBuff,Int,Potion,2,3,7,12,FALSE,50,Buff,1,지능포션
+WarriorPotion_0,WarriorPotion,BuffModifier,StatBuff,Str,Potion,2,3,7,12,FALSE,50,Buff,0.5,전사포션
+WarriorPotion_1,WarriorPotion,BuffModifier,StatBuff,MaxHp,Potion,2,10,7,12,FALSE,50,Buff,0,전사포션
+MpHealingPotion_0,MpHealingPotion,ActionModifier,StatAdd,Mp,Potion,2,10,0,0,FALSE,50,None,1,mp회복포션
+InvisiblePotion_0,InvisiblePotion,BuffModifier,Invisible,Invisible,Potion,2,0,7,12,FALSE,50,Buff,1,투명화포션
+RamdomPotion_0,RandomPotion,ActionModifier,RandomEffect,Potion,Potion,2,0,0,0,FALSE,50,None,0.2,무작위포션효과
+MutatePotion,MutatePotion,ActionModifier,Mutate,RandomMutate,Potion,3,0,0,0,FALSE,50,None,0.5,무작위변이효과
+QuicknessPotion_0,QuicknessPotion,ActionModifier,StatBuff,MoveSpeed,Potion,3,-0.3,7,12,FALSE,50,Buff,1,속도포션
+QuicknessPotion_1,QuicknessPotion,ActionModifier,StatBuff,AttackSpeed,Potion,3,-0.3,7,12,FALSE,50,Buff,0,속도포션
+QuicknessPotion_2,QuicknessPotion,ActionModifier,StatBuff,SepllSpeed,Potion,3,-0.3,7,12,FALSE,50,Buff,0,속도포션
+EagleEyePotion_0,EagleEyePotion,BuffModifier,StatAdd,Vision,Potion,3,1,10,15,FALSE,50,Buff,0.1,시야범위포션
+FireResistPotion_0,FireResistPotion,BuffModifier,StatBuff,FierResist,Potion,3,1,20,25,FALSE,50,Buff,0.5,화염저항포션
+FireResistPotion_1,FireResistPotion,BuffModifier,StatBuff,IceResist,Potion,3,-1,20,25,FALSE,50,Buff,0,화염저항포션
+IceResistPotion_0,IceResistPotion,BuffModifier,StatBuff,IceResist,Potion,3,1,20,25,FALSE,50,Buff,0.5,냉기저항포션
+IceResistPotion_1,IceResistPotion,BuffModifier,StatBuff,FierResist,Potion,3,-1,20,25,FALSE,50,Buff,0,냉기저항포션
+RegeneratePotion_0,RegenerationPotion,BuffModifier,StatAdd,Regeneration,Potion,3,1,10,15,FALSE,50,Buff,0.5,재생포션
+GhostPotion_0,GhostPotion,ActionModifier,Ghost,Invisible,Potion,3,0,7,20,FALSE,50,Buff,0.1,유령화포션
+GhostPotion_0,GhostPotion,BuffModifier,StatAdd,Evasion,Potion,3,5,7,20,FALSE,50,Buff,0,유령화포션
+TrollsBlood_0,TrollsBlood,BuffModifier,StatAdd,Regeneration,Potion,4,1,10,15,FALSE,50,Buff,1,재생포션
+VamfierBlood_0,VamfierBlood,BuffModifier,StatAdd,Vafiric,Potion,4,0.1,20,30,FALSE,50,Buff,0.5,뱀피릭포션
+VamfierBlood_1,vamfierBlood,ActionModifier,StatAdd,BanRegen,Potion,4,0,20,30,TRUE,100,Buff,0,뱀피릭포션(회복제한
+PhoenixTears_0,PhoenixTears,ActionModifier,StatAdd,ExtraLife,Potion,5,1,0,0,FALSE,50,None,1,추가목숨포션
+ElixirOfApex_0,ElixirOfApex,ActionModifier,StatAdd,Str,Potion,5,3,0,0,FALSE,50,None,1,종합스탯포션
+ElixirOfApex_1,ElixirOfApex,ActionModifier,StatAdd,Dex,Potion,5,3,0,0,FALSE,50,None,0,종합스탯포션
+ElixirOfApex_2,ElixirOfApex,ActionModifier,StatAdd,Int,Potion,5,3,0,0,FALSE,50,None,0,종합스탯포션
+ElixirOfSoul_0,ElixirOfSoul,ActionModifier,SlotAdd,Amulet,Potion,5,1,0,0,FALSE,50,None,1,추가슬롯포션
+ElixirOfAccelerate_0,ElixirOfAccelerate,BuffModifier,StatBuff,AttackSpeed,Potion,5,0.5,5,7,FALSE,50,Buff,1,속도포션
+ElixirOfAccelerate_1,ElixirOfAccelerate,BuffModifier,StatBuff,MoveSpeed,Potion,5,0.5,5,7,FALSE,50,Buff,0,속도포션
+ElixirOfAccelerate_2,ElixirOfAccelerate,BuffModifier,StatBuff,SpellSpeed,Potion,5,0.5,5,7,FALSE,50,Buff,0,속도포션
+IdentifyScroll_0,IdentifyScroll,ActionModifier,Identify,None,Scroll,1,1,0,0,FALSE,50,None,2,확인효과
+CurseScroll_0,CurseScroll,ActionModifier,UnEquipable,None,Scroll,1,1,0,0,FALSE,50,None,0.3,저주효과
+PurificationScroll_0,PurificationScroll,ActionModifier,Purification,None,Scroll,1,1,0,0,FALSE,50,None,1,정화효과
+LongScroll_0,LongScroll,BuffModifier,TurnSkip,None,Scroll,1,1,2,3,FALSE,50,Debuff,0.3,duration만큼 턴 낭비
+TelleVisionScroll_0,TellevisionScroll,ActionModifier,TelleVision,None,Scroll,1,5,0,0,FALSE,50,None,0.5,먼곳확인
+ArmorrReinforceScroll_0,ArmorrReinforceScroll,ActionModifier,ItemReinforce,Defence,Scroll,2,1,0,0,FALSE,50,None,1,방어력상승
+ArmorrReinforceScroll_1,ArmorrReinforceScroll,ActionModifier,ItemReinforce,Evasion,Scroll,2,1,0,0,FALSE,50,None,0,회피력상승
+WeaponReinforceScroll_0,WeaponReinforceScroll,ActionModifier,ItemReinforce,Attack,Scroll,2,1,0,0,FALSE,50,None,1,공격력상승
+WeaponReinforceScroll_0,WeaponReinforceScroll,ActionModifier,ItemReinforce,Accurancy,Scroll,2,1,0,0,FALSE,50,None,0,명중력상승
+ParchmentOfNagging_0,ParchmentOfNagging,ActionModifier,TurnSkip,Debuff,Scroll,2,0,10,20,FALSE,50,Debuff,0.2,나불거리기
+BlinkScroll_0,BlinkScroll,BuffModifier,Blink,Buff,Scroll,3,1,3,4,FALSE,50,None,1,버프가 끝난후 랜덤순간이동
+TelleportScroll_0,TelleprtScroll,ActionModifier,Telleport,Buff,Scroll,4,1,0,0,FALSE,50,None,1,플레이어의 선택 순간이동
+InfernoScroll_0,InfernoScroll,ActionModifier,DamageRange,Fire,Scroll,2,15,4,5,FALSE,50,None,1,15의 화염대미지 duration범위
+XrayScroll_0,XrayScroll,BuffModifier,Xray,None,Scroll,3,1,3,5,FALSE,50,Buff,0.3,벽뚫고 보는 시야
+SleepScroll_0,SleepScroll,ActionModifier,Sleep,None,Scroll,4,0.5,5,7,FALSE,50,None,0.5,value확률만큼 duration범위의 적 슬립
+SilenceScroll_0,SilenceScroll,ActionModifier,Silence,Buff,Scroll,3,5,7,10,FALSE,50,None,0.5,value범위를 사일런스
+WishScroll,WishScroll,ActionModifier,Wish,None,Scroll,4,1,4,5,FALSE,50,None,0.5,duration티어범위의 아이템 획득
+GorgonScroll,GorgonScroll,ActionModifier,TurnSkip,Buff,Scroll,5,5,3,3,FALSE,50,None,0.5,주변value 범위 석화
+VoidScroll,VoidScroll,ActionModifier,Void,None,Scroll,5,5,0,0,FALSE,50,None,0.5,벽제거
+Scroll of Essence Extraction,Scroll of Essence Extraction,ActionModifier,EssenceExtract,None,Scroll,5,1,0,0,FALSE,50,None,0.3,아이템의 옵션 추출

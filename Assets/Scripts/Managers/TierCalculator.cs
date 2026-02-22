@@ -35,7 +35,7 @@ public class TierCalculator
         if (isPotion)
         {
             // 포션: 완만한 곡선 (더 큰 표준편차) -> 고층에서도 T1/T2 포션 출현 유도
-            stdDev = 1.5f;
+            stdDev = 1.0f;
         }
         else
         {
@@ -87,5 +87,44 @@ public class TierCalculator
         {
             Debug.Log($"  T{kvp.Key}: {kvp.Value * 100f:F2}% (완만)");
         }
+    }
+
+    public static Dictionary<int, float> GetCoreTierWeights(int currentFloor, int maxFloor, int maxTier)
+    {
+        Dictionary<int, float> weights = new Dictionary<int, float>();
+        float totalWeight = 0f;
+
+        float progress = Mathf.Clamp01((float)(currentFloor - 1) / (maxFloor - 1));
+
+        // 1. 지수를 조금 더 낮게 시작 (3.2 정도로 설정하여 1~2티어 격차를 줄임)
+        float exponent = Mathf.Lerp(3.2f, 0.5f, progress);
+
+        for (int tier = 1; tier <= maxTier; tier++)
+        {
+            float weight = 1.0f / Mathf.Pow(tier, exponent);
+
+            // 2. 3티어 이상부터는 '희귀도'를 위해 가중치를 추가로 감쇄 (Floor 1 기준)
+            // 층이 낮을수록 3티어 이상의 아이템은 기본 지수보다 더 안 나오게 누릅니다.
+            if (tier >= 3)
+            {
+                float rarityMultiplier = Mathf.Lerp(0.2f, 1.0f, progress); // 초반에는 원래 확률의 20%만 적용
+                weight *= rarityMultiplier;
+            }
+
+            // 3. 후반부 평탄화 보정
+            weight += Mathf.Pow(progress, 2) * 0.1f;
+
+            weights.Add(tier, weight);
+            totalWeight += weight;
+        }
+
+        // 정규화
+        Dictionary<int, float> normalized = new Dictionary<int, float>();
+        foreach (var kvp in weights)
+        {
+            normalized.Add(kvp.Key, kvp.Value / totalWeight);
+        }
+
+        return normalized;
     }
 }

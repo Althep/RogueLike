@@ -66,7 +66,7 @@ public class DungeonManager : MonoBehaviour
         Debug.Log($"[Profile] 오브젝트 배치 시간: {Time.realtimeSinceStartup - spawnStart}s");
 
 
-        //await itemManager.ItemMake();
+        await itemManager.OnVisitNewFloor();
 
         await monsterManager.MonsterSpawn();
         Debug.Log($"[Profile] 총 소요 시간: {Time.realtimeSinceStartup - startTime}s");

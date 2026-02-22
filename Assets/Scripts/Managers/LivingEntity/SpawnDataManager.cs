@@ -139,9 +139,10 @@ public class SpawnDataManager : AsyncDataManager<SpawnDataManager>
         foreach(var tier in spawnDatas.Keys)
         {
             List<MonsterSpawnDataBundle> bundleList = spawnDatas[tier];
-
+            float weightSum = 0;
             for(int i = 0; i<bundleList.Count; i++)
             {
+                
                 MonsterSpawnDataBundle bundle = bundleList[i];
 
                 if (!spawnWeightPairs.ContainsKey(tier))
@@ -154,7 +155,9 @@ public class SpawnDataManager : AsyncDataManager<SpawnDataManager>
                 {
                     WeightKeyPair newPair = new WeightKeyPair();
                     newPair.key = bundle.id;
-                    newPair.cumulativeWeight = bundle.weight;
+                    weightSum+=bundle.weight;
+                    newPair.cumulativeWeight = weightSum;
+                    //newPair.cumulativeWeight = bundle.weight;
                     spawnWeightPairs[tier].Add(newPair);
                 }
             }

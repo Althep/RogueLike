@@ -25,13 +25,26 @@ public class ItemFactory
         floor = dm.floor;
 
         equipRates = TierCalculator.GetTierProbabilities(floor,3,5, false);
-        consumRates = TierCalculator.GetTierProbabilities(floor, 3, 5, true);
+        consumRates = TierCalculator.GetCoreTierWeights(floor,25,5);
         miscRates = TierCalculator.GetTierProbabilities(floor, 3, 5, true);
     }
 
     public ItemBase GetRandomItem()
     {
         ItemCategory type = Utils.Get_RandomType<ItemCategory>();
+        if(type == ItemCategory.Misc)
+        {
+            Debug.Log("Misc 아이템 선택됨");
+            int number = UnityEngine.Random.Range(0, 2);
+            if(number == 0)
+            {
+                type = ItemCategory.Consumable;
+            }
+            else
+            {
+                type = ItemCategory.Equipment;
+            }
+        }
         int tier = GetRandomTier(type);
         string key = itemDataManager.GetRandomID(type, tier);
         return GetItemScript(key);

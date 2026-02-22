@@ -151,7 +151,6 @@ public static class Defines
         Invisible,
         Ghost,
         LifeSteel,
-        Stun,
         TurnSkip,
         Blink,
         Telleport,
@@ -161,7 +160,14 @@ public static class Defines
         Silence,
         Wish,
         Void,
-        EssenceExtract
+        EssenceExtract,
+        RandomEffect,
+        Mutate,
+        Identify,
+        UnEquipable,
+        Purification,
+        TelleVision,
+        ItemReinforce
     }
     public enum ModifierType
     {

@@ -12,7 +12,7 @@ QuicknessPotion_1,BuffModifier,QuicknessPotion_1,StatBuff,-0.3,7,12,StatBuff,Att
 QuicknessPotion_2,BuffModifier,QuicknessPotion_2,StatBuff,-0.3,7,12,StatBuff,SepllSpeed,Buff,FALSE,Passive,50,속도포션
 EagleEyePotion_0,BuffModifier,EagleEyePotion_0,StatBuff,1,10,15,StatBuff,Vision,Buff,FALSE,Passive,50,시야범위포션
 FireResistPotion_0,BuffModifier,FireResistPotion_0,StatBuff,1,20,25,StatBuff,FierResist,Buff,FALSE,Passive,50,화염저항포션
-FierResistPotion_1,BuffModifier,FierResistPotion_1,StatBuff,-1,20,25,StatBuff,IceResist,Buff,FALSE,Passive,50,화염저항포션
+FireResistPotion_1,BuffModifier,FireResistPotion_1,StatBuff,-1,20,25,StatBuff,IceResist,Buff,FALSE,Passive,50,화염저항포션
 IceResistPotion_0,BuffModifier,IceResistPotion_0,StatBuff,1,20,25,StatBuff,IceResist,Buff,FALSE,Passive,50,냉기저항포션
 IceResistPotion_1,BuffModifier,IceResistPotion_1,StatBuff,-1,20,25,StatBuff,FierResist,Buff,FALSE,Passive,50,냉기저항포션
 RegeneratePotion_0,BuffModifier,RegeneratePotion_0,StatAdd,1,10,15,StatBuff,Regeneration,Buff,FALSE,Passive,50,재생포션

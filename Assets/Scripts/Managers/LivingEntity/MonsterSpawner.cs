@@ -107,6 +107,8 @@ public class MonsterSpawner
             if(monsterEntity != null)
             {
                 EntityStat monsterStat = originData.CopyStat();
+                monsterEntity.id = monsterId;
+                
                 monsterEntity.SetMyStat(monsterStat);
             }
             monsters.Add(monsterEntity);
@@ -124,6 +126,7 @@ public class MonsterSpawner
         int tier = GetRandomTier();
         List<WeightKeyPair> keypairList = spawnDataManager.spawnWeightPairs[tier];
         string spawnId = Utils.GetRandomIDToWeight(keypairList);
+        Debug.Log($"¼±ÅÃµÈ ·£´ý id : {spawnId}");
         List<MonsterSpawnDataBundle> bundles= spawnDataManager.spawnDatas[tier];
         MonsterSpawnDataBundle selected = bundles.First(b => b.id == spawnId);
         if(selected == null)

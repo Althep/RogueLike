@@ -216,6 +216,7 @@ public static class Utils
                 $"SortedID : {sorted[i].key}");
         }
         float totalWeight = sorted[sorted.Count - 1].cumulativeWeight;
+        Debug.Log($"total Weight : {totalWeight}");
         string id = null;
         float targetWeight = UnityEngine.Random.Range(0, totalWeight);
         Debug.Log($"Å¸°Ù  : {targetWeight}");
