@@ -896,7 +896,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::ItemManager
   playerEntity: {fileID: 0}
-  items: []
 --- !u!1 &596905755
 GameObject:
   m_ObjectHideFlags: 0

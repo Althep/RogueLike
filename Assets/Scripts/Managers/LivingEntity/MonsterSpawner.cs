@@ -89,11 +89,11 @@ public class MonsterSpawner
 
     }
     */
-    public List<MapEntity> MonsterSpawn(MonsterSpawnData spawnData)
+    public List<LivingEntity> MonsterSpawn(MonsterSpawnData spawnData)
     {
         string monsterId = spawnData.monsterID;
         int monsterCount = UnityEngine.Random.Range(spawnData.minCount, spawnData.maxCount + 1);
-        List<MapEntity> monsters = new List<MapEntity>();
+        List<LivingEntity> monsters = new List<LivingEntity>();
         if(monsterDataManager == null)
         {
             Debug.Log("MonsterDataManager Null");
@@ -108,7 +108,6 @@ public class MonsterSpawner
             {
                 EntityStat monsterStat = originData.CopyStat();
                 monsterEntity.id = monsterId;
-                
                 monsterEntity.SetMyStat(monsterStat);
             }
             monsters.Add(monsterEntity);

@@ -52,6 +52,7 @@ public class DungeonManager : MonoBehaviour
         floor++;
         monsterManager.OnFloorChange();
         itemManager.OnFloorChange();
+        mapManager.CalculateInitialCost();
     }
 
     public async UniTask GenerateDungeon()

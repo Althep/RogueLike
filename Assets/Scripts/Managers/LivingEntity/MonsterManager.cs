@@ -143,20 +143,20 @@ public class MonsterManager : MonoBehaviour
 
         foreach(var bundle in bundleList)
         {
-             List<MapEntity> faction = GetMonsters(bundle);
-            mapManager.SetRandomPosition(faction);
+             List<LivingEntity> faction = GetMonsters(bundle);
+            mapManager.SetMonsterRandomPosition(faction);
             monsters.AddRange(faction);
         }
 
 
         await UniTask.Yield();
     }
-    List<MapEntity> GetMonsters(MonsterSpawnDataBundle spawnData)
+    List<LivingEntity> GetMonsters(MonsterSpawnDataBundle spawnData)
     {
-        List<MapEntity> faction = new();
+        List<LivingEntity> faction = new();
         foreach(var key in spawnData.spawnDatas.Keys)
         {
-            List<MapEntity> monster = monsterSpawner.MonsterSpawn(spawnData.spawnDatas[key]);
+            List<LivingEntity> monster = monsterSpawner.MonsterSpawn(spawnData.spawnDatas[key]);
             faction.AddRange(monster);
         }
         return faction;

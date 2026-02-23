@@ -5,15 +5,6 @@ using System.Linq;
 using static Defines;
 using Cysharp.Threading.Tasks;
 
-
-[System.Serializable]
-public struct TileDataEntry
-{
-    public Vector2Int Position;
-    public Defines.TileType Type;
-}
-
-
 public class MapManager : MonoBehaviour
 {
     private Dictionary<MapMakeType, MapMaker> _mapMaker;
@@ -28,10 +19,13 @@ public class MapManager : MonoBehaviour
     Defines.MapMakeType makerType;
     MapMaker selectedMaker;
     [SerializeField] PoolManager poolManager;
-    public Dictionary<Vector2Int, Defines.TileType> originMapData = new Dictionary<Vector2Int, Defines.TileType>(); //타일과 벽, 문등을 포함한 맵데이터
-    public Dictionary<Vector2Int, Defines.TileType> tileData = new Dictionary<Vector2Int, Defines.TileType>(); //몬스터등을 포함한 맵데이터
+
+    //public Dictionary<Vector2Int, Defines.TileType> tileData = new Dictionary<Vector2Int, Defines.TileType>(); //몬스터등을 포함한 맵데이터
+    public Dictionary<Vector2Int, Defines.TileType> enviromentData = new Dictionary<Vector2Int, Defines.TileType>(); //타일과 벽, 문등을 포함한 맵데이터
+    public Dictionary<Vector2Int, MapEntity> dynamicMapData = new Dictionary<Vector2Int, MapEntity>(); //몬스터, 캐릭터등 움직이는 오브젝트 데이터
+    public Dictionary<Vector2Int, List<MapEntity>> interactiveMapData = new Dictionary<Vector2Int, List<MapEntity>>(); //문 아이템등 상호작용 오브젝트 데이터
+    
     [SerializeField] List<MapEntity> tileObjects = new List<MapEntity>();
-    [SerializeField] List<TileDataEntry> inspectorTileData = new List<TileDataEntry>();
 
     public List<Vector2> tilePosList = new List<Vector2>();
     public List<Vector2> wallPosList = new List<Vector2>();
@@ -41,6 +35,10 @@ public class MapManager : MonoBehaviour
 
     MonsterManager monsterManager;
     ItemManager itemManager;
+    public MapLayer mapLayer;
+    int _width;
+    int _height;
+
     Vector2[] around = new Vector2[]
 {
     new Vector2(1, 1),  new Vector2(1, 0),  new Vector2(1, -1),
@@ -62,6 +60,7 @@ public class MapManager : MonoBehaviour
         {
             itemManager = GameManager.instance.Get_ItemManager();
         }
+        mapLayer = new MapLayer(60, 60);
     }
 
     void Init_MapMaker()
@@ -72,14 +71,7 @@ public class MapManager : MonoBehaviour
             GameManager.instance.Get_PoolManager();
         }
     }
-    private void UpdateInspectorData()
-    {
-        inspectorTileData.Clear();
-        foreach (var kvp in tileData)
-        {
-            inspectorTileData.Add(new TileDataEntry { Position = kvp.Key, Type = kvp.Value });
-        }
-    }
+
     #region Gets
     void Get_RandomMapMaker()
     {
@@ -121,16 +113,15 @@ public class MapManager : MonoBehaviour
         return randomPos;
     }
 
-    public Dictionary<Vector2Int,TileType> GetTileData()
+    public Dictionary<Vector2Int,TileType> GetEnviromentData()
     {
-        return tileData;
+        return enviromentData;
     }
     #endregion
 
     public void EntityMove(Vector2Int originPos, Vector2Int nextPos, Defines.TileType myType)
     {
-        //tileData[originPos] = mapData[originPos];
-        //tileData[nextPos] = myType;
+
     }
     #region MapMake
     public async UniTask MapMake()
@@ -139,8 +130,10 @@ public class MapManager : MonoBehaviour
         await SetMapData();
         Debug.Log($"[Profile] 오브젝트 배치 시간: {Time.realtimeSinceStartup - mapMakeStart}s");
         await MapObjSpawn();
-
-        SetOriginMapData();
+        Vector2Int mapSize = selectedMaker.GetMapSize();
+        _height = mapSize.y;
+        _width = mapSize.x;
+        mapLayer.Prepare(mapSize.x, mapSize.y);
         Debug.Log("던전 생성 완료");
     }
     public MapMaker Get_MapMaker()
@@ -152,15 +145,15 @@ public class MapManager : MonoBehaviour
         Debug.Log("던전 생성 시작");
         if (IsSaved())
         {
-            tileData = MakeToSaveData();
+            enviromentData = MakeToSaveData();
         }
         else
         {
             Get_RandomMapMaker();
-            tileData = await selectedMaker.MapMake();
+            enviromentData = await selectedMaker.MapMake();
         }
 
-        UpdateInspectorData();
+
         AddObjToList();
     }
     void AddObjToList()
@@ -171,7 +164,7 @@ public class MapManager : MonoBehaviour
         upStairList.Clear();
         downStairList.Clear();
 
-        foreach (var kv in tileData)
+        foreach (var kv in enviromentData)
         {
             Vector2 pos = (Vector2)kv.Key;
             switch (kv.Value)
@@ -184,24 +177,7 @@ public class MapManager : MonoBehaviour
             }
         }
     }
-    void SetOriginMapData()
-    {
-        foreach(var pos in tileData.Keys)
-        {
-            if (!originMapData.ContainsKey(pos))
-            {
-                originMapData.Add(pos, tileData[pos]);
-            }
-            else
-            {
-                originMapData[pos] = tileData[pos];
-            }
-            if(tileData[pos] ==TileType.Monster || tileData[pos] == TileType.Player || tileData[pos] == TileType.Item)
-            {
-                Debug.Log($"타일 타입 에러! {pos}의 타일 타입이 {tileData[pos]} 입니다!");
-            }
-        }
-    }
+
     void TileListClear()
     {
         tilePosList.Clear();
@@ -217,14 +193,18 @@ public class MapManager : MonoBehaviour
         // 성능 최적화: 한 프레임에 처리할 개수 (컴퓨터 사양에 따라 50~100개 적당)
         const int yieldInterval = 50;
 
-        foreach (Vector2Int pos in tileData.Keys)
+        foreach (Vector2Int pos in enviromentData.Keys)
         {
-            TileType type = tileData[pos];
+            TileType type = enviromentData[pos];
             GameObject go = poolManager.ObjectPool(type);
             go.transform.position = new Vector3(pos.x, pos.y);
 
             if (go.TryGetComponent<MapEntity>(out MapEntity tile))
             {
+                if(tile is  DoorEntity door)
+                {
+                    AddMapData(pos,door);
+                }
                 tileObjects.Add(tile);
             }
 
@@ -256,7 +236,7 @@ public class MapManager : MonoBehaviour
             poolManager.Return(tile.myType, tile.gameObject);
         }
         tileObjects.Clear();
-        tileData.Clear();
+        enviromentData.Clear();
         TileListClear();
         await UniTask.Yield();
         Debug.Log("제거완료");
@@ -269,7 +249,7 @@ public class MapManager : MonoBehaviour
         foreach (var p in around)
         {
             Vector2Int key = new Vector2Int((int)(target.x - p.x), (int)(target.y - p.y));
-            if (tileData.ContainsKey(key))
+            if (enviromentData.ContainsKey(key))
             {
                 final.Add(key);
             }
@@ -278,16 +258,15 @@ public class MapManager : MonoBehaviour
         return final;
     }
 
-    public List<Vector2Int> SetRandomPosition(List<MapEntity> objects)
+    public List<Vector2Int> SetMonsterRandomPosition(List<LivingEntity> monsters)
     {
-
         Vector2 center = GetRandomTilePos();
-        List<Vector2> potentials = GetPotentialPos(center, objects.Count);
+        List<Vector2> potentials = GetPotentialPos(center, monsters.Count);
         int roofs = 0;
-        while (potentials.Count < objects.Count)
+        while (potentials.Count < monsters.Count)
         {
             roofs++;
-            potentials = GetPotentialPos(center, objects.Count + roofs);
+            potentials = GetPotentialPos(center, monsters.Count + roofs);
             if (roofs > 10)
             {
                 Debug.Log("몬스터 젠 시킬 공간이 존재하지않음!");
@@ -296,40 +275,195 @@ public class MapManager : MonoBehaviour
         }
         Utils.Shuffle(potentials);
         List<Vector2Int> shuffledPos = new List<Vector2Int>();
-        for (int i = 0; i < objects.Count && i < potentials.Count; i++)
+        for (int i = 0; i < monsters.Count && i < potentials.Count; i++)
         {
             shuffledPos.Add(Vector2Int.RoundToInt(potentials[i]));
         }
 
-        for (int i = 0; i < objects.Count; i++)
+        for (int i = 0; i < monsters.Count; i++)
         {
             if (i >= shuffledPos.Count) break;
 
             Debug.Log($"Suffled position : {shuffledPos[i]}");
-            objects[i].transform.position = new Vector3(shuffledPos[i].x, shuffledPos[i].y, -1);
-            TileType tileType = objects[i].GetMyType();
-            Vector2Int suppfleRandomPos = shuffledPos[i];
-            if (tileData.ContainsKey(shuffledPos[i]))
-            {
-                tileData[shuffledPos[i]] = tileType;
-            }
+            monsters[i].transform.position = new Vector3(shuffledPos[i].x, shuffledPos[i].y, -1);
+            TileType tileType = monsters[i].GetMyType();
+            Vector2Int shuppfleRandomPos = shuffledPos[i];
+            AddMapData(shuppfleRandomPos, monsters[i]);
+            tilePosList.Remove(shuppfleRandomPos);
         }
 
         return shuffledPos;
         
     }
 
-    public GameObject SetObjectPos(GameObject go,Vector2Int pos, TileType objType)
+    public GameObject SetEnviromentObjectPos(GameObject go,Vector2Int pos, TileType objType)
     {
         go.transform.position = (Vector2)pos;
-        tileData[pos] = objType;
 
         return go;
     }
 
-    public void ObjectRemovePos(GameObject go)
+    #region Entitys
+    public bool CanMove(Vector2Int dest)
     {
-        Vector2Int pos = Vector2Int.RoundToInt(go.transform.position);
-        tileData[pos] = originMapData[pos];
+        if(enviromentData.TryGetValue(dest ,out var tileType))
+        {
+            if(tileType == TileType.Wall || tileType == TileType.DeepWater)
+            {
+                return false;
+            }
+        }
+
+        if (dynamicMapData.ContainsKey(dest))
+        {
+            return false;
+        }
+
+        if (interactiveMapData.TryGetValue(dest, out List<MapEntity> entities))
+        {
+            var door = entities.OfType<DoorEntity>().FirstOrDefault();
+            if (door != null && !door.IsOpen())
+            {
+                return false; // 문이 있는데 닫혀있으면 못 감
+            }
+        }
+        return true;
     }
+
+    public void EntityMove(LivingEntity entity,Vector2Int pos,Vector2Int dest)
+    {
+        if (!dynamicMapData.ContainsKey(pos))
+        {
+            Debug.Log($"다이나믹 맵데이터에 포함되어 있지 않음! {entity.name} 포지션 : {pos}");
+            return;
+        }
+        if (dynamicMapData.ContainsKey(dest))
+        {
+            Debug.LogWarning($"{dest} 위치에 이미 {dynamicMapData[dest].name}이 있습니다!");
+        }
+        dynamicMapData.Remove(pos);
+        dynamicMapData[dest] = entity;
+
+
+        mapLayer[pos.x, pos.y] = (byte)GetTypeCost(pos);
+        mapLayer[dest.x, dest.y] = (byte)(GetTypeCost(dest));
+    }
+    
+    public void AddMapData(Vector2Int pos, LivingEntity entity)
+    {
+        if (dynamicMapData.ContainsKey(pos))
+        {
+            Debug.Log("해당 위치에 이미 맵엔티티 저장되어있음!");
+        }
+        else
+        {
+            dynamicMapData.Add(pos, entity);
+        }
+    }
+
+    public void AddMapData(Vector2Int pos, DoorEntity entity)
+    {
+        if (interactiveMapData.ContainsKey(pos))
+        {
+            Debug.Log("해당 위치에 이미 맵엔티티 저장되어있음!");
+        }
+        else
+        {
+            interactiveMapData.Add(pos, new List<MapEntity>());
+        }
+        if (!interactiveMapData[pos].Contains(entity))
+        {
+            interactiveMapData[pos].Add(entity);
+        }
+        
+    }
+    public void AddMapData(Vector2Int pos, ItemEntity entity)
+    {
+        if (interactiveMapData.ContainsKey(pos))
+        {
+            Debug.Log("해당 위치에 이미 맵엔티티 저장되어있음!");
+        }
+        else
+        {
+            interactiveMapData.Add(pos, new List<MapEntity>());
+        }
+        if (!interactiveMapData[pos].Contains(entity))
+        {
+            interactiveMapData[pos].Add(entity);
+        }
+    }
+    public void OnItemPickUp(Vector2Int pos)
+    {
+
+    }
+    #endregion
+    #region MapLayer
+    public int GetTypeCost(Vector2Int pos)
+    {
+        if (dynamicMapData.ContainsKey(pos))
+        {
+            return 255;
+        }
+        if (interactiveMapData.TryGetValue(pos, out var entities))
+        {
+            for (int i = 0; i < entities.Count; i++)
+            {
+                if (entities[i] is DoorEntity door && !door.IsOpen())
+                    return 255;
+            }
+        }
+        TileType type = enviromentData[pos];
+        switch (type)
+        {
+            case TileType.Wall:return 255;
+            case TileType.ShallowWater: return 2;
+            case TileType.DeepWater: return 255;
+        }
+        return 1;
+    }
+    public void CalculateInitialCost()
+    {
+        foreach(var kvp in enviromentData)
+        {
+            Vector2Int pos = kvp.Key;
+            TileType type = kvp.Value;
+
+            if (pos.x<0||pos.x>=_width||pos.y<0||pos.y<_height) continue;
+
+            byte cost = 255;
+            if (type == TileType.Tile) cost = 1;
+            else if (type == TileType.ShallowWater) cost =2;
+            mapLayer[pos.x, pos.y] = cost;
+        }
+
+        foreach (var kvp in interactiveMapData)
+        {
+            Vector2Int pos = kvp.Key;
+            if (pos.x < 0 || pos.x >= _width || pos.y < 0 || pos.y >= _height) continue;
+
+            byte cost = mapLayer[pos.x, pos.y];
+            var entities = kvp.Value;
+            for (int i = 0; i < entities.Count; i++)
+            {
+                if (entities[i] is DoorEntity door && !door.IsOpen())
+                {
+                    cost = 255;
+                    break;
+                }
+            }
+            mapLayer[pos.x, pos.y] = cost;
+        }
+
+        foreach (var kvp in dynamicMapData)
+        {
+            Vector2Int pos = kvp.Key;
+            byte cost = 255;
+
+            if (pos.x<0||pos.x>=_width||pos.y<0||pos.y<_height) continue;
+            if (kvp.Value is PlayerEntity) cost = 10;
+
+            mapLayer[pos.x, pos.y] = cost;
+        }
+    }
+    #endregion
 }

@@ -30,7 +30,9 @@ public class PriorityQueue<T> where T : IComparable<T>
             if (heap[now].CompareTo(heap[next]) >= 0)
                 break;
 
-            (heap[now], heap[next]) = (heap[next], heap[now]);
+            T temp = heap[now];
+            heap[now] = heap[next];
+            heap[next] = temp;
             now = next;
         }
     }
@@ -41,8 +43,9 @@ public class PriorityQueue<T> where T : IComparable<T>
             throw new InvalidOperationException("The heap is empty.");
 
         T ret = heap[0];
-        heap[0] = heap[^1];
-        heap.RemoveAt(heap.Count - 1);
+        int lastIndex = heap.Count - 1;
+        heap[0] = heap[lastIndex];
+        heap.RemoveAt(lastIndex);
 
         int now = 0;
         while (true)
@@ -64,6 +67,6 @@ public class PriorityQueue<T> where T : IComparable<T>
 
         return ret;
     }
-
+    public void Clear() => heap.Clear();
     public int Count => heap.Count;
 }

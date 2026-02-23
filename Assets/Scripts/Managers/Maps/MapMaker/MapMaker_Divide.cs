@@ -23,9 +23,10 @@ public class MapMaker_Divide : MapMaker
         InitMap(mapData);
         await Dividing(0, 0, xSize, ySize, 0, mapData);
         TwistDungeon(mapData);
-        MapBorder(mapData);
+        SetMapBorder(mapData);
         
         MakeRandomStair(mapData);
+        
         return ArrayToDictionary(mapData);
     }
 
@@ -38,7 +39,7 @@ public class MapMaker_Divide : MapMaker
 
         return value; 
     }
-
+    
     public async UniTask Dividing(int startX, int startY,int endX,int endY,int count,TileType[,] mapData)
     {
         int intervalCount = 500;
@@ -160,6 +161,20 @@ public class MapMaker_Divide : MapMaker
         else
         {
             return divide;
+        }
+    }
+
+    public void SetMapBorder(TileType[,] mapData)
+    {
+        for (int x = 0; x<xSize; x++)
+        {
+            mapData[x, ySize-1] = TileType.Wall;
+            mapData[x, 0] = TileType.Wall;
+        }
+        for (int y = 0; y<ySize; y++)
+        {
+            mapData[xSize-1, y] = TileType.Wall;
+            mapData[0, y] = TileType.Wall;
         }
     }
 }

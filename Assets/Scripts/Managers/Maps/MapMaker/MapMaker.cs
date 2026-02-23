@@ -117,7 +117,10 @@ public class MapMaker
             mapArray[tilePosList[i].x, tilePosList[i].y] = TileType.DownStair;
         }
     }
-
+    public Vector2Int GetMapSize()
+    {
+        return new Vector2Int(xSize, ySize);
+    }
     protected int[,] Set_MapSize()
     {
         return new int[Set_MapLength(), Set_MapHeight()];

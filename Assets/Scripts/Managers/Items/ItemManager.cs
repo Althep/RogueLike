@@ -54,6 +54,7 @@ public class ItemManager :MonoBehaviour
         {
             fieldItems.Add(keyPos, new List<ItemEntity>());
         }
+        mapManager.AddMapData(keyPos, entity);
         fieldItems[keyPos].Add(entity);
         return go;
     }

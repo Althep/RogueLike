@@ -13,7 +13,7 @@ public class Astar
     {
         if(tileData == null)
         {
-            tileData = GameManager.instance.Get_MapManager().tileData;
+            tileData = GameManager.instance.Get_MapManager().GetEnviromentData();
         }
         if(mapMaker == null)
         {
@@ -44,7 +44,7 @@ public class Astar
         if (tileData == null)
         {
             Debug.Log("MapScript Null");
-            tileData = GameManager.instance.Get_MapManager().tileData;
+            tileData = GameManager.instance.Get_MapManager().GetEnviromentData();
         }
         
         Node[,] parents = new Node[mapMaker.ySize, mapMaker.xSize];
