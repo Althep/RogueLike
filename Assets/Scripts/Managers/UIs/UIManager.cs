@@ -3,14 +3,15 @@ using UnityEngine.UI;
 using UnityEngine.EventSystems;
 using System;
 using System.Collections.Generic;
-
+using static Defines;
 public class UIManager : MonoBehaviour
 {
-    Dictionary<string, GameObject> popUpObjs = new Dictionary<string, GameObject>();
-    Dictionary<string, string> buttonBind = new Dictionary<string, string>();//버튼이름 키 , 열릴 오브젝트 밸류 , 이부분 CSV로 매핑처리 필요
-
-    List<GameObject> opened_UIs = new List<GameObject>();
-
+    public static UIManager instance;
+    
+    Stack<UI_Base> uiStacks = new Stack<UI_Base>();
+    
+    //List<GameObject> opened_UIs = new List<GameObject>();
+    InputUIManager inputUIManager;
     UI_ConfirmPanel confirmPanel;
 
     [SerializeField]UIPooler uiPooler;
@@ -23,9 +24,17 @@ public class UIManager : MonoBehaviour
 
     private void Init()
     {
+        if(instance == null)
+        {
+            instance = this;
+        }
         if(uiPooler == null)
         {
             uiPooler = GameObject.Find("UIPooler").transform.GetComponent<UIPooler>();
+        }
+        if(inputUIManager == null)
+        {
+            inputUIManager = transform.GetComponent<InputUIManager>();
         }
         if(uiPooler == null)
         {
@@ -35,6 +44,31 @@ public class UIManager : MonoBehaviour
             GameObject Managers = GameObject.Find("Managers");
             go.transform.SetParent(Managers.transform);
         }
+    }
+
+    public void BindPopUp(UI_PopUpObj target)
+    {
+
+    }
+    public void Pop_Up_UI(string name)
+    {
+
+    }
+    /*
+    public void OpenUI(UI_InputUIBase OpenedUI, InputType inputType)
+    {
+        OpenedUI.gameObject.SetActive(true);
+        inputUIStack.Push(OpenedUI);
+        InputManager.instance.ChangeContext(inputType,OpenedUI);
+        OpenedUI.transform.SetAsLastSibling();
+    }
+    public UI_Base CloseUI()
+    {
+        UI_InputUIBase closedUI = inputUIStack.Pop();
+        GameObject targetobj = closedUI.gameObject;
+        InputType inputType = closedUI.GetInputType();
+        targetobj.SetActive(false);
+        return closedUI;
     }
     public void Pop_Up_UI(string button_Name)
     {
@@ -48,20 +82,21 @@ public class UIManager : MonoBehaviour
                 Debug.Log("name Didn't Contain");
                 return;
             }
-            GameObject target = popUpObjs[targetName];
-            if (target.activeSelf)
+            UI_Base target = popUpObjs[targetName];
+            GameObject targetOBJ = target.gameObject;
+            if (targetOBJ.activeSelf)
             {
-                target.SetActive(false);
+                targetOBJ.SetActive(false);
                 Debug.Log("Setactive False");
 
             }
             else
             {
-                target.SetActive(true);
+                targetOBJ.SetActive(true);
                 Debug.Log("SetActive True");
 
             }
-            AddorRemoveAtList(target);
+            //AddorRemoveAtList(targetOBJ);
         }
     }
 
@@ -74,19 +109,19 @@ public class UIManager : MonoBehaviour
             Debug.Log($"PopUp obj Binded Objname : {objName} ");
         }
     }
-
-    void AddorRemoveAtList(GameObject go)
+    /*
+    void AddorRemoveAtList(UI_Base ui)
     {
-        if (opened_UIs.Contains(go))
+        if (uiStack.Contains(ui))
         {
-            opened_UIs.Remove(go);
+            uiStack.Remove(ui);
         }
         else
         {
-            opened_UIs.Add(go);
+            opened_UIs.Add(ui);
         }
     }
-
+    */
     public void OpenConfirmPanel(Action confirmAction)
     {
         if(confirmPanel == null)

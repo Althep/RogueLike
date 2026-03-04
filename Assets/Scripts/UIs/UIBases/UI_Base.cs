@@ -4,16 +4,17 @@ using System.Collections.Generic;
 using UnityEngine.UI;
 using TMPro;
 using UnityEngine.EventSystems;
-
+using static Defines;
 public class UI_Base : MonoBehaviour
 {
     Dictionary<string, List<UnityEngine.Object>> _objects = new Dictionary<string, List<UnityEngine.Object>>();
-
-
+    
     private void Start()
     {
 
     }
+
+    
 
     protected void Bind<T>() where T : UnityEngine.Object
     {
@@ -36,7 +37,10 @@ public class UI_Base : MonoBehaviour
             }
         }
     }
+    public virtual void Excute()
+    {
 
+    }
     protected T Get<T>(string name) where T : UnityEngine.Object
     {
         List<UnityEngine.Object> objects = null;
@@ -55,6 +59,7 @@ public class UI_Base : MonoBehaviour
     protected Button GetButton(string name) { return Get<Button>(name); }
     protected Image GetImage(string name) { return Get<Image>(name); }
 
+    
 
     public static void AddUIEvent(GameObject go, Action<PointerEventData> action, Defines.UIEvents type)
     {
@@ -85,4 +90,5 @@ public class UI_Base : MonoBehaviour
 
 
     }
+
 }

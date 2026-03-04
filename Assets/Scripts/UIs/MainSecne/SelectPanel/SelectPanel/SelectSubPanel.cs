@@ -58,6 +58,15 @@ public class SelectSubPanel : UI_Base
         }
         myPools.Clear();
     }
+    public void SetParentController(UI_GridSelect gridPanel)
+    {
+
+    }
+    public virtual List<List<UI_Base>> GetGridData()
+    {
+        List<List<UI_Base>> data = new List<List<UI_Base>>();
+        return data;
+    }
 
     public virtual void Select<T>(T t , GameObject go) where T : Enum
     {

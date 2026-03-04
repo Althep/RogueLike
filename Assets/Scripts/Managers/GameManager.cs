@@ -29,6 +29,7 @@ public class GameManager : MonoBehaviour
     [SerializeField] PlayerEntity playerEntity;
     [SerializeField] EffectManager effectManager;
     [SerializeField] ModifierManager modifierManager;
+    [SerializeField] InputManager inputManager;
     private async UniTask Awake()
     {
         await Init();
@@ -113,6 +114,10 @@ public class GameManager : MonoBehaviour
         if(effectManager == null)
         {
             effectManager = GameObject.Find("EffectManager").transform.GetComponent<EffectManager>();
+        }
+        if(inputManager == null)
+        {
+            inputManager = GameObject.Find("InputManager").transform.GetComponent<InputManager>();
         }
         await monsterManager.Init();
         DontDestroyOnLoad(Managers);

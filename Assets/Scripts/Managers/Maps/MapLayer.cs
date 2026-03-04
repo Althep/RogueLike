@@ -28,7 +28,7 @@ public class MapLayer
         get
         {
             // 이 안전장치 하나가 나중에 원인 모를 크래시를 막아줍니다.
-            if (x < 0 || x >= _width || y < 0 || y >= _height) return 0;
+            if (x < 0 || x >= _width || y < 0 || y >= _height) return 255;
             return _data[y * _width + x];
         }
         set

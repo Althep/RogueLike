@@ -7,6 +7,7 @@ public class UI_PopUpButton : UI_Base
     string buttonName;
     private void Awake()
     {
+        buttonName = this.gameObject.name;
         Init();
     }
     private void OnEnable()

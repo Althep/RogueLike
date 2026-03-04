@@ -1,75 +1,54 @@
-using UnityEngine;
-using System;
 using System.Collections.Generic;
+using UnityEngine;
 using static Defines;
+
 public class JobSelectPanel : SelectSubPanel
 {
-    public Jobs selectJob;
-    public List<Jobs> jobs = new List<Jobs>();
-    public ItemSelectPanel itemselectPanel;
-    private void Awake()
-    {
-        OnAwake();
-        if(itemselectPanel == null)
-        {
-            itemselectPanel = selectPanel.itemSelect;
-        }
-    }
+    public Defines.Jobs selectJob;
+    private SelectPanels _parent;
 
-    public override void OnAwake()
-    {
-        base.OnAwake();
-        InitMenu();
-        itemselectPanel.OnAwake();
-    }
+    public void SetParentController(SelectPanels parent) => _parent = parent;
 
-    private void OnEnable()
-    {
-        
-    }
-    private void OnDisable()
+    public void RefreshContents(Defines.Races race)
     {
         ReturnMyPools();
-    }
-    public void Init()
-    {
-        InitMenu();
-    }
-    protected override void InitMenu()
-    {
-        if (selectPanel == null)
-        {
-            selectPanel = GameObject.Find("SelectPanel").transform.GetComponent<SelectPanels>();
-        }
-        if (itemselectPanel == null)
-        {
-            itemselectPanel = selectPanel.itemSelect;
-        }
-        Races selectRace = selectPanel.raceSelect.selectRace;
         DataManager dm = GameManager.instance.Get_DataManager();
-        List<Jobs> jobList = dm.startDataManager.raceJobList[selectRace];
-        foreach(Jobs job in jobList)
+        List<Defines.Jobs> jobList = dm.startDataManager.raceJobList[race];
+
+        foreach (var job in jobList)
         {
-            if (job == Jobs.Default)
-                continue;
+            if (job == Defines.Jobs.Default) continue;
             AddJobButton(job);
         }
-        if (myPools[0] is JobSelectCell cell)
+    }
+
+    public override void Select<T>(T t, GameObject go)
+    {
+        if (t is Defines.Jobs j)
         {
-            selectJob = cell.selectJob;
-            Select(selectJob, cell.gameObject);
+            selectJob = j;
+            MoveSelectView(go);
+            _parent.OnJobSelected(j); // 부모에게 보고
         }
     }
+
+    public List<List<UI_Base>> GetGridData()
+    {
+        List<UI_Base> row = new List<UI_Base>();
+        foreach (var pool in myPools) row.Add(pool as UI_Base);
+        return new List<List<UI_Base>> { row };
+    }
+
     void AddJobButton(Jobs job)
     {
-        if(myContents == null)
+        if (myContents == null)
         {
             SetContents();
         }
         GameObject go = uiManager.Get_PoolUI(UIDefines.UI_PrefabType.MainSelect, myContents);
-        if(go.TryGetComponent<JobSelectCell>(out JobSelectCell cell))
+        if (go.TryGetComponent<JobSelectCell>(out JobSelectCell cell))
         {
-            if(cell is IPoolUI && !myPools.Contains(cell))
+            if (cell is IPoolUI && !myPools.Contains(cell))
             {
                 myPools.Add(cell);
                 cell.enabled = true;
@@ -82,28 +61,12 @@ public class JobSelectPanel : SelectSubPanel
         else
         {
             cell = go.AddComponent<JobSelectCell>();
-            if(cell is IPoolUI)
+            if (cell is IPoolUI)
             {
                 myPools.Add(cell);
             }
         }
-        cell.SetMyType<Jobs>(job,this);
+        cell.SetMyType<Jobs>(job, this);
         cell.AddButtonFunction();
     }
-
-    public override void Select<T>(T t, GameObject go)
-    {
-        base.Select(t, go);
-        if(t is Jobs j)
-        {
-            selectJob = j;
-            MoveSelectView(go);
-        }
-        //ItemSelect패널 초기화 필요
-        itemselectPanel.ReturnMyPools();
-        itemselectPanel.Init();
-    }
-
-
-
 }

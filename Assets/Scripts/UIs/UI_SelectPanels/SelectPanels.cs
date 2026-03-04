@@ -1,121 +1,106 @@
 using System;
 using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.UI;
-using UnityEngine.EventSystems;
 using UnityEngine.SceneManagement;
-using static Defines;
-using System.Collections;
+using Cysharp.Threading.Tasks;
 
-public class SelectPanels : UI_Base
+// UI_GridSelect를 상속하여 직접 그리드 조작 기능을 가짐
+public class SelectPanels : UI_GridSelect
 {
-
+    [Header("Sub Panels")]
     public RaceSelectPanel raceSelect;
     public JobSelectPanel jobSelect;
     public ItemSelectPanel itemSelect;
 
-    [SerializeField] GameObject raceSelectPanel;
-    [SerializeField] GameObject jobSelectPanel;
-    [SerializeField] GameObject itemSelectPanel;
+    [Header("Additional UI")]
     [SerializeField] UI_ConfirmPanel confirmPanel;
-    Dictionary<SlotType,GameObject> itemSelectPanels = new Dictionary<SlotType, GameObject>();
-    Dictionary<SlotType, List<SelectSubCell>> itemSubPanels = new Dictionary<SlotType, List<SelectSubCell>>();
-
-    UIManager uiManager;
 
     public ModifierController checker = new ModifierController();
+    private UIManager uiManager;
 
-    PlayerEntity playerEntity;
-    Dictionary<Type, Type> subCellBind = new Dictionary<Type, Type>()
-    {
-        {typeof(Defines.Jobs),typeof(JobSelectCell) },
-        {typeof(Defines.Races),typeof(RaceSelectCell) },
-        {typeof(Defines.SlotType),typeof(ItemSlotListCell) }
-    };
-
-    
-
+    public UI_Base CurrentSelected;
     private void Awake()
     {
+        // UI_GridSelect(부모)의 초기화 로직 수행
+        // 만약 부모에 Awake가 있다면 base.Awake() 호출
         Init();
-        //confirmPanel.Open(ConfirmFunction);
-    }
-    private void OnEnable()
-    {
-        
     }
 
     void Init()
     {
         uiManager = GameManager.instance.Get_UIManager();
-        //AddUIEvent(confirmPanel, ConfirmFunction, Defines.UIEvents.Click);
 
-        raceSelect = raceSelectPanel.transform.GetComponent<RaceSelectPanel>();
-        jobSelect = jobSelectPanel.transform.GetComponent<JobSelectPanel>();
-        playerEntity = GameManager.instance.Get_PlayerObj().transform.GetComponent<PlayerEntity>();
+        // 서브 패널들에게 중재자(자신)를 알려줌
+        raceSelect.SetParentController(this);
+        jobSelect.SetParentController(this);
+        itemSelect.SetParentController(this);
+
+        // 첫 단계: 종족 선택 화면 활성화
+        OpenRaceSelect();
     }
 
-    public void ConfirmFunction()
+    // --- 그리드 데이터 주입 및 패널 전환 ---
+    public void OpenRaceSelect()
     {
-        StartCoroutine(SeUpAndDungeonLoad());
+        raceSelect.gameObject.SetActive(true);
+        jobSelect.gameObject.SetActive(false);
+        itemSelect.gameObject.SetActive(false);
+
+        // 부모(UI_GridSelect)의 메서드를 사용하여 데이터 세팅
+        SetGridData(raceSelect.GetGridData());
     }
 
-
-
-    IEnumerator SeUpAndDungeonLoad()
+    public void OnRaceSelected(Defines.Races race)
     {
-        yield return StartCoroutine(AddItems());
-        Debug.Log("아이템 추가 완료");
-        yield return StartCoroutine(LoadDungeonSceneCoroutine());
+        jobSelect.gameObject.SetActive(true);
+        jobSelect.RefreshContents(race);
+
+        // 직업 패널의 데이터를 그리드로 주입
+        SetGridData(jobSelect.GetGridData());
     }
 
-    public IEnumerator AddItems()
+    public void OnJobSelected(Defines.Jobs job)
     {
-        Dictionary<SlotType, string> selectedItem = itemSelect.selectItems;
-        Debug.Log("컨펌 펑션!");
+        itemSelect.gameObject.SetActive(true);
+        itemSelect.Init();
+
+        // 아이템 패널의 데이터를 그리드로 주입
+        SetGridData(itemSelect.GetGridData());
+    }
+
+    // --- 메뉴 실행 로직 오버라이드 ---
+    public override void ExecuteSelectedMenu()
+    {
+        // 현재 그리드에서 선택된 요소를 가져옴
+        UI_Base current = CurrentSelected;
+        if (current == null) return;
+
+        // 선택된 셀의 Excute를 호출 (RaceSelectCell, JobSelectCell 등이 실행됨)
+        current.Excute();
+    }
+
+    // --- 게임 시작 및 씬 로드 (UniTask) ---
+    public void ConfirmFunction() => SetUpAndDungeonLoad().Forget();
+
+    private async UniTaskVoid SetUpAndDungeonLoad()
+    {
+        await AddItemsAsync();
+        await LoadDungeonSceneAsync();
+    }
+
+    private async UniTask AddItemsAsync()
+    {
+        var selectedItem = itemSelect.selectItems;
         ItemManager itemManager = GameManager.instance.Get_ItemManager();
-        if (itemManager == null)
-        {
-            Debug.Log("ItemManager Null");
-            yield break;
-        }
-        List<string> items = new List<string>();
-        foreach(string name in selectedItem.Values)
-        {
-            items.Add(name);
-        }
+        if (itemManager == null) return;
 
-        itemManager.AddStartItems(items);
-
-        Debug.Log("아이템 생성 완료");
-        yield return null;
+        itemManager.AddStartItems(new List<string>(selectedItem.Values));
+        await UniTask.Yield();
     }
-    public IEnumerator LoadDungeonSceneCoroutine()
+
+    private async UniTask LoadDungeonSceneAsync()
     {
-        // 1. 던전 씬 비동기 로드 시작
-        Debug.Log("던전씬 비동기 로드 시작!");
-        AsyncOperation asyncOperation = SceneManager.LoadSceneAsync("DungeonScene");
-
-        // 로드가 완료될 때까지 기다립니다.
-        // asyncOperation.isDone이 true가 될 때까지 코루틴 일시 정지
-        while (!asyncOperation.isDone)
-        {
-            // 로딩 진행 상황 등을 UI에 표시하려면 여기서 로직을 추가할 수 있습니다.
-            // Debug.Log($"Loading progress: {asyncOperation.progress * 100}%");
-            yield return null; // 다음 프레임까지 기다림
-        }
-
-        // 2. 씬 로드가 완료된 후 던전 생성 로직 실행
-        Debug.Log("던전씬 로드 완료. 던전 생성 시작.");
-        GenerateDungeon();
+        await SceneManager.LoadSceneAsync("DungeonScene").ToUniTask();
+        Debug.Log("Dungeon Scene Loaded");
     }
-
-    public void GenerateDungeon()
-    {
-        // 이곳에 던전 생성 로직을 구현합니다.
-        // 예: GameManager.instance.Get_DungeonGenerator().CreateNewDungeon();
-        // 예: 맵 데이터를 로드하고 플레이어를 배치하는 등의 작업
-        Debug.Log("던전 생성 완료");
-    }
-
 }

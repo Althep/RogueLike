@@ -1,61 +1,49 @@
-using UnityEngine;
-using System;
-using System.Linq;
 using System.Collections.Generic;
+using UnityEngine;
 using static Defines;
+
 public class RaceSelectPanel : SelectSubPanel
 {
-    public Races selectRace;
-    JobSelectPanel jobselect;
+    public Defines.Races selectRace;
+    private SelectPanels _parent;
 
-    private void Awake()
-    {
-        OnAwake();
-    }
+    public void SetParentController(SelectPanels parent) => _parent = parent;
 
-    public override void OnAwake()
-    {
-        base.OnAwake();
-        
-    }
-
-    
-    public void OnEnable()
-    {
-        InitMenu();
-    }
-    public void OnDisable()
-    {
-        ReturnMyPools();
-        
-    }
-    
     protected override void InitMenu()
     {
-        Races[] races = Utils.Get_Enums<Races>(Races.Default);
-        jobselect = selectPanel.jobSelect;
-        foreach (Races race in races)
+        ReturnMyPools();
+        Defines.Races[] races = Utils.Get_Enums<Defines.Races>(Defines.Races.Default);
+
+        foreach (var race in races)
         {
-            if (race == Races.Default)
-                continue;
+            if (race == Defines.Races.Default) continue;
             AddRaceButton(race);
         }
-        RaceSelectCell first = myPools[0].Get().transform.GetComponent<RaceSelectCell>();
-        if(first != null)
-        {
-            Select<Races>(first.race,first.gameObject);
-            Debug.Log($"Selected {first.race}");
-        }
-        
     }
 
-    #region 버튼
+    public override void Select<T>(T race, GameObject go)
+    {
+        if (race is Defines.Races r)
+        {
+            selectRace = r;
+            MoveSelectView(go);
+            _parent.OnRaceSelected(r); // 부모에게 보고
+        }
+    }
+
+    public override List<List<UI_Base>> GetGridData()
+    {
+        List<UI_Base> row = new List<UI_Base>();
+        foreach (var pool in myPools) row.Add(pool as UI_Base);
+        return new List<List<UI_Base>> { row };
+    }
+
     public void AddRaceButton(Races race)
     {
         GameObject go = uiManager.Get_PoolUI(UIDefines.UI_PrefabType.MainSelect, myContents);
-        if(go.TryGetComponent<RaceSelectCell>(out RaceSelectCell cell))
+        if (go.TryGetComponent<RaceSelectCell>(out RaceSelectCell cell))
         {
-            if(cell is IPoolUI && !myPools.Contains(cell))
+            if (cell is IPoolUI && !myPools.Contains(cell))
             {
                 cell.enabled = true;
                 myPools.Add(cell);
@@ -68,31 +56,14 @@ public class RaceSelectPanel : SelectSubPanel
         else
         {
             cell = go.AddComponent<RaceSelectCell>();
-            if(cell is IPoolUI)
+            if (cell is IPoolUI)
             {
                 myPools.Add(cell);
             }
         }
-        cell.SetMyType<Races>(race,this);
+        cell.SetMyType<Races>(race, this);
         cell.AddButtonFunction();
     }
-    public override void Select<T>(T race,GameObject go)
-    {
-        if(race is Races r)
-        {
-            selectRace = r;
-            MoveSelectView(go);
-        }
-        else
-        {
-            Debug.Log("RaceSElectPanel 에러");
-        }
-        //Job패널 초기화
-        jobselect.ReturnMyPools();
-        jobselect.OnAwake();
-
-    }
-
+    // 그리드 데이터 생성 (1행 N열 구조)
     
-    #endregion
 }

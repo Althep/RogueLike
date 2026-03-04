@@ -398,6 +398,11 @@ public class MapManager : MonoBehaviour
     }
     #endregion
     #region MapLayer
+    public MapLayer GetWeightMap()
+    {
+        return mapLayer;
+    }
+
     public int GetTypeCost(Vector2Int pos)
     {
         if (dynamicMapData.ContainsKey(pos))

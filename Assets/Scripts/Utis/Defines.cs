@@ -50,6 +50,14 @@ public class BuffInstance : IPoolScript
 
 public static class Defines
 {
+    public enum InputType
+    {
+        VirticalUI,
+        HorizonUI,
+        Player,
+        GridUI,
+        SelectTarget
+    }
     public enum UIEvents
     {
         Click,

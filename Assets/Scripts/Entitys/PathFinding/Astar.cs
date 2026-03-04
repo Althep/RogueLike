@@ -1,137 +1,99 @@
 using UnityEngine;
 using System;
 using System.Collections.Generic;
-public class Astar 
+
+public class Astar
 {
-    public List<Node> path = new List<Node>();
-    Dictionary<Vector2Int, Defines.TileType> tileData;
-    MapMaker mapMaker;
-    GameObject myObj;
-    LivingEntity myEntity;
+    private List<Node> _path = new List<Node>();
+    private MapLayer _navLayer;
+    private GameObject _owner;
 
-    Astar(GameObject myObj)
+    // 방향 데이터 (8방향: 상하좌우 + 대각선)
+    private readonly int[] dx = { 0, 0, -1, 1, -1, -1, 1, 1 };
+    private readonly int[] dy = { 1, -1, 0, 0, 1, -1, 1, -1 };
+    // 모든 이동 비용을 10으로 통일 (사용자 요청 사항)
+    private readonly int moveCost = 10;
+
+    public Astar(GameObject owner)
     {
-        if(tileData == null)
-        {
-            tileData = GameManager.instance.Get_MapManager().GetEnviromentData();
-        }
-        if(mapMaker == null)
-        {
-            mapMaker = GameManager.instance.Get_MapManager().Get_MapMaker();
-        }
-        if(this.myObj == null)
-        {
-            this.myObj = myObj;
-        }
-        if(myEntity == null)
-        {
-            myObj.transform.GetComponent<LivingEntity>();
-        }
+        _owner = owner;
+        // MapManager를 통해 이미 255로 초기화된 레이어를 가져옴
+        _navLayer = GameManager.instance.Get_MapManager().GetWeightMap();
     }
 
-    public void Get_Path(Vector2 Dest)
+    public List<Node> Get_Path(Vector2Int dest)
     {
-        
-        if (path.Count > 0)
+        _path.Clear();
+
+        Vector2Int startPos = new Vector2Int((int)_owner.transform.position.x, (int)_owner.transform.position.y);
+
+        // 도착지점이 벽(255)이라면 길을 찾을 수 없음
+        if (_navLayer[dest.x, dest.y] >= 255) return _path;
+
+        PriorityQueue<Node> openList = new PriorityQueue<Node>();
+        Dictionary<Vector2Int, Node> allNodes = new Dictionary<Vector2Int, Node>();
+        HashSet<Vector2Int> closedList = new HashSet<Vector2Int>();
+
+        Node startNode = new Node(startPos.x, startPos.y) { G = 0, H = GetManhattanDistance(startPos, dest) };
+        openList.Push(startNode);
+        allNodes[startPos] = startNode;
+
+        while (openList.Count > 0)
         {
-            path.Clear();
-        }
-        bool[,] closed;
-        int[,] open;
-        int[] dx = new int[] { -1, 0, 1, -1, 1, -1, 0, 1 };
-        int[] dy = new int[] { 1, 1, 1, 0, 0, -1, -1, -1 };
-        int[] cost = new int[] { 8, 10, 8, 10, 10, 8, 10, 8 };//{ 14, 10, 14, 10, 10, 14, 10, 14 };
-        if (tileData == null)
-        {
-            Debug.Log("MapScript Null");
-            tileData = GameManager.instance.Get_MapManager().GetEnviromentData();
-        }
-        
-        Node[,] parents = new Node[mapMaker.ySize, mapMaker.xSize];
-        PriorityQueue<Node> q = new PriorityQueue<Node>();
-        Node start = new Node();
-        closed = new bool[mapMaker.ySize, mapMaker.xSize];
-        open = new int[mapMaker.ySize, mapMaker.xSize];
-        //int[,] cost = new int[mapMakeScript.ySize,mapMakeScript.xSize];
-        Vector2 nowPos = new Vector2();
-        for (int i = 0; i < mapMaker.ySize; i++)
-        {
-            for (int j = 0; j < mapMaker.xSize; j++)
+            Node current = openList.Pop();
+            Vector2Int currentPos = new Vector2Int(current.x, current.y);
+
+            if (current.x == dest.x && current.y == dest.y)
+                return TracePath(current);
+
+            closedList.Add(currentPos);
+
+            for (int i = 0; i < 8; i++)
             {
-                open[i, j] = Int32.MaxValue;
-            }
-        }
-        nowPos = myObj.transform.position;
-        start.x = (int)nowPos.x;
-        start.y = (int)nowPos.y;
-        start.F = (int)(Vector2.Distance(Dest, nowPos) * 10);//((int)Math.Abs(Dest.x - start.x) + (int)Math.Abs(Dest.y - start.y))*10;
-        start.G = 0;
-        parents[start.y, start.x] = start;
-        q.Push(start);
-        while (q.Count > 0)
-        {
-            Node now = q.Pop();
-            closed[now.y, now.x] = true;
-            if (now.x == Dest.x && now.y == Dest.y)
-            {
-                GetPath(now, parents);
-                break;
-            }
-            for (int i = 0; i < dx.Length; i++)
-            {
-                Vector2Int closePos = new Vector2Int();
-                closePos.x = now.x + dx[i];
-                closePos.y = now.y + dy[i];
-                int f = (int)(Vector2.Distance(Dest, closePos) * 10) + cost[i];//((int)Math.Abs(Dest.x - closePos.x) + (int)Math.Abs(Dest.y - closePos.y)) * 10 + cost[i];//
-                if (!tileData.ContainsKey(closePos))
-                    continue;
-                if (closed[(int)closePos.y, (int)closePos.x])
-                    continue;
-                if (f > open[(int)closePos.y, (int)closePos.x])
-                    continue;
-                if (tileData[closePos] != Defines.TileType.Tile && tileData[closePos] != Defines.TileType.Door && tileData[closePos] != Defines.TileType.Player)
-                    continue;
-                Node next = new Node()
+                Vector2Int nextPos = new Vector2Int(current.x + dx[i], current.y + dy[i]);
+
+                // 1. 이미 검사한 노드 스킵
+                if (closedList.Contains(nextPos)) continue;
+
+                // 2. MapLayer 인덱서를 통한 벽(255) 및 가중치 확인
+                byte weight = _navLayer[nextPos.x, nextPos.y];
+                if (weight >= 255) continue;
+
+                // 3. 비용 계산: 이전G + 이동비용(10) + 타일 가중치
+                int newG = current.G + moveCost + weight;
+
+                if (!allNodes.ContainsKey(nextPos) || newG < allNodes[nextPos].G)
                 {
-                    x = (int)closePos.x,
-                    y = (int)closePos.y,
-                    F = f,// ((int)Math.Abs(Dest.y-closePos.y) + (int)Math.Abs(Dest.x-closePos.x))*10+cost[i],
-                    G = cost[i]
-                };
-                q.Push(next);
-                //Debug.Log("Next : "+next.x +","+next.y);
-                open[next.y, next.x] = next.F;
-                parents[next.y, next.x] = now;
+                    Node nextNode = new Node(nextPos.x, nextPos.y)
+                    {
+                        G = newG,
+                        H = GetManhattanDistance(nextPos, dest),
+                        parent = current
+                    };
+
+                    allNodes[nextPos] = nextNode;
+                    openList.Push(nextNode);
+                }
             }
         }
+        return _path;
     }
 
-    public void GetPath(Node LastNode, Node[,] parents)
+    // 대각선 비용이 10일 때 가장 적합한 맨해튼 거리 휴리스틱
+    private int GetManhattanDistance(Vector2Int a, Vector2Int b)
     {
-        while (LastNode.x != (int)myObj.transform.position.x || LastNode.y != (int)myObj.transform.position.y)
+        return 10 * (Math.Abs(a.x - b.x) + Math.Abs(a.y - b.y));
+    }
+
+    private List<Node> TracePath(Node lastNode)
+    {
+        Node temp = lastNode;
+        while (temp != null)
         {
-            if (Vector2.Distance(myObj.transform.position, GameManager.instance.Get_PlayerObj().transform.position) <= myEntity.GetEntityStat(Defines.ModifierTriggerType.OnAttack)[Defines.StatType.AttackRange]);
-            {
-                LastNode = parents[LastNode.y, LastNode.x];
-                path.Add(LastNode);
-                break;
-            }
-            if (parents.Length == 0)
-            {
-                break;
-            }
-            LastNode = parents[LastNode.y, LastNode.x];
-            path.Add(LastNode);
+            _path.Add(temp);
+            temp = temp.parent;
         }
-        path.Reverse();
-        /*
-        for (int i = 0; i < path.Count - 1; i++)
-        {
-            drawingStart = new Vector2(path[i].x, path[i].y);
-            drawingEnd = new Vector2(path[i + 1].x, path[i + 1].y);
-            Debug.DrawLine(drawingStart, drawingEnd, Color.red, 30f);
-            //Debug.Log("Path : "+"i : " + path[i]);
-        }
-        */
+        _path.Reverse();
+        return _path;
     }
 }

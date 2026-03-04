@@ -1,19 +1,17 @@
 using UnityEngine;
 using System;
 using System.Collections.Generic;
-public struct Node : IComparable<Node>
+public class Node : IComparable<Node>
 {
     public int x, y;
-    public int F, G, H;
+    public int G;
+    public int H;
+    public int F => G + H;
+    public Node parent;
 
-    public int CompareTo(Node other)
-    {
-        if (F == other.F)
-        {
-            return G.CompareTo(other.G); // 동점일 경우 G값 비교
-        }
-        return F.CompareTo(other.F);
-    }
+    public Node(int x, int y) { this.x = x; this.y = y; }
+
+    public int CompareTo(Node other) => F.CompareTo(other.F);
 }
 
 public class PriorityQueue<T> where T : IComparable<T>
