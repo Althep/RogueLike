@@ -1,5 +1,7 @@
+using System;
 using UnityEngine;
 using static Defines;
+[Serializable]
 public class MonsterStat : EntityStat
 {
     int tier;
@@ -21,6 +23,7 @@ public class MonsterStat : EntityStat
     {
         this.tier = tier;
     }
+    
     public MonsterStat CopyMonsterStat()
     {
         MonsterStat newStat = new MonsterStat();

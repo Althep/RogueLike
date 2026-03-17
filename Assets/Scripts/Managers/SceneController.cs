@@ -7,7 +7,8 @@ using Cysharp.Threading.Tasks;
 using static Defines;
 public class SceneController: MonoBehaviour
 {
-
+    public static SceneController Instance { get; private set; }
+    public Scenes currentScene;
     Dictionary<Scenes, string> scenes = new Dictionary<Scenes, string>()
     {
         { Scenes.MainScene,"MainScene" },
@@ -15,13 +16,21 @@ public class SceneController: MonoBehaviour
         { Scenes.EndingScene,"EndingScene"}
     };
 
-
+    private void Awake()
+    {
+        if(SceneController.Instance == null)
+        {
+            Instance = this;
+        }
+        currentScene = Scenes.MainScene;
+    }
     public void LoadCene(Action action, Scenes scene)
     {
         action?.Invoke();
         if (scenes.ContainsKey(scene))
         {
             SceneManager.LoadScene(scenes[scene]);
+            InputManager.instance.OnSceneChange();
         }
         else
         {
@@ -35,6 +44,7 @@ public class SceneController: MonoBehaviour
         if (scenes.ContainsKey(scene))
         {
             SceneManager.LoadScene(scenes[scene]);
+            InputManager.instance.OnSceneChange();
         }
         else
         {
@@ -65,8 +75,14 @@ public class SceneController: MonoBehaviour
         {
             await asyncPostAction.Invoke();
         }
-
+        currentScene = sceneType;
+        InputManager.instance.OnSceneChange();
         Debug.Log($"씬로드 완료 및 후처리 완료 :{sceneType}");
+    }
+
+    public Scenes Get_CurrentScene()
+    {
+        return currentScene;
     }
 }
 

@@ -74,7 +74,7 @@ public class StatModifier : Modifier
     }
    public override void Apply(LivingEntity entity)
     {
-        ModifierContext context = entity.GetContext();
+        ModifierContext context = entity.GetContext(triggerType);
         if (isMulti)
         {
             if (!context.multifle.ContainsKey(this.stat))
@@ -181,7 +181,7 @@ public class DamageModifier : Modifier
     }
     public override void Apply(LivingEntity entity)
     {
-        ModifierContext context = entity.GetContext();
+        ModifierContext context = entity.GetContext(triggerType);
         if (CanEvoke())
         {
             if (isMulti)
@@ -237,7 +237,7 @@ public class ActionModifier: Modifier
     public int maxValue;    
     public override void Apply(LivingEntity entity)
     {
-        ModifierContext context = entity.GetContext();
+        ModifierContext context = entity.GetContext(triggerType);
         List<ModifierAction> effects = context.modifierActions;
         int duration = 0;
         for(int i = 0; i<effects.Count; i++)
@@ -302,7 +302,7 @@ public class ItemModifier : Modifier
     }
     public override void Apply(LivingEntity entity)
     {
-        ModifierContext context = entity.GetContext();
+        ModifierContext context = entity.GetContext(triggerType);
         if (isMulti)
         {
             if (!context.multifle.ContainsKey(stat))

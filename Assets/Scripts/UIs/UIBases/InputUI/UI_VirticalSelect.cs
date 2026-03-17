@@ -1,24 +1,30 @@
 using UnityEngine;
 using UnityEngine.UI;
 using System;
+using System.Linq;
 using System.Collections.Generic;
 public class UI_VirticalSelect : UI_InputUIBase
 {
     public int selectedNumber = 0;
-    UI_Base[] childs;
-    UI_Base selectedButton;
+    [SerializeField]UI_Base[] childs;
+    [SerializeField]UI_Base selectedButton;
     public GameObject selectPanel;
 
     private void Awake()
     {
-        myInputType = Defines.InputType.VirticalUI; 
+        myInputType = Defines.InputType.VirticalUI;
+        if (InputManager.instance!=null)
+        {
+            Set_Input();
+        }
     }
     private void OnEnable()
     {
         SetButtons();
+        Debug.Log("1111111111");
         if(InputManager.instance !=null)
         {
-            InputManager.instance.ChangeContext(Defines.InputType.VirticalUI, this,true);
+            Set_Input();
         }
     }
 
@@ -28,7 +34,8 @@ public class UI_VirticalSelect : UI_InputUIBase
     }
     void SetButtons()
     {
-        childs = transform.GetComponentsInChildren<UI_Base>();
+        childs = transform.GetComponentsInChildren<UI_Base>().Where(c => c.gameObject!=this.gameObject).ToArray();
+        selectedButton = childs[0];
     }
 
     public void ChangeSelection(int direction)

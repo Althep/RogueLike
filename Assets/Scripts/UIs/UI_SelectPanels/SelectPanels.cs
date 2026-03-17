@@ -3,104 +3,217 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using Cysharp.Threading.Tasks;
+using static Defines;
 
-// UI_GridSelect를 상속하여 직접 그리드 조작 기능을 가짐
 public class SelectPanels : UI_GridSelect
 {
-    [Header("Sub Panels")]
     public RaceSelectPanel raceSelect;
     public JobSelectPanel jobSelect;
     public ItemSelectPanel itemSelect;
 
-    [Header("Additional UI")]
+    [SerializeField] GameObject raceSelectPanelObj;
+    [SerializeField] GameObject jobSelectPanelObj;
+    [SerializeField] GameObject itemSelectPanelObj;
     [SerializeField] UI_ConfirmPanel confirmPanel;
-
+    //[SerializeField] GameObject selectViewObj;
     public ModifierController checker = new ModifierController();
     private UIManager uiManager;
 
-    public UI_Base CurrentSelected;
+    UI_Base CurrentSelected;
+
+    Vector2Int pos = Vector2Int.zero;
     private void Awake()
     {
-        // UI_GridSelect(부모)의 초기화 로직 수행
-        // 만약 부모에 Awake가 있다면 base.Awake() 호출
+        myInputType = Defines.InputType.GridUI;
         Init();
+        if(SelectObj == null)
+        {
+            SelectObj = UIManager.instance.Get_PoolUI(UIDefines.UI_PrefabType.SelectView, this.gameObject);
+        }
     }
-
+    private void OnEnable()
+    {
+        EnableFunc();
+    }
+    protected override void EnableFunc()
+    {
+        base.EnableFunc();
+        RefreshEverything();
+    }
     void Init()
     {
-        uiManager = GameManager.instance.Get_UIManager();
+        if(uiManager == null)
+        {
+            uiManager = GameManager.instance.Get_UIManager();
+        }
 
-        // 서브 패널들에게 중재자(자신)를 알려줌
         raceSelect.SetParentController(this);
         jobSelect.SetParentController(this);
         itemSelect.SetParentController(this);
 
-        // 첫 단계: 종족 선택 화면 활성화
-        OpenRaceSelect();
+        confirmPanel.SetConfirmAction(LoadDungeonSceneAsync);
+        confirmPanel.SetCancelAction(CloseButton);
+        RefreshEverything();
     }
 
-    // --- 그리드 데이터 주입 및 패널 전환 ---
-    public void OpenRaceSelect()
+    public void RefreshEverything()
     {
-        raceSelect.gameObject.SetActive(true);
-        jobSelect.gameObject.SetActive(false);
-        itemSelect.gameObject.SetActive(false);
+        raceSelect.Init();
 
-        // 부모(UI_GridSelect)의 메서드를 사용하여 데이터 세팅
-        SetGridData(raceSelect.GetGridData());
+
     }
 
-    public void OnRaceSelected(Defines.Races race)
+
+    public void AddGridData(List<UI_Base> uis)
     {
-        jobSelect.gameObject.SetActive(true);
+        _grid.Add(uis);
+        Debug.Log($"Call Add GridData{_grid.Count}");
+    }
+    public void RemoveGridData(List<UI_Base> uis)
+    {
+        _grid.Remove(uis);
+    }
+    public int GetGridCount()
+    {
+        return _grid.Count;
+    }
+    // 하위 패널에서 선택 시 호출
+    public void OnRaceSelected(Races race)
+    {
         jobSelect.RefreshContents(race);
 
-        // 직업 패널의 데이터를 그리드로 주입
-        SetGridData(jobSelect.GetGridData());
     }
 
-    public void OnJobSelected(Defines.Jobs job)
+    public void OnJobSelected(Jobs job)
     {
-        itemSelect.gameObject.SetActive(true);
-        itemSelect.Init();
-
-        // 아이템 패널의 데이터를 그리드로 주입
-        SetGridData(itemSelect.GetGridData());
+        itemSelect.RefreshContents(job);
     }
 
-    // --- 메뉴 실행 로직 오버라이드 ---
+    public void OnItemSelected()
+    {
+
+    }
+    public override void ChangeSelection(Vector2Int direction)
+    {
+        if (_grid == null || _grid.Count == 0) return;
+        if(direction.x != 0)
+        {
+            _currentRow = 0;
+        }
+        else
+        {
+            _currentRow -= direction.y;
+        }
+        _currentCol += direction.x;
+        _currentCol = Mathf.Clamp(_currentCol, 0, _grid.Count-1);
+        if (_currentRow >= _grid[_currentCol].Count)
+        {
+            _currentRow = 0;
+        }
+        _currentRow = Mathf.Clamp(_currentRow, 0, _grid[_currentCol].Count);
+
+        UI_Base selected = _grid[_currentCol][_currentRow];
+        if(!(selected is UI_Buttons buttons))
+        {
+            selected.Excute();
+        }
+        
+        SelectObj.transform.SetParent(selected.transform);
+        SelectObj.transform.localPosition = Vector2.zero;
+        CurrentSelected = selected;
+        RectTransform selectedRect = selected.GetComponent<RectTransform>();
+        RectTransform selectObjRect = SelectObj.GetComponent<RectTransform>();
+
+        if (selectedRect != null && selectObjRect != null)
+        {
+            // 앵커를 중앙으로 맞추고 크기를 동일하게 설정
+            selectObjRect.anchorMin = new Vector2(0.5f, 0.5f);
+            selectObjRect.anchorMax = new Vector2(0.5f, 0.5f);
+            selectObjRect.pivot = new Vector2(0.5f, 0.5f);
+
+            // 대상의 실제 가로, 세로 크기를 복사
+            selectObjRect.sizeDelta = selectedRect.rect.size;
+        }
+
+        Debug.Log($"{selected.gameObject.name}");
+    }
+
+    
+
+    
     public override void ExecuteSelectedMenu()
     {
-        // 현재 그리드에서 선택된 요소를 가져옴
-        UI_Base current = CurrentSelected;
-        if (current == null) return;
-
-        // 선택된 셀의 Excute를 호출 (RaceSelectCell, JobSelectCell 등이 실행됨)
-        current.Excute();
+        CurrentSelected?.Excute();
     }
 
-    // --- 게임 시작 및 씬 로드 (UniTask) ---
-    public void ConfirmFunction() => SetUpAndDungeonLoad().Forget();
+    // --- 씬 이동 및 생성 로직 ---
+    public void ConfirmFunction()
+    {
+        SetUpAndDungeonLoad().Forget();
+    }
 
     private async UniTaskVoid SetUpAndDungeonLoad()
     {
         await AddItemsAsync();
+        Debug.Log("아이템 추가 완료");
         await LoadDungeonSceneAsync();
     }
 
-    private async UniTask AddItemsAsync()
+    public async UniTask AddItemsAsync()
     {
-        var selectedItem = itemSelect.selectItems;
+        Dictionary<SlotType, string> selectedItem = itemSelect.selectItems;
         ItemManager itemManager = GameManager.instance.Get_ItemManager();
-        if (itemManager == null) return;
+        PlayerEntity playerEntity = GameManager.instance.Get_PlayerEntity();
+        if (itemManager == null)
+        {
+            Debug.Log("ItemManager Null");
+            return;
+        }
+        
+        List<string> items = new List<string>();
+        foreach (string name in selectedItem.Values)
+        {
+            items.Add(name);
+        }
 
-        itemManager.AddStartItems(new List<string>(selectedItem.Values));
+        for(int i = 0; i<items.Count; i++)
+        {
+            ItemBase item = itemManager.ItemMake(items[i]);
+            playerEntity.AddItem(item);
+        }
+
         await UniTask.Yield();
     }
 
     private async UniTask LoadDungeonSceneAsync()
     {
-        await SceneManager.LoadSceneAsync("DungeonScene").ToUniTask();
-        Debug.Log("Dungeon Scene Loaded");
+        //await AddItemsAsync();
+        Debug.Log("던전씬 비동기 로드 시작!");
+        await SceneController.Instance.PrePostAwaits(null, Defines.Scenes.DungeonScene, GameManager.instance.GetDungeonManager().GenerateDungeon);
+        Debug.Log("던전씬 로드 완료. 던전 생성 시작.");
+        
+    }
+
+    public void AddConfirmPanel()
+    {
+        List<List<UI_Base>> data = confirmPanel.Get_GridData();
+        Debug.Log("Call Add ConfirmPanel");
+        for (int i = 0; i<data.Count; i++)
+        {
+            if (_grid.Contains(data[i]))
+            {
+                _grid.Remove(data[i]);
+            }
+            _grid.Add(data[i]);
+            Debug.Log("Add ConfirmPanel");
+        }
+    }
+    public void CloseButton()
+    {
+        InputManager.instance.CloseInputUI(this);
+    }
+    public override void CloseUI()
+    {
+        //base.CloseUI();
     }
 }

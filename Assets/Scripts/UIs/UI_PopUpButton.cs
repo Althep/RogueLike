@@ -21,9 +21,13 @@ public class UI_PopUpButton : UI_Base
         AddUIEvent(this.gameObject, OnClickEvent, Defines.UIEvents.Click);
     }
 
-
+    public override void Excute()
+    {
+        Debug.Log("PopUpUI!");
+        GameManager.instance.PopUpUI(buttonName);
+    }
     protected virtual void OnClickEvent(PointerEventData evt)
     {
-        GameManager.instance.PopUpUI(buttonName);
+        Excute();
     }
 }

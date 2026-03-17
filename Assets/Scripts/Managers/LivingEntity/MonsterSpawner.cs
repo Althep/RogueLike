@@ -101,7 +101,7 @@ public class MonsterSpawner
         }
         for(int i = 0; i < monsterCount; i++)
         {
-            EntityStat originData = monsterDataManager.GetMonsterStat(monsterId);
+            MonsterStat originData = monsterDataManager.GetMonsterStat(monsterId);
             GameObject monster = poolmanager.ObjectPool(Defines.TileType.Monster);
             MonsterEntity monsterEntity = monster.transform.GetComponent<MonsterEntity>();
             if(monsterEntity != null)
@@ -109,6 +109,10 @@ public class MonsterSpawner
                 EntityStat monsterStat = originData.CopyStat();
                 monsterEntity.id = monsterId;
                 monsterEntity.SetMyStat(monsterStat);
+            }
+            else
+            {
+                Debug.Log("MonsterEntity null");
             }
             monsters.Add(monsterEntity);
         }

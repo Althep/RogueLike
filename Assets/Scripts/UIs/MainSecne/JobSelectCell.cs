@@ -17,13 +17,22 @@ public class JobSelectCell : SelectSubCell
             }
             this.selectJob = job;
         }
+        SetMyStringKey();
     }
     public override void AddButtonFunction()
     {
         AddUIEvent(this.gameObject, ButtonFunction, Defines.UIEvents.Click);
     }
+    public override void Excute()
+    {
+        selectPanel.Select(selectJob, this.gameObject);
+    }
     public override void ButtonFunction(PointerEventData evt)
     {
         selectPanel.Select<Jobs>(selectJob,this.gameObject);
+    }
+    protected override void SetMyStringKey()
+    {
+        myTextController.Set_MyKey(selectJob.ToString());
     }
 }

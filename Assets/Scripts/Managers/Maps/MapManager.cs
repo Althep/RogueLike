@@ -21,17 +21,17 @@ public class MapManager : MonoBehaviour
     [SerializeField] PoolManager poolManager;
 
     //public Dictionary<Vector2Int, Defines.TileType> tileData = new Dictionary<Vector2Int, Defines.TileType>(); //몬스터등을 포함한 맵데이터
-    public Dictionary<Vector2Int, Defines.TileType> enviromentData = new Dictionary<Vector2Int, Defines.TileType>(); //타일과 벽, 문등을 포함한 맵데이터
+    public Dictionary<Vector2Int, TileType> enviromentData = new Dictionary<Vector2Int, TileType>(); //타일과 벽, 문등을 포함한 맵데이터
     public Dictionary<Vector2Int, MapEntity> dynamicMapData = new Dictionary<Vector2Int, MapEntity>(); //몬스터, 캐릭터등 움직이는 오브젝트 데이터
     public Dictionary<Vector2Int, List<MapEntity>> interactiveMapData = new Dictionary<Vector2Int, List<MapEntity>>(); //문 아이템등 상호작용 오브젝트 데이터
-    
+
     [SerializeField] List<MapEntity> tileObjects = new List<MapEntity>();
 
-    public List<Vector2> tilePosList = new List<Vector2>();
-    public List<Vector2> wallPosList = new List<Vector2>();
-    public List<Vector2> doorPosList = new List<Vector2>();
-    public List<Vector2> upStairList = new List<Vector2>();
-    public List<Vector2> downStairList = new List<Vector2>();
+    public List<Vector2Int> tilePosList = new List<Vector2Int>();
+    public List<Vector2Int> wallPosList = new List<Vector2Int>();
+    public List<Vector2Int> doorPosList = new List<Vector2Int>();
+    public List<Vector2Int> upStairList = new List<Vector2Int>();
+    public List<Vector2Int> downStairList = new List<Vector2Int>();
 
     MonsterManager monsterManager;
     ItemManager itemManager;
@@ -46,17 +46,22 @@ public class MapManager : MonoBehaviour
     new Vector2(-1, 1), new Vector2(-1, 0), new Vector2(-1, -1)
 };
 
+
+    public void Awake()
+    {
+        Init();
+    }
     void Start()
     {
 
     }
     private void Init()
     {
-        if(monsterManager == null)
+        if (monsterManager == null)
         {
             monsterManager = GameManager.instance.Get_MonsterManager();
         }
-        if(itemManager == null)
+        if (itemManager == null)
         {
             itemManager = GameManager.instance.Get_ItemManager();
         }
@@ -89,40 +94,37 @@ public class MapManager : MonoBehaviour
         this.makerType = selectedMaker.makerType;
     }
 
-    public List<Vector2> GetEmptyPosList()
+    public List<Vector2Int> GetEmptyPosList()
     {
-        List<Vector2> emptyPos = tilePosList;
+        List<Vector2Int> emptyPos = tilePosList;
 
 
 
         return emptyPos;
     }
 
-    public List<Vector2> GetPotentialPos(Vector2 center, int range)
+    public List<Vector2Int> GetPotentialPos(Vector2 center, int range)
     {
-        List<Vector2> potentials = tilePosList.Where(p =>
+        List<Vector2Int> potentials = tilePosList.Where(p =>
         p.x >= center.x - range && p.x <= center.x + range &&
         p.y >= center.y - range && p.y <= center.y + range
         ).ToList();
         return potentials;
     }
-    public Vector2 GetRandomTilePos()
+    public Vector2Int GetRandomTilePos()
     {
         int randomIndex = UnityEngine.Random.Range(0, tilePosList.Count);
-        Vector2 randomPos = tilePosList[randomIndex];
+        Vector2Int randomPos = tilePosList[randomIndex];
         return randomPos;
     }
 
-    public Dictionary<Vector2Int,TileType> GetEnviromentData()
+    public Dictionary<Vector2Int, TileType> GetEnviromentData()
     {
         return enviromentData;
     }
     #endregion
 
-    public void EntityMove(Vector2Int originPos, Vector2Int nextPos, Defines.TileType myType)
-    {
 
-    }
     #region MapMake
     public async UniTask MapMake()
     {
@@ -166,7 +168,7 @@ public class MapManager : MonoBehaviour
 
         foreach (var kv in enviromentData)
         {
-            Vector2 pos = (Vector2)kv.Key;
+            Vector2Int pos = kv.Key;
             switch (kv.Value)
             {
                 case TileType.Tile: tilePosList.Add(pos); break;
@@ -201,11 +203,12 @@ public class MapManager : MonoBehaviour
 
             if (go.TryGetComponent<MapEntity>(out MapEntity tile))
             {
-                if(tile is  DoorEntity door)
+                if (tile is DoorEntity door)
                 {
-                    AddMapData(pos,door);
+                    AddMapData(pos, door);
                 }
                 tileObjects.Add(tile);
+                tile.SetMyPos(pos);
             }
 
             count++;
@@ -260,8 +263,8 @@ public class MapManager : MonoBehaviour
 
     public List<Vector2Int> SetMonsterRandomPosition(List<LivingEntity> monsters)
     {
-        Vector2 center = GetRandomTilePos();
-        List<Vector2> potentials = GetPotentialPos(center, monsters.Count);
+        Vector2Int center = GetRandomTilePos();
+        List<Vector2Int> potentials = GetPotentialPos(center, monsters.Count);
         int roofs = 0;
         while (potentials.Count < monsters.Count)
         {
@@ -293,10 +296,10 @@ public class MapManager : MonoBehaviour
         }
 
         return shuffledPos;
-        
+
     }
 
-    public GameObject SetEnviromentObjectPos(GameObject go,Vector2Int pos, TileType objType)
+    public GameObject SetEnviromentObjectPos(GameObject go, Vector2Int pos, TileType objType)
     {
         go.transform.position = (Vector2)pos;
 
@@ -304,11 +307,66 @@ public class MapManager : MonoBehaviour
     }
 
     #region Entitys
+
+    public MapEntity GetMonsterEntity(Vector2Int targetPos)
+    {
+        if (dynamicMapData.ContainsKey(targetPos))
+        {
+            return dynamicMapData[targetPos];
+        }
+        return null;
+    }
+
+    public DoorEntity GetDoorEntity(Vector2Int targetPos)
+    {
+        if (interactiveMapData.ContainsKey(targetPos))
+        {
+            List<MapEntity> targets = interactiveMapData[targetPos];
+
+            for (int i = 0; i<targets.Count; i++)
+            {
+                if (targets[i].GetMyType() == TileType.Door)
+                {
+                    return targets[i] as DoorEntity;
+                }
+            }
+
+        }
+        return null;
+    }
+    public Vector2Int Get_UpStairPos(int index)
+    {
+        Mathf.Clamp(index, 0, upStairList.Count);
+        return upStairList[index];
+    }
+    public Vector2Int Get_DownStairPos(int index)
+    {
+        Mathf.Clamp(index, 0, downStairList.Count);
+        return upStairList[index];
+    }
+    public bool CanAcctack(Vector2Int dest)
+    {
+        bool canAttack = false;
+        if (dynamicMapData.ContainsKey(dest))
+        {
+            canAttack = true;
+        }
+        return canAttack;
+    }
+    public bool CanInteract(Vector2Int dest)
+    {
+        bool canInteract = false;
+        if (interactiveMapData.ContainsKey(dest))
+            canInteract = true;
+
+        return canInteract;
+    }
     public bool CanMove(Vector2Int dest)
     {
-        if(enviromentData.TryGetValue(dest ,out var tileType))
+        if (enviromentData.TryGetValue(dest, out var tileType))
         {
-            if(tileType == TileType.Wall || tileType == TileType.DeepWater)
+            Debug.Log(tileType);
+            if (tileType == TileType.Wall || tileType == TileType.DeepWater)
             {
                 return false;
             }
@@ -329,8 +387,27 @@ public class MapManager : MonoBehaviour
         }
         return true;
     }
-
-    public void EntityMove(LivingEntity entity,Vector2Int pos,Vector2Int dest)
+    public TileType Get_TargetType(Vector2Int targetPos)
+    {
+        if (dynamicMapData.ContainsKey(targetPos))
+        {
+            return dynamicMapData[targetPos].GetMyType();
+        }
+        if (interactiveMapData.ContainsKey(targetPos))
+        {
+            if (interactiveMapData[targetPos].Count> 1)
+            {
+                return interactiveMapData[targetPos][0].GetMyType();
+            }
+        }
+        if (enviromentData.ContainsKey(targetPos))
+        {
+            return enviromentData[targetPos];
+        }
+        Debug.Log($"Tile Tpye Not Defined {targetPos} ");
+        return TileType.DeepWater;
+    }
+    public void EntityMove(LivingEntity entity, Vector2Int pos, Vector2Int dest)
     {
         if (!dynamicMapData.ContainsKey(pos))
         {
@@ -348,7 +425,7 @@ public class MapManager : MonoBehaviour
         mapLayer[pos.x, pos.y] = (byte)GetTypeCost(pos);
         mapLayer[dest.x, dest.y] = (byte)(GetTypeCost(dest));
     }
-    
+    #region AddMapData
     public void AddMapData(Vector2Int pos, LivingEntity entity)
     {
         if (dynamicMapData.ContainsKey(pos))
@@ -375,7 +452,7 @@ public class MapManager : MonoBehaviour
         {
             interactiveMapData[pos].Add(entity);
         }
-        
+
     }
     public void AddMapData(Vector2Int pos, ItemEntity entity)
     {
@@ -392,6 +469,7 @@ public class MapManager : MonoBehaviour
             interactiveMapData[pos].Add(entity);
         }
     }
+    #endregion
     public void OnItemPickUp(Vector2Int pos)
     {
 
@@ -420,7 +498,7 @@ public class MapManager : MonoBehaviour
         TileType type = enviromentData[pos];
         switch (type)
         {
-            case TileType.Wall:return 255;
+            case TileType.Wall: return 255;
             case TileType.ShallowWater: return 2;
             case TileType.DeepWater: return 255;
         }
@@ -428,7 +506,7 @@ public class MapManager : MonoBehaviour
     }
     public void CalculateInitialCost()
     {
-        foreach(var kvp in enviromentData)
+        foreach (var kvp in enviromentData)
         {
             Vector2Int pos = kvp.Key;
             TileType type = kvp.Value;

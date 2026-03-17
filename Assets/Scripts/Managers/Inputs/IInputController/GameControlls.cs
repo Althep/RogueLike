@@ -775,7 +775,7 @@ public partial class @GameControlls: IInputActionCollection2, IDisposable
                 {
                     ""name"": """",
                     ""id"": ""828c9f12-3fe2-44a6-b469-8204ece01922"",
-                    ""path"": ""<Keyboard>/numpad9"",
+                    ""path"": ""<Keyboard>/numpad7"",
                     ""interactions"": """",
                     ""processors"": """",
                     ""groups"": """",
@@ -786,7 +786,7 @@ public partial class @GameControlls: IInputActionCollection2, IDisposable
                 {
                     ""name"": """",
                     ""id"": ""37b496cd-bfc0-4448-bd1a-df50ce670c61"",
-                    ""path"": ""<Keyboard>/numpad7"",
+                    ""path"": ""<Keyboard>/numpad9"",
                     ""interactions"": """",
                     ""processors"": """",
                     ""groups"": """",
@@ -797,7 +797,7 @@ public partial class @GameControlls: IInputActionCollection2, IDisposable
                 {
                     ""name"": """",
                     ""id"": ""9b9d8948-ec69-489d-a592-4c9ec6260d46"",
-                    ""path"": ""<Keyboard>/numpad6"",
+                    ""path"": ""<Keyboard>/numpad4"",
                     ""interactions"": """",
                     ""processors"": """",
                     ""groups"": """",
@@ -808,7 +808,7 @@ public partial class @GameControlls: IInputActionCollection2, IDisposable
                 {
                     ""name"": """",
                     ""id"": ""5982dd92-e5a1-415b-86cc-0141d0e63598"",
-                    ""path"": ""<Keyboard>/numpad4"",
+                    ""path"": ""<Keyboard>/numpad6"",
                     ""interactions"": """",
                     ""processors"": """",
                     ""groups"": """",

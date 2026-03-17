@@ -174,7 +174,11 @@ public static class Utils
         Array values = Enum.GetValues(typeof(T));
         return (T[])values;
     }
-
+    public static T[] Get_Enums<T>()where T : Enum
+    {
+        Array values = Enum.GetValues(typeof(T));
+        return (T[])values;
+    }
     public static bool StringToEnum<T>(string data, ref T target) where T : struct, Enum
     {
         if (Enum.TryParse<T>(data, true, out target))

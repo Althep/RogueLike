@@ -166,8 +166,13 @@ public class StartDataManager : AsyncDataManager<StartDataManager>
     public async UniTask ReadBandJob(List<Dictionary<string, object>> originData)
     {
         Debug.Log("ReadBandJob");
-        Jobs[] jobs = (Jobs[])Utils.Get_Enums<Jobs>(Jobs.Default);
-        Races[] races = (Races[])Utils.Get_Enums<Races>(Races.Default);
+
+        // 1. 모든 직업과 종족 배열 가져오기
+        Jobs[] allJobs = (Jobs[])Utils.Get_Enums<Jobs>(Jobs.Default);
+        Races[] allRaces = (Races[])Utils.Get_Enums<Races>(Races.Default);
+
+        // 2. 밴 데이터를 종족별로 정리 (데이터가 있는 경우만 쌓임)
+        bandJobDatas.Clear(); // 기존 데이터 초기화 필요 시
         for (int i = 0; i < originData.Count; i++)
         {
             Races race = Utils.ConvertToEnum<Races>(originData[i]["groupKey"].ToString());
@@ -175,17 +180,25 @@ public class StartDataManager : AsyncDataManager<StartDataManager>
             {
                 bandJobDatas.Add(race, new List<Jobs>());
             }
+
             Jobs job = Utils.ConvertToEnum<Jobs>(originData[i]["value"].ToString());
-            if(job != Jobs.Default)
+            if (job != Jobs.Default)
             {
                 bandJobDatas[race].Add(job);
             }
         }
-        foreach(var race in bandJobDatas.Keys)
+
+        foreach (var race in allRaces)
         {
-            List<Jobs> bannedJobs = bandJobDatas[race];
+            if (race == Races.Default) continue;
+
+            // 밴 리스트가 있으면 가져오고, 없으면 빈 리스트 생성
+            List<Jobs> bannedJobs = bandJobDatas.ContainsKey(race) ? bandJobDatas[race] : new List<Jobs>();
             var bannedSet = new HashSet<Jobs>(bannedJobs);
-            raceJobList[race] = jobs.Where(job => !bannedSet.Contains(job)).ToList();
+
+            // 전체 직업에서 밴된 직업만 제외하고 할당
+            // 밴 리스트가 비어있다면 allJobs 전체가 할당됨
+            raceJobList[race] = allJobs.Where(job => job != Jobs.Default && !bannedSet.Contains(job)).ToList();
         }
     }
 

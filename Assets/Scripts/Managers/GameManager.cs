@@ -23,13 +23,13 @@ public class GameManager : MonoBehaviour
     [SerializeField] SceneController sceneController;
     [SerializeField] SpriteManager spriteManager;
     [SerializeField] DungeonManager dungeonManager;
-    [SerializeField] GameObject playerPrefab;
-    [SerializeField] GameObject playerObj;
+    [SerializeField] PlayerController playerController;
+    [SerializeField] PlayerInputController playerInputController;
     [SerializeField] EventManager eventManager;
-    [SerializeField] PlayerEntity playerEntity;
     [SerializeField] EffectManager effectManager;
     [SerializeField] ModifierManager modifierManager;
     [SerializeField] InputManager inputManager;
+    [SerializeField] GameObject MapParent;
     private async UniTask Awake()
     {
         await Init();
@@ -48,15 +48,15 @@ public class GameManager : MonoBehaviour
             dataManager = new DataManager();
             await dataManager.Init();
         }
-        if(modifierManager == null)
+        if (modifierManager == null)
         {
             modifierManager = GameObject.Find("ModifierManager").transform.GetComponent<ModifierManager>();
             await modifierManager.Init();
         }
-        if(uiManager == null)
+        if (uiManager == null)
         {
             uiManager = GameObject.Find("UIManager").transform.GetComponent<UIManager>();
-            if(uiManager == null)
+            if (uiManager == null)
             {
                 GameObject go = new GameObject();
                 go.name = "UIManager";
@@ -64,27 +64,27 @@ public class GameManager : MonoBehaviour
 
             }
         }
-        if(poolManager == null)
+        if (poolManager == null)
         {
             poolManager = GameObject.Find("ObjectPooler").transform.GetComponent<PoolManager>();
-            if(poolManager == null)
+            if (poolManager == null)
             {
                 GameObject go = new GameObject();
                 go.name = "ObjectPooler";
                 poolManager = Utils.GetOrAddComponent<PoolManager>(go);
             }
         }
-        if(itemManager == null)
+        if (itemManager == null)
         {
             GameObject go = GameObject.Find("ItemManager");
             itemManager = Utils.GetOrAddComponent<ItemManager>(go);
             itemFactory = itemManager.Get_ItemFactory();
         }
-        if(itemFactory == null)
+        if (itemFactory == null)
         {
             itemFactory = itemManager.Get_ItemFactory();
         }
-        if(sceneController == null)
+        if (sceneController == null)
         {
             sceneController = new SceneController();
         }
@@ -92,18 +92,16 @@ public class GameManager : MonoBehaviour
         {
             spriteManager = GameObject.Find("SpriteManager").transform.GetComponent<SpriteManager>();
         }
-        if(playerObj == null)
+        if (playerController == null)
         {
-            playerObj = Instantiate(playerPrefab);
-            playerObj.transform.SetParent(Managers.transform);
-            playerEntity = playerObj.transform.GetComponent<PlayerEntity>();
+            playerController = GameObject.Find("PlayerController").transform.GetComponent<PlayerController>();
         }
-        if(monsterManager == null)
+        if (monsterManager == null)
         {
             monsterManager = GameObject.Find("MonsterManager").transform.GetComponent<MonsterManager>();
-            
+
         }
-        if(dungeonManager == null)
+        if (dungeonManager == null)
         {
             dungeonManager = GameObject.Find("DungeonManager").transform.GetComponent<DungeonManager>();
         }
@@ -111,13 +109,21 @@ public class GameManager : MonoBehaviour
         {
             eventManager = GameObject.Find("EventManager").transform.GetComponent<EventManager>();
         }
-        if(effectManager == null)
+        if (effectManager == null)
         {
             effectManager = GameObject.Find("EffectManager").transform.GetComponent<EffectManager>();
         }
-        if(inputManager == null)
+        if (inputManager == null)
         {
             inputManager = GameObject.Find("InputManager").transform.GetComponent<InputManager>();
+        }
+        if(playerController == null)
+        {
+            playerController = GameObject.Find("PlayerController").transform.GetComponent<PlayerController>();
+        }
+        if (playerInputController == null)
+        {
+            playerInputController = GameObject.Find("PlayerController").transform.GetComponent<PlayerInputController>();
         }
         await monsterManager.Init();
         DontDestroyOnLoad(Managers);
@@ -133,19 +139,16 @@ public class GameManager : MonoBehaviour
     }
     public GameObject Get_PlayerObj()
     {
-        if(playerObj == null)
-        {
-            playerObj = Instantiate(playerPrefab);
-        }
-        return playerObj;
+        return playerController.Get_PlayerObj();
     }
     public PlayerEntity Get_PlayerEntity()
     {
-        if(playerEntity == null)
-        {
-            Get_PlayerObj().transform.GetComponent<PlayerEntity>();
-        }
-        return playerEntity;
+
+        return playerController.Get_PlayerEntity() ;
+    }
+    public PlayerInputController Get_PlayerInputController()
+    {
+        return playerInputController;
     }
     #region Get_Managers
     public EventManager Get_EventManager()
@@ -229,9 +232,13 @@ public class GameManager : MonoBehaviour
     }
     #endregion
     #region Maps
-    public void EntityMove(Vector2Int origin,Vector2Int target,Defines.TileType type)
+    public void EntityMove(LivingEntity entity,Vector2Int origin,Vector2Int target)
     {
-        mapManager.EntityMove(origin, target, type);
+        mapManager.EntityMove(entity,origin,target);
+    }
+    public bool CanMove(Vector2Int dir)
+    {
+        return mapManager.CanMove(dir);
     }
     #endregion
     #region UIs
@@ -257,4 +264,9 @@ public class GameManager : MonoBehaviour
     }
 
     #endregion
+
+    public void SetMapObjectParent(GameObject go)
+    {
+        go.transform.SetParent(MapParent.transform);
+    }
 }

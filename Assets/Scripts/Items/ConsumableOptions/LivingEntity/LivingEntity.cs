@@ -4,8 +4,8 @@ using UnityEngine;
 using static Defines;
 public class LivingEntity : MapEntity
 {
-    GameObject myObj;
-    protected EntityStat myStat;
+    [SerializeField]protected GameObject myObj;
+    [SerializeReference] protected EntityStat myStat;
     public string Objname;
     public string id;
     //private Dictionary<ModifierTriggerType, ModifierContext> modifierContext = new Dictionary<ModifierTriggerType, ModifierContext>();
@@ -13,24 +13,33 @@ public class LivingEntity : MapEntity
     [SerializeField] protected SPUM_MatchingList spriteMatching;
     Astar pathFinder;
 
-    Vector2Int destination;
+    protected Vector2Int destination;
 
     Defines.MoveState moveState;
 
     public float animSpeed = 10f;
 
-    ModifierController modifierController = new ModifierController();
+    [SerializeField]protected ModifierController modifierController = new ModifierController();
 
-    ModifierContext context;
+    //ModifierContext context;
 
     List<Modifier> buffs = new List<Modifier>();
 
     protected Races race;
     private void Awake()
     {
-        modifierController.InitContext(this);
+
     }
 
+    private void Update()
+    {
+        /*
+        if (myStat == null)
+        {
+            Debug.Log($"Stat Is Null{this.gameObject.name}");
+        }*/
+    }
+    #region InitiateEntity
     protected virtual void OnAwake()
     {
         if (spriteMatching == null)
@@ -43,13 +52,24 @@ public class LivingEntity : MapEntity
     protected override void Init()
     {
         base.Init();
+        //modifierController.InitContext(this);
+        myObj = this.gameObject;
+        InitStat();
     }
 
+    protected virtual void InitStat()
+    {
+        if (myStat == null)
+        {
+            myStat = new EntityStat();
+        }
+    }
+    #endregion
     public virtual EntityStat GetMyStat()
     {
         return myStat;
     }
-    public void SetMyStat(EntityStat stat)
+    public virtual void SetMyStat(EntityStat stat)
     {
         myStat = stat;
     }
@@ -83,12 +103,14 @@ public class LivingEntity : MapEntity
         Dictionary<StatType, float> baseStat = myStat.GetBase();
         Dictionary<StatType, float> finalStat = myStat.GetFinal();
         finalStat.Clear();
-        ModifierContext context = modifierController.ApplyModifiers(trigger, this.context);
-        ModifierContext passive = modifierController.ApplyModifiers(ModifierTriggerType.Passive, this.context);
+        ModifierContext context = modifierController.ApplyModifiers(trigger);
+        ModifierContext passive = modifierController.ApplyModifiers(ModifierTriggerType.Passive);
+        
         if (trigger == ModifierTriggerType.Passive)
         {
             foreach (var key in baseStat.Keys)
             {
+                finalStat.Add(key,0);
                 float finalValue = (baseStat[key] + passive.stats[key])
                 * (1 + passive.multifle[key]);
 
@@ -102,6 +124,33 @@ public class LivingEntity : MapEntity
         }
         foreach (var key in baseStat.Keys)
         {
+            finalStat.Add(key, 0);
+            if (!baseStat.ContainsKey(key))
+            {
+                Debug.Log($"Base Stat Din't Contain Key {key}");
+                return null;
+            }
+            if (!context.stats.ContainsKey(key))
+            {
+                Debug.Log($"context Multi Din't Contain Key {key}");
+                return null;
+            }
+            if (!passive.stats.ContainsKey(key))
+            {
+                Debug.Log($"passive Stat Din't Contain Key {key}");
+                return null;
+            }
+            if (!passive.multifle.ContainsKey(key))
+            {
+                Debug.Log($"passive multifle Din't Contain Key {key}");
+                return null;
+            }
+            
+            if (!context.stats.ContainsKey(key))
+            {
+                Debug.Log($"context Stat Din't Contain Key {key}");
+                return null;
+            }
             float finalValue = (baseStat[key] + context.stats[key] + passive.stats[key])
                 * (1 + context.multifle[key] + passive.multifle[key]);
 
@@ -142,6 +191,10 @@ public class LivingEntity : MapEntity
     }
     public StatType Get_WeaponAttribueType()
     {
+        if (!equipments.ContainsKey(SlotType.MainHand))
+        {
+            return StatType.Str;
+        }
         if (equipments[SlotType.MainHand] != null)
         {
             if (equipments[SlotType.MainHand] is Weapon weapon)
@@ -195,18 +248,20 @@ public class LivingEntity : MapEntity
 
     #endregion
     #region move
-    protected virtual void Move_To(Vector2Int dest)
+    protected virtual void Move_To(Vector2Int dir)
     {
-        destination = dest;
-        Vector2Int myPos = new Vector2Int((int)myObj.transform.position.x, (int)myObj.transform.position.y);
+        Vector2Int myPos = new Vector2Int((int)this.transform.position.x,(int)this.transform.position.y);
+        destination = myPos+dir;
+
         Start_Move();
-        GameManager.instance.EntityMove(myPos, dest, myType);
+        GameManager.instance.EntityMove(this, myPos, destination);
     }
+    
     public void SetDestination(Vector2Int target)
     {
         destination = target;
     }
-
+    
     public void Start_Move()
     {
         if (moveState == Defines.MoveState.Idle)
@@ -262,12 +317,12 @@ public class LivingEntity : MapEntity
     }
     public ModifierContext GetDefenseBonus()
     {
-        return modifierController.ApplyModifiers(ModifierTriggerType.OnHited, this.context);
+        return modifierController.ApplyModifiers(ModifierTriggerType.OnHited);
     }
 
     public ModifierContext Get_MeleeAttackContext()
     {
-        return modifierController.ApplyModifiers(ModifierTriggerType.OnAttack, this.context);
+        return modifierController.ApplyModifiers(ModifierTriggerType.OnAttack);
     }
 
     public int GetResistDamage(DamageType type, int damage)
@@ -290,9 +345,9 @@ public class LivingEntity : MapEntity
 
 
     #region Modifier
-    public ModifierContext GetContext()
+    public ModifierContext GetContext(ModifierTriggerType trigger)
     {
-        return context;
+        return modifierController.Get_Context(trigger);
     }
     public void AddModifier(Modifier modifier)
     {

@@ -8,16 +8,21 @@ public class ItemSlotListCell : SelectSubCell, IPoolUI
 {
     string selectItemKey;
     public SlotType slot;
+
     public List<ItemSelectCell> cellList = new List<ItemSelectCell>();
     [SerializeField] List<IPoolUI> myPools = new List<IPoolUI>();
     public List<string> itemKeys = new List<string>();
     public GameObject myContents;
     public GameObject selectViewObj;
-
+    [SerializeField]SelectPanels _parent;
+    List<UI_Base> gridData = new List<UI_Base>();
     protected override void OnAwake()
     {
         //base.OnAwake();
     }
+
+    public void SetParentController(SelectPanels parent) => _parent = parent;
+
     public override void SetMyType<T>(T type, SelectSubPanel selectPanels)
     {
         base.SetMyType<T>(type, selectPanels);
@@ -28,6 +33,7 @@ public class ItemSlotListCell : SelectSubCell, IPoolUI
         this.selectPanel = selectPanels;
 
     }
+
     public void SetMyKey(string key)
     {
         selectItemKey = key;
@@ -36,12 +42,14 @@ public class ItemSlotListCell : SelectSubCell, IPoolUI
 
     public void Init(SlotType slot, List<string> itemKeys)
     {
+        _parent.RemoveGridData(gridData);
+        gridData.Clear();
         if (uiManager == null)
         {
             uiManager = GameManager.instance.Get_UIManager();
         }
         if (myContents == null)
-        {
+        {  
             ScrollRect scroll = transform.GetComponent<ScrollRect>();
             myContents = scroll.content.gameObject;
         }
@@ -50,7 +58,7 @@ public class ItemSlotListCell : SelectSubCell, IPoolUI
         foreach (string key in itemKeys)
         {
             GameObject go = uiManager.Get_PoolUI(UIDefines.UI_PrefabType.MainSelect, myContents);
-
+            go.transform.SetAsLastSibling();
             if (go.TryGetComponent<ItemSelectCell>(out ItemSelectCell cell))
             {
                 if (cell is IPoolUI && !myPools.Contains(cell))
@@ -71,14 +79,13 @@ public class ItemSlotListCell : SelectSubCell, IPoolUI
             cell.SetMyKey(key);
             cell.SetMyParents(this);
             cell.AddButtonFunction();
-            //cell.Init();
-            Debug.Log($"[ItemSlotListCell] selectPanel Type = {selectPanel?.GetType().Name}");
+            gridData.Add(cell);
         }
-
+        _parent.AddGridData(gridData);
         ItemSelectCell first = myPools[0].Get().transform.GetComponent<ItemSelectCell>();
         if (first != null)
         {
-            first.Function();
+            first.Excute();
         }
     }
 

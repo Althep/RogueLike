@@ -11,7 +11,7 @@ public class ModifierManager : MonoBehaviour
     
     //public Dictionary<Races, List<Jobs>> bandJobDatas = new Dictionary<Races, List<Jobs>>();
     CSVReader reader;
-
+    public static ModifierManager instance;
     ModifierFactory modifierFactory;
     ModifierPooler modifierPooler;
     public StartDataManager startDataManager;
@@ -32,7 +32,10 @@ public class ModifierManager : MonoBehaviour
     }
     public async UniTask Init()
     {
-
+        if(ModifierManager.instance == null)
+        {
+            ModifierManager.instance = this;
+        }
         if (modifierFactory == null)
         {
             modifierFactory = await ModifierFactory.CreateAsync();

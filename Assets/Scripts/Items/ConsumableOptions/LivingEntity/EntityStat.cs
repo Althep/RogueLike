@@ -2,6 +2,7 @@ using UnityEngine;
 using System;
 using System.Collections.Generic;
 using static Defines;
+[Serializable]
 public class EntityStat
 {
     protected TileType tileType;
@@ -10,7 +11,16 @@ public class EntityStat
     protected int level;
     protected string entityId;
     protected string entityName;
-
+    public EntityStat()
+    {
+        StatType[] types = Utils.Get_Enums<StatType>();
+        foreach (var stat in types)
+        {
+            baseStat.Add(stat, 0);
+            finalStat.Add(stat, 0);
+            
+        }
+    }
     public void SetBaseStat(StatType type, float value)
     {
         if (baseStat.ContainsKey(type))
@@ -63,7 +73,17 @@ public class EntityStat
     {
         return baseStat[stat];
     }
-    
+    public void AddBaseStat(StatType stat,float value)
+    {
+        if (!baseStat.ContainsKey(stat))
+        {
+            baseStat.Add(stat, value);
+        }
+        else
+        {
+            baseStat[stat]+=value;
+        }
+    }
     public virtual EntityStat CopyStat() 
     {
         EntityStat newStat = new EntityStat();

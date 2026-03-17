@@ -15,20 +15,41 @@ public class ModifierController
     LivingEntity myEntity;
 
     bool isDirty;
-    public void InitContext(LivingEntity entity)
+    public void InitAllContext(LivingEntity entity)
     {
-        foreach (ModifierTriggerType type in Enum.GetValues(typeof(ModifierTriggerType)))
+        Debug.Log("Init Context");
+        ModifierTriggerType[] triggers = Utils.Get_Enums<ModifierTriggerType>();
+        Debug.Log($"Trigger Count ! :    {triggers.Length}");
+        foreach (ModifierTriggerType type in triggers)
         {
-            contexts[type] = new ModifierContext
+            Debug.Log($"Init context Trigger : {type}");
+            if (contexts.ContainsKey(type))
             {
-                triggerType = type,
-                stats = new Dictionary<StatType, float>(),
-                multifle = new Dictionary<StatType, float>()
-            };
+                Debug.Log("Trigger Contained");
+                continue;
+            }
+            else
+            {
+                contexts.Add(type, new ModifierContext());
+                contexts[type].InitContext(type);
+            }
         }
         SetMyEntity(entity);
     }
+    public ModifierContext Get_Context(ModifierTriggerType trigger)
+    {
+        //딕셔너리 초기화 오래걸리니 지연 초기화 사용
+        if (contexts.TryGetValue(trigger, out ModifierContext existingContext))
+        {
+            existingContext.Clear();
+            return existingContext;
+        }
 
+        ModifierContext newContext = new ModifierContext();
+        newContext.InitContext(trigger);
+        contexts.Add(trigger, newContext);
+        return newContext;
+    }
     public void SetMyEntity(LivingEntity entity)
     {
         myEntity = entity;
@@ -46,7 +67,7 @@ public class ModifierController
         modifiers[type].Sort((a, b) => a.priority.CompareTo(b.priority));
         if(type == ModifierTriggerType.Passive)
         {
-            contexts[ModifierTriggerType.Passive].Clear();
+            Get_Context(ModifierTriggerType.Passive);
             ApplyPassiveModifiers();
         }
     }
@@ -65,7 +86,7 @@ public class ModifierController
 
         if (modifier.triggerType == ModifierTriggerType.Passive)
         {
-            contexts[ModifierTriggerType.Passive].Clear();
+            Get_Context(ModifierTriggerType.Passive);
             ApplyPassiveModifiers();
         }
     }
@@ -82,17 +103,16 @@ public class ModifierController
         }
         
     }
-    public ModifierContext ApplyModifiers(ModifierTriggerType type,ModifierContext context)
+    public ModifierContext ApplyModifiers(ModifierTriggerType type)
     {
-        if(type == ModifierTriggerType.Passive)
+        ModifierContext context = Get_Context(type);
+        if (type == ModifierTriggerType.Passive)
         {
-            return contexts[ModifierTriggerType.Passive];
+            return Get_Context(type);
         }
-        
-        contexts[type].Clear();
         if (!modifiers.TryGetValue(type, out var list))
         {
-            return contexts[type];
+            return Get_Context(type);
         }
         
         foreach (var modifier in list)
@@ -101,12 +121,12 @@ public class ModifierController
             //result = context.ModifiedValue;
         }
         List<Modifier> actionModifiers = modifiers[type].Where(m => m is ActionModifier).ToList();
-        context = contexts[type];
+
         for(int i = 0; i < actionModifiers.Count; i++)
         {
             modifiers[type].Remove(actionModifiers[i]);
         }
-        return contexts[type];
+        return Get_Context(type);
     }
 
     public void ResetModifiers()
@@ -145,7 +165,7 @@ public class ModifierController
         if (!modifiers.TryGetValue(trigger, out var list))
             return false;
 
-        var context = contexts[trigger];
+        var context = Get_Context(trigger);
         context.Clear();
 
         foreach (var modifier in list)

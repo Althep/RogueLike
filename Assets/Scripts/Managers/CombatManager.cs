@@ -4,6 +4,15 @@ using System.Collections.Generic;
 using static Defines;
 public class CombatManager : MonoBehaviour
 {
+    public static CombatManager instance;
+
+    private void Awake()
+    {
+        if(CombatManager.instance == null)
+        {
+            CombatManager.instance = this;
+        }
+    }
     int Random2Avg(int max)
     {
         return (UnityEngine.Random.Range(0, max) + UnityEngine.Random.Range(0, max)) / 2;

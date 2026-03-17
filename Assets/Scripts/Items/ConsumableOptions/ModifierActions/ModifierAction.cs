@@ -24,7 +24,7 @@ public abstract class ModifierAction
     public ActionEffectType actionEffectType;
     public int minTime;
     public int maxTime;
-    protected ModifierManager mm = GameManager.instance.Get_ModifierManager();
+    //protected ModifierManager mm = GameManager.instance.Get_ModifierManager();
     public virtual Modifier GetMyModifier()
     {
         return null;
@@ -97,7 +97,7 @@ public class StatBuff : BuffAction
 
     public override Modifier GetMyModifier()
     {
-        modifier = (BuffModifier)mm.GetModifierPooler().GetModifier(ModifierType.BuffModifier, effectID);
+        modifier = (BuffModifier)ModifierManager.instance.GetModifierPooler().GetModifier(ModifierType.BuffModifier, effectID);
         return modifier;
     }
     public override void Excute(LivingEntity target)

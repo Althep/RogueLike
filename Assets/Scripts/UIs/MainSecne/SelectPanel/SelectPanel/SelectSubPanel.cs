@@ -5,7 +5,7 @@ using UnityEngine.UI;
 using static Defines;
 public class SelectSubPanel : UI_Base
 {
-    public GameObject selectViewObj;
+
     [SerializeField]protected GameObject myContents;
     Dictionary<string, GameObject> mysubCells = new Dictionary<string, GameObject>();
 
@@ -14,7 +14,7 @@ public class SelectSubPanel : UI_Base
     protected SelectPanels selectPanel;
 
     public List<IPoolUI> myPools = new List<IPoolUI>();
-
+    [SerializeField] protected GameObject selectedView;
     private void Awake()
     {
         OnAwake();
@@ -58,6 +58,10 @@ public class SelectSubPanel : UI_Base
         }
         myPools.Clear();
     }
+    public void FindSelectedObj()
+    {
+
+    }
     public void SetParentController(UI_GridSelect gridPanel)
     {
 
@@ -74,9 +78,13 @@ public class SelectSubPanel : UI_Base
 
     }
 
-    protected void MoveSelectView(GameObject go)
+    protected virtual void MoveSelectView(GameObject go)
     {
-        selectViewObj.transform.SetParent(go.transform);
-        selectViewObj.transform.localPosition = Vector3.zero;
+        if(selectedView !=null)
+        {
+            selectedView.transform.SetParent(go.transform);
+            selectedView.transform.localPosition = Vector3.zero;
+        }
     }
+
 }

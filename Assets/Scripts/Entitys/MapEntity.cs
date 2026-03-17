@@ -2,13 +2,14 @@ using UnityEngine;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using static Defines;
 public abstract class MapEntity:MonoBehaviour
 {
     public Defines.TileType myType;
 
     protected FogOfWar fogOfWar;
 
-    
+    [SerializeField] Vector2 myPos;
     private void Awake()
     {
         Init();
@@ -20,7 +21,10 @@ public abstract class MapEntity:MonoBehaviour
             fogOfWar = new FogOfWar(this.gameObject);
         }
     }
-
+    public void SetMyPos(Vector2 pos)
+    {
+        myPos = pos;
+    }
 
     public void SetMyTileType(Defines.TileType type)
     {

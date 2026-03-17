@@ -221,5 +221,4 @@ public class MonsterManager : MonoBehaviour
     }
     #endregion
 
-    
 }

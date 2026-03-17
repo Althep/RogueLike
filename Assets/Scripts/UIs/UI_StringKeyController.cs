@@ -11,19 +11,21 @@ public class UI_StringKeyController : MonoBehaviour
 
     private void Awake()
     {
-        
+        Init();
     }
 
     public void Init()
     {
         Set_MyTMP();
-        skManager = GameManager.instance.Get_StringKeyManager();
+        skManager = UIManager.instance.GetStringKeyManager();
         skManager.Add_StringKey(this);
     }
 
     public void Set_MyKey(string key)
     {
+        
         myKey = key;
+        myTmp.text = key;
     }
 
     public void UpdateText()

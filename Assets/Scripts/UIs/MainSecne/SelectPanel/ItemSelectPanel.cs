@@ -1,77 +1,130 @@
 using UnityEngine;
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using static Defines;
 
 public class ItemSelectPanel : SelectSubPanel
 {
-    // 최종 선택된 아이템 저장 (슬롯타입별 아이템 키)
     public Dictionary<SlotType, string> selectItems = new Dictionary<SlotType, string>();
-
-    // 필터링 결과: 슬롯별 가용 아이템 리스트
     public Dictionary<SlotType, List<string>> startEquips = new Dictionary<SlotType, List<string>>();
-
-    // 소모품 등 기타 아이템 리스트
     public List<string> startItems = new List<string>();
 
-    // 생성된 슬롯(행) 관리
     Dictionary<SlotType, ItemSlotListCell> itemScrolls = new Dictionary<SlotType, ItemSlotListCell>();
-
     private SelectPanels _parent;
 
     public void SetParentController(SelectPanels parent) => _parent = parent;
 
-    public void Init()
-    {
-        OnAwake(); // 초기화
-        InitMenu(); // 메뉴 생성
-    }
-
     public override void OnAwake()
     {
-        base.OnAwake(); //
+        base.OnAwake();
     }
 
     public void OnDisable()
     {
-        ReturnMyPools(); //
+        ReturnMyPools();
     }
+
+    public void Init()
+    {
+        OnAwake();
+        InitMenu();
+    }
+
+
 
     protected override void InitMenu()
     {
         base.InitMenu();
-        MakePanels(); // 패널 생성 로직 시작
+        MakePanels();
     }
+
+    public void RefreshContents(Jobs job)
+    {
+        MakePanels();
+    }
+
 
     public void MakePanels()
     {
-        ReturnMyPools(); // 기존 풀 회수
+        ReturnMyPools();
         itemScrolls.Clear();
         startItems.Clear();
 
-        startEquips = FilterItems(); // 아이템 필터링 실행
-
+        startEquips = FilterItems();
+        /*
         foreach (SlotType slot in startEquips.Keys)
         {
-            AddItemSlotList(slot); // 각 슬롯별 가로 리스트 생성
+            foreach (string value in startEquips[slot])
+            {
+                Debug.Log($"Start Item Keys {value}");
+            }
         }
+        */
+        foreach (SlotType slot in startEquips.Keys)
+        {
+            AddItemSlotList(slot);
+        }
+
+        _parent.AddConfirmPanel();
     }
 
-    // --- 핵심 필터링 로직 ---
+    void AddItemSlotList(SlotType slot)
+    {
+        GameObject go = uiManager.Get_PoolUI(UIDefines.UI_PrefabType.ItemSelect, myContents);
+        if (go.TryGetComponent<ItemSlotListCell>(out ItemSlotListCell cell))
+        {
+            if (cell is IPoolUI && !myPools.Contains(cell))
+            {
+                cell.enabled = true;
+                myPools.Add(cell);
+            }
+            else
+            {
+                Debug.Log("ItemSlotListCell IPoolUI 아님");
+            }
+            cell.SetParentController(_parent);
+            cell.Init(slot, startEquips[slot]);
+            cell.SetMyType(slot, this);
+        }
+        else
+        {
+            cell = go.AddComponent<ItemSlotListCell>();
+            if (cell is IPoolUI)
+            {
+                myPools.Add(cell);
+            }
+            cell.SetParentController(_parent);
+            cell.Init(slot, startEquips[slot]);
+            cell.SetMyType(slot, this);
+        }
+        if (!itemScrolls.ContainsKey(slot))
+        {
+            itemScrolls.Add(slot, cell);
+        }
+        else
+        {
+            itemScrolls[slot] = cell;
+        }
+        
+    }
+
     Dictionary<SlotType, List<string>> FilterItems()
     {
-        // 부모 컨트롤러를 통해 현재 선택된 종족/직업 획득
         Jobs selectJob = _parent.jobSelect.selectJob;
         Races selectRace = _parent.raceSelect.selectRace;
-
         DataManager dm = GameManager.instance.Get_DataManager();
         ItemDataManager im = dm.itemDataManager;
-        ModifierController checker = _parent.checker; // 제약 조건 체크기
+        ModifierController checker = _parent.checker;
 
-        if (selectJob == Jobs.Default) selectJob = Jobs.Warrior; // 예외 처리
+        if (selectJob == Jobs.Default)
+        {
+            Debug.Log("JobInit Error Change To Warrior");
+            selectJob = Jobs.Warrior;
+        }
 
-        // 직업별 초기 데이터 가져오기
+        RaceData raceData = dm.startDataManager.raceDatas[selectRace];
+        List<Modifier> modifiers = raceData.modifiers;
+
         Dictionary<SlotType, StartData> jobItems = dm.startDataManager.startDatas[selectJob];
         Dictionary<SlotType, List<string>> selects = new Dictionary<SlotType, List<string>>();
         Dictionary<string, ItemBase> itemDatas = im.Get_ItemDatas();
@@ -83,20 +136,19 @@ public class ItemSelectPanel : SelectSubPanel
 
             foreach (string key in itemName)
             {
-                if (!itemDatas.ContainsKey(key)) continue;
-
                 if (itemDatas[key] is EquipItem equip)
                 {
-                    // 착용 제한 확인
                     if (!checker.IsRestricted(itemDatas[key], ModifierTriggerType.OnEquip))
                     {
-                        if (!selects.ContainsKey(slot)) selects.Add(slot, new List<string>());
+                        if (!selects.ContainsKey(slot))
+                        {
+                            selects.Add(slot, new List<string>());
+                        }
                         selects[slot].Add(key);
                     }
                 }
                 else
                 {
-                    // 사용 아이템 제약 확인
                     if (!checker.IsRestricted(itemDatas[key], ModifierTriggerType.OnUseItem))
                     {
                         startItems.Add(key);
@@ -104,56 +156,41 @@ public class ItemSelectPanel : SelectSubPanel
                 }
             }
         }
+
         return selects;
     }
 
-    void AddItemSlotList(SlotType slot)
+    public override void Select<T>(T t, GameObject go)
     {
-        // UI 풀에서 아이템 슬롯 리스트(가로 행) 가져오기
-        GameObject go = uiManager.Get_PoolUI(UIDefines.UI_PrefabType.ItemSelect, myContents);
-        ItemSlotListCell cell = go.GetComponent<ItemSlotListCell>();
-
-        if (cell == null) cell = go.AddComponent<ItemSlotListCell>();
-
-        if (!myPools.Contains(cell)) myPools.Add(cell);
-
-        cell.enabled = true;
-        cell.Init(slot, startEquips[slot]); // 내부 아이템 셀들 생성
-        cell.SetMyType(slot, this);
-
-        if (!itemScrolls.ContainsKey(slot)) itemScrolls.Add(slot, cell);
-        else itemScrolls[slot] = cell;
-    }
-
-    // --- GridUI 시스템을 위한 2차원 리스트 생성 ---
-    public override List<List<UI_Base>> GetGridData()
-    {
-        List<List<UI_Base>> grid = new List<List<UI_Base>>();
-
-        // itemScrolls에 담긴 각 슬롯(행)을 순회하며 내부 아이템(열)들을 가져옴
-        foreach (var slotKvp in itemScrolls)
-        {
-            // ItemSlotListCell 내부에서 생성된 ItemSelectCell 리스트를 가져와서 한 행으로 추가
-            List<UI_Base> rowCells = slotKvp.Value.GetItemCells();
-            if (rowCells != null && rowCells.Count > 0)
-            {
-                grid.Add(rowCells);
-            }
-        }
-        return grid;
+        base.Select(t, go);
     }
 
     public void SelectItem(string key, SlotType slot, GameObject go)
     {
-        if (!selectItems.ContainsKey(slot)) selectItems.Add(slot, key);
-        else selectItems[slot] = key;
-
-        Debug.Log($"Item Selected in Slot {slot}: {key}");
+        if (!selectItems.ContainsKey(slot))
+        {
+            selectItems.Add(slot, key);
+        }
+        else
+        {
+            selectItems[slot] = key;
+        }
+        //MoveSelectView(go); // 시각적 선택 표시
     }
 
     public override void ReturnMyPools()
     {
         base.ReturnMyPools();
-        itemScrolls.Clear(); //
+        itemScrolls.Clear();
+    }
+
+    public List<UI_Base> GetCellList()
+    {
+        List<UI_Base> list = new List<UI_Base>();
+        foreach (var pool in myPools)
+        {
+            if (pool is UI_Base uiBase) list.Add(uiBase);
+        }
+        return list;
     }
 }

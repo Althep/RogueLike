@@ -14,7 +14,8 @@ public static class UIDefines
     {
         Confirm,
         MainSelect,
-        ItemSelect
+        ItemSelect,
+        SelectView
     }
 
 }

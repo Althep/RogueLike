@@ -1,8 +1,8 @@
 using System;
 using System.Collections.Generic;
-
+using System.Linq;
+using UnityEngine;
 using static Defines;
-using UnityEngine.TextCore.Text;
 
 public class ModifierContext
 {
@@ -13,16 +13,22 @@ public class ModifierContext
     public List<StatusEffect> statusEffect = new List<StatusEffect>();
     public ModifierType ModifierType;
     public DamageType damageType = DamageType.Physical;
+    private static readonly StatType[] allStatTypes = Utils.Get_Enums<StatType>();
     public bool isDirty;
 
     public ModifierContext()
     {
-        StatType[] types = Utils.Get_Enums<StatType>((StatType.Int));
-        if(stats == null)
+        
+    }
+    public void InitContext(ModifierTriggerType trigger)
+    {
+        triggerType = trigger;
+        StatType[] types = Utils.Get_Enums<StatType>();
+        if (stats == null)
         {
             stats = new Dictionary<StatType, float>();
         }
-        if(multifle == null)
+        if (multifle == null)
         {
             multifle = new Dictionary<StatType, float>();
         }
@@ -37,15 +43,13 @@ public class ModifierContext
     }
     public void Clear()
     {
-        foreach(StatType key in stats.Keys)
+        for (int i = 0; i < allStatTypes.Length; i++)
         {
+            StatType key = allStatTypes[i];
+
             stats[key] = 0;
-        }
-        foreach(StatType key in multifle.Keys)
-        {
             multifle[key] = 0;
         }
         damageType = DamageType.Physical;
-        
     }
 }

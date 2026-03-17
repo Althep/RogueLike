@@ -21,15 +21,21 @@ public class SelectSubCell : UI_Base,IPoolUI
     public virtual void SetMyType<T>(T type,SelectSubPanel panel) where T : Enum
     {
         selectPanel = panel;
-        /*
+        
         if(myTextController == null)
         {
             myTextController = this.gameObject.transform.GetComponentInChildren<UI_StringKeyController>();
         }
         //myTextController.Set_MyKey(type.ToString());
-        */
     }
+    protected virtual void SetMyStringKey() 
+    { 
+    }
+    
+    public virtual void GetMyType()
+    {
 
+    }
     public virtual void AddButtonFunction()
     {
         AddUIEvent(this.gameObject, ButtonFunction, Defines.UIEvents.Click);

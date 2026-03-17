@@ -11,6 +11,7 @@ public class DungeonManager : MonoBehaviour
     List<int> visitiedFloor = new List<int>();
     TierCalculator tierCalculator;
     PoolManager poolManager;
+    //PlayerController playerController;
     GameObject playerObj;
     public int floor;
 
@@ -40,6 +41,7 @@ public class DungeonManager : MonoBehaviour
         {
             itemManager = GameManager.instance.Get_ItemManager();
         }
+
     }
 
     public TierCalculator GetTierCalculator()
@@ -70,6 +72,11 @@ public class DungeonManager : MonoBehaviour
         await itemManager.OnVisitNewFloor();
 
         await monsterManager.MonsterSpawn();
+
+        if(floor == 1)
+        {
+            PlayerController.instance.Set_Player_UpStair(0);
+        }
         Debug.Log($"[Profile] ÃÑ ¼Ò¿ä ½Ã°£: {Time.realtimeSinceStartup - startTime}s");
     }
 }

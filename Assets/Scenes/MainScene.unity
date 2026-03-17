@@ -216,13 +216,13 @@ MonoBehaviour:
   sceneController: {fileID: 1913002477}
   spriteManager: {fileID: 0}
   dungeonManager: {fileID: 863406640}
-  playerPrefab: {fileID: 791542365209723472, guid: a87bbe8d6da5c69448e4c8f70d9d628e, type: 3}
-  playerObj: {fileID: 0}
+  playerController: {fileID: 1458603167}
+  playerInputController: {fileID: 0}
   eventManager: {fileID: 767412205}
-  playerEntity: {fileID: 0}
   effectManager: {fileID: 1294342678}
   modifierManager: {fileID: 1786786438}
   inputManager: {fileID: 0}
+  MapParent: {fileID: 1320747133}
 --- !u!1 &165067570
 GameObject:
   m_ObjectHideFlags: 0
@@ -564,13 +564,12 @@ MonoBehaviour:
   m_GameObject: {fileID: 414510832}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 851b4d74b7e8d0e47a57e7d478f8a1ef, type: 3}
+  m_Script: {fileID: 11500000, guid: f049a6cb61f5b1d4a9e438e9cfef09fd, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: 
-  confirmButton: {fileID: 1638592089}
-  cancelButton: {fileID: 1394828081}
-  confirmText: {fileID: 1758994804}
-  parentsObj: {fileID: 833014354}
+  m_EditorClassIdentifier: Assembly-CSharp::UI_ConfirmPanel
+  confirmButton: {fileID: 1638592093}
+  cancelButton: {fileID: 1394828085}
+  confirmText: {fileID: 0}
 --- !u!1 &475991372
 GameObject:
   m_ObjectHideFlags: 0
@@ -670,6 +669,7 @@ GameObject:
   - component: {fileID: 502260427}
   - component: {fileID: 502260429}
   - component: {fileID: 502260428}
+  - component: {fileID: 502260430}
   m_Layer: 5
   m_Name: ExitPanel
   m_TagString: Untagged
@@ -734,6 +734,18 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 502260426}
   m_CullTransparentMesh: 1
+--- !u!114 &502260430
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 502260426}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f42ab8e324eaaa24987ea71d68b2c2fc, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::UI_PopUpButton
 --- !u!1 &536658791
 GameObject:
   m_ObjectHideFlags: 0
@@ -905,11 +917,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 3ce8c77dd267d4849849506779781420, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  selectViewObj: {fileID: 565847458}
   myContents: {fileID: 0}
+  selectedView: {fileID: 565847458}
   selectJob: 1
   jobs: 
-  itemselectPanel: {fileID: 0}
 --- !u!114 &553127788
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -990,7 +1001,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_Material: {fileID: 0}
-  m_Color: {r: 0, g: 0, b: 0, a: 0.5882353}
+  m_Color: {r: 0, g: 0, b: 0, a: 1}
   m_RaycastTarget: 1
   m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
   m_Maskable: 1
@@ -1358,6 +1369,7 @@ GameObject:
   - component: {fileID: 803215735}
   - component: {fileID: 803215736}
   - component: {fileID: 803215737}
+  - component: {fileID: 803215738}
   m_Layer: 0
   m_Name: UIManager
   m_TagString: Untagged
@@ -1405,6 +1417,19 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 2fa130e670856504885f7143007b1da4, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::InputUIManager
+--- !u!114 &803215738
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 803215734}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2f318c5242c1d974e9b81c6fcba92fcb, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::StringKeyManager
+  language: 0
 --- !u!1 &833014354
 GameObject:
   m_ObjectHideFlags: 0
@@ -1497,12 +1522,14 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 1b72365fdbe1aea45a8cfdfacecc3293, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  myInputType: 3
+  SelectObj: {fileID: 0}
   raceSelect: {fileID: 1007948414}
   jobSelect: {fileID: 553127787}
   itemSelect: {fileID: 8256055505827846685}
-  raceSelectPanel: {fileID: 1007948410}
-  jobSelectPanel: {fileID: 553127783}
-  itemSelectPanel: {fileID: 5428364760693528407}
+  raceSelectPanelObj: {fileID: 0}
+  jobSelectPanelObj: {fileID: 0}
+  itemSelectPanelObj: {fileID: 0}
   confirmPanel: {fileID: 414510837}
 --- !u!1 &861156290
 GameObject:
@@ -1716,8 +1743,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 447e5b25a9871af43b99511422d68683, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  selectViewObj: {fileID: 1841441832}
   myContents: {fileID: 0}
+  selectedView: {fileID: 1841441832}
   selectRace: 0
 --- !u!114 &1007948415
 MonoBehaviour:
@@ -1987,6 +2014,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::UI_VirticalSelect
   myInputType: 0
   selectedNumber: 0
+  childs: []
+  selectedButton: {fileID: 0}
   selectPanel: {fileID: 0}
 --- !u!114 &1101154631
 MonoBehaviour:
@@ -2141,7 +2170,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1179848034}
   serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
@@ -2160,6 +2189,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 00254dd635a5a544f8edd0e17b4ee3de, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::InputManager
+  currentUI: {fileID: 0}
 --- !u!1 &1228958005
 GameObject:
   m_ObjectHideFlags: 0
@@ -2259,13 +2289,13 @@ Transform:
   - {fileID: 1913002476}
   - {fileID: 64278848}
   - {fileID: 767412204}
-  - {fileID: 1458603166}
   - {fileID: 863406639}
   - {fileID: 743908790}
   - {fileID: 1294342677}
   - {fileID: 1786786437}
   - {fileID: 1320747134}
   - {fileID: 1179848035}
+  - {fileID: 1458603166}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1294342676
@@ -2538,6 +2568,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::UI_VirticalSelect
   myInputType: 0
   selectedNumber: 0
+  childs: []
+  selectedButton: {fileID: 0}
   selectPanel: {fileID: 1027825636}
 --- !u!1 &1394828081
 GameObject:
@@ -2550,6 +2582,7 @@ GameObject:
   - component: {fileID: 1394828082}
   - component: {fileID: 1394828084}
   - component: {fileID: 1394828083}
+  - component: {fileID: 1394828085}
   m_Layer: 5
   m_Name: CancleButton
   m_TagString: Untagged
@@ -2615,6 +2648,18 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1394828081}
   m_CullTransparentMesh: 1
+--- !u!114 &1394828085
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1394828081}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6c36c2da072fac344a3bc45ada4eaf4f, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::UI_Buttons
 --- !u!1 &1401767748
 GameObject:
   m_ObjectHideFlags: 0
@@ -2714,8 +2759,10 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 1458603166}
+  - component: {fileID: 1458603167}
+  - component: {fileID: 1458603168}
   m_Layer: 0
-  m_Name: PlayerManager
+  m_Name: PlayerController
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -2729,13 +2776,40 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1458603165}
   serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 1238493031}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1458603167
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1458603165}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 42a8e3eef25aa624496713920890be82, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::PlayerController
+  Pre_Player: {fileID: 791542365209723472, guid: a87bbe8d6da5c69448e4c8f70d9d628e, type: 3}
+  playerObj: {fileID: 0}
+--- !u!114 &1458603168
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1458603165}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3c248c3a301430d4e8a7c11ded448c91, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::PlayerInputController
+  myInputType: 2
 --- !u!1 &1528334844
 GameObject:
   m_ObjectHideFlags: 0
@@ -2979,6 +3053,7 @@ MonoBehaviour:
   confirmUIPrefab: {fileID: 3396678102754610424, guid: 5b92f21528eedcc42a734c66c0c978cd, type: 3}
   mainSelectPrefab: {fileID: 1650631923874377154, guid: 7acf8fec7a3694047b5e14253848fc90, type: 3}
   itemSelectPrefab: {fileID: 1202924272449545584, guid: 4cee00dfad0ba474685cd648dad017db, type: 3}
+  selectViewPrefab: {fileID: 2095454033652956570, guid: dea346c7c49657546bc1ce3dd059a079, type: 3}
 --- !u!1 &1638592089
 GameObject:
   m_ObjectHideFlags: 0
@@ -2990,6 +3065,7 @@ GameObject:
   - component: {fileID: 1638592090}
   - component: {fileID: 1638592092}
   - component: {fileID: 1638592091}
+  - component: {fileID: 1638592093}
   m_Layer: 5
   m_Name: ConfirmButton
   m_TagString: Untagged
@@ -3055,6 +3131,18 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1638592089}
   m_CullTransparentMesh: 1
+--- !u!114 &1638592093
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1638592089}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6c36c2da072fac344a3bc45ada4eaf4f, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::UI_Buttons
 --- !u!1 &1705949744
 GameObject:
   m_ObjectHideFlags: 0
@@ -3331,6 +3419,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::UI_VirticalSelect
   myInputType: 0
   selectedNumber: 0
+  childs: []
+  selectedButton: {fileID: 0}
   selectPanel: {fileID: 0}
 --- !u!114 &1737084744
 MonoBehaviour:
@@ -3702,7 +3792,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_Material: {fileID: 0}
-  m_Color: {r: 0, g: 0, b: 0, a: 0.54901963}
+  m_Color: {r: 0, g: 0, b: 0, a: 1}
   m_RaycastTarget: 1
   m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
   m_Maskable: 1
@@ -3897,6 +3987,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 1246b29f622e52f4098baab722424fde, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  currentScene: 0
 --- !u!1 &2035555772
 GameObject:
   m_ObjectHideFlags: 0
@@ -4621,8 +4712,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c8cfd6765bea4bb46b5bb159ee94aeef, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  selectViewObj: {fileID: 0}
   myContents: {fileID: 0}
+  selectedView: {fileID: 0}
   startItems: []
 --- !u!114 &9083704023401292929
 MonoBehaviour:

@@ -15,34 +15,41 @@ public class ItemSelectCell : SelectSubCell // UI_Base를 상속받는 구조여야 함
         {
             this.slot = s;
         }
+        //SetMyStringKey();
     }
 
-    public void SetMyKey(string key) => itemKey = key;
+    public void SetMyKey(string key) 
+    {
+        itemKey = key;
+        SetMyStringKey();
+    } 
     public void SetMyParents(ItemSlotListCell parent) => this.myParents = parent;
 
     // --- 그리드 시스템의 "실행" 명령에 대응 ---
-    public override void Excute()
-    {
-        base.Excute();
-        ConfirmSelection();
-    }
 
     // 마우스 클릭 시에도 동일하게 작동
     public override void ButtonFunction(PointerEventData pev)
     {
         ConfirmSelection();
     }
-
+    public override void Excute()
+    {
+        ConfirmSelection();
+    }
+    protected override void SetMyStringKey()
+    {
+        myTextController.Set_MyKey(itemKey);
+    }
     private void ConfirmSelection()
     {
         if (selectPanel is ItemSelectPanel panel)
         {
             // 1. 패널 데이터 갱신
-            panel.SelectItem(itemKey, slot);
+            panel.SelectItem(itemKey, slot,this.gameObject);
             // 2. 부모 슬롯(Row) 비주얼 갱신 (선택 표시 등)
             myParents.Select(itemKey, this.gameObject);
 
-            Debug.Log($"[ItemSelectCell] {itemKey} Confirmed");
+            //Debug.Log($"[ItemSelectCell] {itemKey} Confirmed");
         }
     }
 }

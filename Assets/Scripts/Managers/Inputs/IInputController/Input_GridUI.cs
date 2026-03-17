@@ -34,8 +34,8 @@ public class Input_GridUI : IInputController
     {
         controls.GridUI.MoveN.performed += ctx => OnMenuMove(_dirVectors[0]);
         controls.GridUI.MoveS.performed += ctx => OnMenuMove(_dirVectors[1]);
+        controls.GridUI.MoveW.performed += ctx => OnMenuMove(_dirVectors[2]);
         controls.GridUI.MoveE.performed += ctx => OnMenuMove(_dirVectors[3]);
-        controls.GridUI.MoveS.performed += ctx => OnMenuMove(_dirVectors[2]);
         controls.GridUI.Select.performed += ctx => ExcuteSelectMenu();
         controls.GridUI.Cancle.performed += ctx => CancleMenu();
         control = controls;
@@ -53,6 +53,6 @@ public class Input_GridUI : IInputController
 
     private void CancleMenu()
     {
-        targetUI.CancleMenu();
+       InputManager.instance.CloseInputUI(targetUI);
     }
 }

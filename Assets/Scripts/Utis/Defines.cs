@@ -192,6 +192,7 @@ public static class Defines
         OnUnequip,
         OnAttack,
         OnHited,
+        OnDamaged,
         OnSpellCast,
         OnLevelUp,
         Passive,
