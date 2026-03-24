@@ -8,8 +8,9 @@ public abstract class MapEntity:MonoBehaviour
     public Defines.TileType myType;
 
     protected FogOfWar fogOfWar;
-
+    [SerializeField]protected SpriteRenderer[] spriteRenderer;
     [SerializeField] Vector2 myPos;
+    protected GameObject myUIs;
     private void Awake()
     {
         Init();
@@ -52,4 +53,6 @@ public abstract class MapEntity:MonoBehaviour
     {
         return myType;
     }
+
+
 }

@@ -4,7 +4,7 @@ using UnityEngine;
 using static Defines;
 public class LivingEntity : MapEntity
 {
-    [SerializeField]protected GameObject myObj;
+    [SerializeField] protected GameObject myObj;
     [SerializeReference] protected EntityStat myStat;
     public string Objname;
     public string id;
@@ -19,7 +19,7 @@ public class LivingEntity : MapEntity
 
     public float animSpeed = 10f;
 
-    [SerializeField]protected ModifierController modifierController = new ModifierController();
+    [SerializeField] protected ModifierController modifierController = new ModifierController();
 
     //ModifierContext context;
 
@@ -88,7 +88,7 @@ public class LivingEntity : MapEntity
     {
         return myStat;
     }
- 
+
     public void Set_MyStat(EntityStat stat)
     {
         myStat = stat;
@@ -105,12 +105,12 @@ public class LivingEntity : MapEntity
         finalStat.Clear();
         ModifierContext context = modifierController.ApplyModifiers(trigger);
         ModifierContext passive = modifierController.ApplyModifiers(ModifierTriggerType.Passive);
-        
+
         if (trigger == ModifierTriggerType.Passive)
         {
             foreach (var key in baseStat.Keys)
             {
-                finalStat.Add(key,0);
+                finalStat.Add(key, 0);
                 float finalValue = (baseStat[key] + passive.stats[key])
                 * (1 + passive.multifle[key]);
 
@@ -145,7 +145,7 @@ public class LivingEntity : MapEntity
                 Debug.Log($"passive multifle Din't Contain Key {key}");
                 return null;
             }
-            
+
             if (!context.stats.ContainsKey(key))
             {
                 Debug.Log($"context Stat Din't Contain Key {key}");
@@ -184,6 +184,10 @@ public class LivingEntity : MapEntity
     }
     #endregion
     #region Item
+    public void Add_Item(ItemBase item)
+    {
+        
+    }
 
     public Dictionary<SlotType, EquipItem> GetEquips()
     {
@@ -250,18 +254,18 @@ public class LivingEntity : MapEntity
     #region move
     protected virtual void Move_To(Vector2Int dir)
     {
-        Vector2Int myPos = new Vector2Int((int)this.transform.position.x,(int)this.transform.position.y);
+        Vector2Int myPos = new Vector2Int((int)this.transform.position.x, (int)this.transform.position.y);
         destination = myPos+dir;
 
         Start_Move();
         GameManager.instance.EntityMove(this, myPos, destination);
     }
-    
+
     public void SetDestination(Vector2Int target)
     {
         destination = target;
     }
-    
+
     public void Start_Move()
     {
         if (moveState == Defines.MoveState.Idle)
@@ -362,4 +366,34 @@ public class LivingEntity : MapEntity
         return modifierController.GetModifiers();
     }
     #endregion
+
+    public virtual void Set_Visibility(bool isVisible)
+    {
+        bool isChange = false;
+        foreach (SpriteRenderer sr in spriteRenderer)
+        {
+            if (sr.sprite == null)
+                continue;
+
+            if (sr.enabled != isVisible)
+            {
+                sr.enabled = isVisible;
+                isChange = true;
+                Debug.Log($"Set Visible {isVisible}");
+            }
+        }
+        if (isChange)
+        {
+            Set_UIVisible(isVisible);
+        }
+
+    }
+
+    public virtual void Set_UIVisible(bool isVisible)
+    {
+        if (myUIs!=null)
+        {
+            myUIs.SetActive(isVisible);
+        }
+    }
 }

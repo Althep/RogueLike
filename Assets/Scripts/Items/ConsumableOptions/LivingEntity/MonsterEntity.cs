@@ -11,6 +11,7 @@ public class MonsterEntity : LivingEntity
     private void Awake()
     {
         OnAwake();
+        
     }
     protected override void OnAwake()
     {
@@ -20,6 +21,7 @@ public class MonsterEntity : LivingEntity
     {
         base.Init();
         modifierController.SetMyEntity(this);
+        spriteRenderer = GetComponentsInChildren<SpriteRenderer>();
     }
     public void InitMonster()
     {
@@ -47,4 +49,5 @@ public class MonsterEntity : LivingEntity
         entity.myStat = this.myStat.CopyStat();
         return entity;
     }
+    
 }

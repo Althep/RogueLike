@@ -108,11 +108,11 @@ public class ModifierController
         ModifierContext context = Get_Context(type);
         if (type == ModifierTriggerType.Passive)
         {
-            return Get_Context(type);
+            return context;
         }
         if (!modifiers.TryGetValue(type, out var list))
         {
-            return Get_Context(type);
+            return context;
         }
         
         foreach (var modifier in list)
@@ -126,27 +126,14 @@ public class ModifierController
         {
             modifiers[type].Remove(actionModifiers[i]);
         }
-        return Get_Context(type);
+        return context;
     }
 
     public void ResetModifiers()
     {
         modifiers.Clear();
     }
-    /*
-    public float Calculate(ModifierTriggerType type, ModifierContext context)
-    {
-        context.ModifiedValue = context.BaseValue;
 
-        // 우선순위 기준으로 정렬 후 순차적 적용
-        foreach (var mod in modifiers[type])
-        {
-            mod.Apply(context);
-        }
-
-        return context.ModifiedValue;
-    }
-    */
     public Dictionary<ModifierTriggerType, List<Modifier>> GetModifiers()
     {
         return modifiers;

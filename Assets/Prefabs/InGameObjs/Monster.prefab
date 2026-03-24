@@ -46,10 +46,20 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::MonsterEntity
   myType: 8
+  myPos: {x: 0, y: 0}
+  myObj: {fileID: 0}
+  myStat:
+    rid: -2
   Objname: 
   id: 
   spriteMatching: {fileID: 0}
   animSpeed: 10
+  MaxHP: 0
+  references:
+    version: 2
+    RefIds:
+    - rid: -2
+      type: {class: , ns: , asm: }
 --- !u!1 &7857533342259846447
 GameObject:
   m_ObjectHideFlags: 0
@@ -61,7 +71,7 @@ GameObject:
   - component: {fileID: 3751892085659077267}
   - component: {fileID: 608717483160152983}
   m_Layer: 0
-  m_Name: GameObject
+  m_Name: Sprite
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0

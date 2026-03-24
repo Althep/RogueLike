@@ -3,6 +3,8 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using System.Linq;
+using static UnityEditor.Progress;
+
 public class InventoryData
 {
     [SerializeField]
@@ -16,6 +18,23 @@ public class InventoryData
 
     public void AddinInventory(ItemBase item)
     {
+        switch (item.category)
+        {
+            case Defines.ItemCategory.Equipment:
+                if (InventoryCountCheck())
+                {
+                    inventory.Add(item);
+                }
+                break;
+            case Defines.ItemCategory.Consumable:
+                break;
+            case Defines.ItemCategory.Misc:
+                break;
+            default:
+                break;
+        }
+
+        /*
         Debug.Log("Added Item Invoke");
         if(itemManager == null)
         {
@@ -28,12 +47,12 @@ public class InventoryData
             Debug.Log("ItemData Null");
         }
         Debug.Log($"item name : {item.name}");
-        /*
+        
         if (item == null || !itemData.ContainsKey(item.name))
         {
             Debug.Log("Item Id isn't Contain or item is Null");
             return;
-        }*/
+        }
         ItemBase addedItem = OnGetCountCheck(item);
         if (addedItem == null)
         {
@@ -85,8 +104,18 @@ public class InventoryData
 
         }
         //EventManager.instance.OnInventoryUpdate.Invoke();
-
+        */
     }
+
+    public bool InventoryCountCheck()
+    {
+        if (inventory.Count+1<maxInventory)
+        {
+            return true;
+        }
+        return false;
+    }
+    /*
     public ItemBase OnGetCountCheck(ItemBase item)
     {
         ItemBase getItem;
@@ -269,5 +298,5 @@ public class InventoryData
         {
             inventory.Remove(targetItem);
         }
-    }
+    }*/
 }

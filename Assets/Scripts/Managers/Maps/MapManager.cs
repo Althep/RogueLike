@@ -22,6 +22,7 @@ public class MapManager : MonoBehaviour
 
     //public Dictionary<Vector2Int, Defines.TileType> tileData = new Dictionary<Vector2Int, Defines.TileType>(); //몬스터등을 포함한 맵데이터
     public Dictionary<Vector2Int, TileType> enviromentData = new Dictionary<Vector2Int, TileType>(); //타일과 벽, 문등을 포함한 맵데이터
+    public MapEntity[,] bakedEnviromentData;
     public Dictionary<Vector2Int, MapEntity> dynamicMapData = new Dictionary<Vector2Int, MapEntity>(); //몬스터, 캐릭터등 움직이는 오브젝트 데이터
     public Dictionary<Vector2Int, List<MapEntity>> interactiveMapData = new Dictionary<Vector2Int, List<MapEntity>>(); //문 아이템등 상호작용 오브젝트 데이터
 
@@ -93,7 +94,15 @@ public class MapManager : MonoBehaviour
         selectedMaker = mapMakers[mapMakerType[index]];
         this.makerType = selectedMaker.makerType;
     }
-
+    public MapEntity Get_BakedEnvironmentEntity(Vector2Int pos)
+    {
+        if (pos.x >= 0 && pos.x < _width && pos.y >= 0 && pos.y < _height)
+        {
+            return bakedEnviromentData[pos.x, pos.y];
+        }
+        // 맵 밖이거나 해당 칸에 오브젝트가 생성되지 않았다면 null 반환
+        return null;
+    }
     public List<Vector2Int> GetEmptyPosList()
     {
         List<Vector2Int> emptyPos = tilePosList;
@@ -131,10 +140,12 @@ public class MapManager : MonoBehaviour
         float mapMakeStart = Time.realtimeSinceStartup;
         await SetMapData();
         Debug.Log($"[Profile] 오브젝트 배치 시간: {Time.realtimeSinceStartup - mapMakeStart}s");
-        await MapObjSpawn();
         Vector2Int mapSize = selectedMaker.GetMapSize();
         _height = mapSize.y;
         _width = mapSize.x;
+        await MapObjSpawn();
+        
+        
         mapLayer.Prepare(mapSize.x, mapSize.y);
         Debug.Log("던전 생성 완료");
     }
@@ -186,15 +197,18 @@ public class MapManager : MonoBehaviour
         wallPosList.Clear();
         doorPosList.Clear();
     }
+    void BakeEnviromentData()
+    {
+
+    }
     public async UniTask MapObjSpawn()
     {
         if (poolManager == null)
             poolManager = GameManager.instance.Get_PoolManager();
 
         int count = 0;
-        // 성능 최적화: 한 프레임에 처리할 개수 (컴퓨터 사양에 따라 50~100개 적당)
         const int yieldInterval = 50;
-
+        bakedEnviromentData = new MapEntity[_width, _height];
         foreach (Vector2Int pos in enviromentData.Keys)
         {
             TileType type = enviromentData[pos];
@@ -209,15 +223,24 @@ public class MapManager : MonoBehaviour
                 }
                 tileObjects.Add(tile);
                 tile.SetMyPos(pos);
+                if (pos.x >= 0 && pos.x < _width && pos.y >= 0 && pos.y < _height)
+                {
+                    bakedEnviromentData[pos.x, pos.y] = tile;
+                }
+                else
+                {
+                    // 어떤 이상한 좌표가 범위를 벗어났는지 콘솔에 찍어서 범인을 찾습니다.
+                    Debug.LogWarning($"[배열 범위 이탈] 타일 좌표가 맵 크기를 벗어났습니다! pos: {pos}, width: {_width}, height: {_height}");
+                }
             }
 
             count++;
-            // 일정 개수를 생성하면 다음 프레임으로 넘김
             if (count % yieldInterval == 0)
             {
                 await UniTask.Yield();
             }
         }
+        FogOfWarManager.Instance.InitMapFog(_width, _height);
     }
     public bool IsSaved()
     {
@@ -259,6 +282,79 @@ public class MapManager : MonoBehaviour
         }
         final.Add(newTarget);
         return final;
+    }
+
+    public List<Vector2Int> GetCoordinatesInCircle(Vector2Int center, int radius)
+    {
+        List<Vector2Int> coordinatesInCircle = new List<Vector2Int>();
+        int radiusSquared = radius * radius; // 원 넓이 계산
+
+        for (int x = center.x - radius; x <= center.x + radius; x++)
+        {
+            for (int y = center.y - radius; y <= center.y + radius; y++)
+            {
+                int dx = x - center.x;
+                int dy = y - center.y;
+
+                if (dx * dx + dy * dy <= radiusSquared)
+                {
+                    coordinatesInCircle.Add(new Vector2Int(x, y));
+                }
+            }
+        }
+
+        return coordinatesInCircle;
+    }
+
+    public List<MonsterEntity> Get_MonstersInRadius(Vector2Int playerPos,int radius)
+    {
+        List<MonsterEntity> monsters = new List<MonsterEntity>();
+        List<Vector2Int> circlePosList = GetCoordinatesInCircle(playerPos, radius);
+
+        foreach(Vector2Int pos in circlePosList)
+        {
+            MonsterEntity entity = GetMonsterEntity(pos)as MonsterEntity;
+            if(entity!= null)
+            {
+                monsters.Add(entity);
+            }
+        }
+
+        return monsters;
+    }
+
+    public List<MapEntity> Get_DoorsInRadius(Vector2Int playerPos,int radius)
+    {
+        List<MapEntity> interacts = new List<MapEntity>();
+        List<Vector2Int> circlePosList = GetCoordinatesInCircle(playerPos, radius);
+
+        foreach(Vector2Int pos in circlePosList)
+        {
+            DoorEntity entity = GetDoorEntity(pos) as DoorEntity;
+            if(entity != null)
+            {
+                interacts.Add(entity);
+            }
+        }
+
+        return interacts;
+    }
+
+    public List<MapEntity> Get_EnviromentsInRadius(Vector2Int playerPos,int radius)
+    {
+        List<MapEntity> enviroments = new List<MapEntity>();
+        List<Vector2Int> circlePosList = GetCoordinatesInCircle(playerPos, radius);
+
+        foreach(Vector2Int pos in circlePosList)
+        {
+            MapEntity entity = bakedEnviromentData[pos.x,pos.y];
+            if (entity!=null)
+            {
+                enviroments.Add(entity);
+            }
+        }
+        return enviroments;
+
     }
 
     public List<Vector2Int> SetMonsterRandomPosition(List<LivingEntity> monsters)
@@ -308,11 +404,11 @@ public class MapManager : MonoBehaviour
 
     #region Entitys
 
-    public MapEntity GetMonsterEntity(Vector2Int targetPos)
+    public MonsterEntity GetMonsterEntity(Vector2Int targetPos)
     {
         if (dynamicMapData.ContainsKey(targetPos))
         {
-            return dynamicMapData[targetPos];
+            return dynamicMapData[targetPos]as MonsterEntity;
         }
         return null;
     }
@@ -547,6 +643,96 @@ public class MapManager : MonoBehaviour
 
             mapLayer[pos.x, pos.y] = cost;
         }
+    }
+    #endregion
+
+    #region FogOfWar
+    public bool CheckLineOfSight(Vector2Int start, Vector2Int target)
+    {
+        // 시작점과 목표점이 같으면 당연히 보입니다.
+        if (start == target) return true;
+
+        Vector2 startPos = new Vector2(start.x, start.y);
+        Vector2 targetPos = new Vector2(target.x, target.y);
+
+        // --- DDA (Digital Differential Analyzer) 알고리즘 ---
+        int dx = target.x - start.x;
+        int dy = target.y - start.y;
+
+        // [핵심 수정 1] 검사 해상도 2배 증가! 
+        // 듬성듬성 검사해서 타일을 건너뛰는(스킵) 현상을 막기 위해 스텝을 2배로 늘립니다.
+        int step = Mathf.Max(Mathf.Abs(dx), Mathf.Abs(dy)) * 2;
+
+        // 한 스텝마다 이동할 x, y의 실수 비율을 구합니다. (보폭이 절반으로 줄어 촘촘해짐)
+        float xIncrement = (float)dx / step;
+        float yIncrement = (float)dy / step;
+
+        float currentX = start.x;
+        float currentY = start.y;
+
+        for (int i = 1; i < step; i++)
+        {
+            currentX += xIncrement;
+            currentY += yIncrement;
+
+            // [핵심 수정 2] C#의 이상한 반올림(RoundToInt) 대신, 기하학적으로 정확한 Floor 규칙 적용
+            int checkX = Mathf.FloorToInt(currentX + 0.5f);
+            int checkY = Mathf.FloorToInt(currentY + 0.5f);
+            Vector2Int checkPos = new Vector2Int(checkX, checkY);
+
+            // 타겟 좌표에 도달했다면 더 이상 벽 판정을 할 필요가 없습니다. (자기 자신 검사 방지)
+            if (checkPos == target) break;
+
+            // 해당 타일이 시야를 막는 오브젝트인지 확인
+            TileType type = Get_TargetType(checkPos);
+
+            if (type == TileType.Wall || (type == TileType.Door && !GetDoorEntity(checkPos).IsOpen()))
+            {
+                // 십자가 교차 판정 (정말로 마름모를 뚫었는가?)
+                if (CheckLineCrossIntersection(startPos, targetPos, checkPos))
+                {
+                    return false; // 시야 차단!
+                }
+            }
+        }
+
+        return true; // 무사히 통과!
+    }
+
+    /// <summary>
+    /// 마름모를 대체하는 십자가(+) 교차 판정 수학 공식
+    /// </summary>
+    private bool CheckLineCrossIntersection(Vector2 start, Vector2 end, Vector2Int tileCenter, float tileSize = 1f)
+    {
+        float halfSize = tileSize * 0.5f;
+
+        // 1. 가로 선분 교차 검사
+        if (!Mathf.Approximately(start.y, end.y))
+        {
+            float t = (tileCenter.y - start.y) / (end.y - start.y);
+
+            if (t >= 0f && t <= 1f)
+            {
+                float x_int = start.x + t * (end.x - start.x);
+                if (x_int >= tileCenter.x - halfSize && x_int <= tileCenter.x + halfSize) return true;
+            }
+        }
+
+        // 2. 세로 선분 교차 검사
+        if (!Mathf.Approximately(start.x, end.x))
+        {
+            // [핵심 수정 3] 혼재되어 있던 오타 수식 완벽 제거 및 정상화
+            // 기울기 수식: $t = \frac{tileCenter.x - start.x}{end.x - start.x}$
+            float t = (tileCenter.x - start.x) / (end.x - start.x);
+
+            if (t >= 0f && t <= 1f)
+            {
+                float y_int = start.y + t * (end.y - start.y);
+                if (y_int >= tileCenter.y - halfSize && y_int <= tileCenter.y + halfSize) return true;
+            }
+        }
+
+        return false;
     }
     #endregion
 }

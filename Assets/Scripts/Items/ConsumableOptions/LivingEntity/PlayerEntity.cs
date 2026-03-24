@@ -6,6 +6,9 @@ public class PlayerEntity : LivingEntity
 {
     InventoryData inventory = new InventoryData();
     MapManager mapManager;
+    FogOfWarManager fowManager;
+
+    List<Vector2Int> previousView = new List<Vector2Int>();
     #region Initiate
     private void Awake()
     {
@@ -18,6 +21,10 @@ public class PlayerEntity : LivingEntity
         if (mapManager == null)
         {
             mapManager = GameManager.instance.Get_MapManager();
+        }
+        if(fowManager == null)
+        {
+            fowManager = FogOfWarManager.Instance;
         }
     }
     protected override void Init()
@@ -135,5 +142,41 @@ public class PlayerEntity : LivingEntity
             return;
         }
         door.Interaction();
+    }
+    protected override void Move_To(Vector2Int dir)
+    {
+        base.Move_To(dir);
+        Vector2Int playerPos = new Vector2Int((int)transform.position.x+dir.x, (int)transform.position.y+dir.y);
+        int vision = (int)GetEntityStat(ModifierTriggerType.OnMove)[StatType.Vision];
+        UpdateFoV(playerPos,vision);
+    }
+    public void UpdateFoV(Vector2Int playerPos, int viewRadius)
+    {
+        foreach (Vector2Int pos in previousView)
+        {
+            FogOfWarManager.Instance.SetExplored(pos);
+
+            MonsterEntity entity = mapManager.GetMonsterEntity(pos);
+            if (entity != null) entity.Set_Visibility(false);
+        }
+
+        List<Vector2Int> currentView = new List<Vector2Int>();
+
+        List<Vector2Int> circlePosList = mapManager.GetCoordinatesInCircle(playerPos, viewRadius);
+
+        foreach (Vector2Int targetPos in circlePosList)
+        {
+            if (mapManager.CheckLineOfSight(playerPos, targetPos))
+            {
+                currentView.Add(targetPos);
+
+                FogOfWarManager.Instance.SetVisible(targetPos);
+
+                MonsterEntity entity = mapManager.GetMonsterEntity(targetPos);
+                if (entity != null) entity.Set_Visibility(true);
+            }
+        }
+
+        previousView = currentView;
     }
 }
