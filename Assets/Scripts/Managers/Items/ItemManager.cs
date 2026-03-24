@@ -5,6 +5,7 @@ using Cysharp.Threading.Tasks;
 using static Defines;
 public class ItemManager :MonoBehaviour
 {
+    public static ItemManager instance;
     [SerializeField]ItemFactory itemFactory;
     [SerializeField]PlayerEntity playerEntity;
     MapManager mapManager;
@@ -17,6 +18,10 @@ public class ItemManager :MonoBehaviour
     }
     public void Init()
     {
+        if(instance == null)
+        {
+            instance = this;
+        }
         if(itemFactory == null)
         {
             itemFactory =  new ItemFactory();
@@ -48,7 +53,9 @@ public class ItemManager :MonoBehaviour
         ItemEntity entity = go.GetComponent<ItemEntity>();
         entity.item = itemFactory.GetRandomItem();
         entity.id = entity.item.name;
-        go.transform.position = pos;
+        Vector3 targetPos = new Vector3(pos.x, pos.y, -1);
+        go.transform.position = targetPos;
+        
         Vector2Int keyPos = new Vector2Int((int)pos.x, (int)pos.y);
         if (!fieldItems.ContainsKey(keyPos))
         {
@@ -104,5 +111,22 @@ public class ItemManager :MonoBehaviour
     public void OnFloorChange()
     {
         itemFactory.OnFloorChange();
+    }
+
+    public bool GroundCheck(Vector2Int pos)
+    {
+        if (fieldItems.ContainsKey(pos))
+        {
+            return true;
+        }
+        return false;
+    }
+    public List<ItemEntity> Get_GroundItems(Vector2Int pos)
+    {
+        if (fieldItems.ContainsKey(pos))
+        {
+            return fieldItems[pos];
+        }
+        return null;
     }
 }

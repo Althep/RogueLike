@@ -24,7 +24,7 @@ public class LivingEntity : MapEntity
     //ModifierContext context;
 
     List<Modifier> buffs = new List<Modifier>();
-
+    protected List<ItemEntity> groundItems;
     protected Races race;
     private void Awake()
     {
@@ -394,6 +394,14 @@ public class LivingEntity : MapEntity
         if (myUIs!=null)
         {
             myUIs.SetActive(isVisible);
+        }
+    }
+    public void ItemCheck(Vector2Int pos)
+    {
+        groundItems = null;
+        if (ItemManager.instance.GroundCheck(pos))
+        {
+            groundItems = ItemManager.instance.Get_GroundItems(pos);
         }
     }
 }

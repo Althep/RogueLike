@@ -2,6 +2,8 @@ using UnityEngine;
 using System;
 using System.Linq;
 using System.Collections.Generic;
+using Unity.VisualScripting;
+
 public abstract class ItemBase 
 {
     public string id;
@@ -13,24 +15,7 @@ public abstract class ItemBase
     public float weight;
     public List<Modifier> options = new List<Modifier>();
     LivingEntity entity;
-    public int AddStack(ItemBase item, int amount)
-    {        int overflow = 0;
-        if (!CanStack(amount))
-        {
-            overflow = itemCount + amount - maxStack;
-            itemCount = maxStack;
-            item.itemCount = overflow;
-            Debug.Log("itemCount = overflow;");
-        }
-        else
-        {
-            itemCount += amount;
-            item.itemCount = 0;
-            Debug.Log("itemCount = 0;");
-        }
-        Debug.Log("1111111111111111111111111");
-        return overflow;
-    }
+
     public void OnUse()
     {
         List<BuffModifier> buffs = options.OfType<BuffModifier>().ToList();
@@ -65,4 +50,30 @@ public abstract class ItemBase
         return rest;
     }
     public abstract Enum GetSpecificType();
+
+    public abstract ItemBase Clone();
+
+    // ?? 공통 데이터 복사를 위한 도우미 함수 (상세 설명)
+    protected void CopyBaseProperties(ItemBase cloneObj)
+    {
+        cloneObj.id = this.id;
+        cloneObj.name = this.name;
+        cloneObj.itemCount = this.itemCount;
+        cloneObj.maxStack = this.maxStack;
+        cloneObj.tier = this.tier;
+        cloneObj.category = this.category;
+        cloneObj.weight = this.weight;
+
+        // 엔티티 참조는 그대로 넘겨주거나 null로 초기화합니다. (상황에 맞게 선택)
+        cloneObj.entity = this.entity;
+
+        // ?? 핵심: 리스트 내부의 옵션들까지 '깊은 복사' 수행
+        cloneObj.options = new List<Modifier>();
+        foreach (var option in this.options)
+        {
+            // option.Clone()을 호출하여 Modifier도 새롭게 생성해서 넣습니다.
+            Modifier copied = ModifierManager.instance.Get_Modifier(option.modifierType,option.id);
+            cloneObj.options.Add(copied);
+        }
+    }
 }

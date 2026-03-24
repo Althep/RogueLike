@@ -60,7 +60,7 @@ public class PlayerInputController : UI_InputUIBase
 
     public void GetItemKey()
     {
-
+        playerEntity.TryGetItem();
     }
     #endregion
 }

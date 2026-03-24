@@ -6,9 +6,10 @@ using Cysharp.Threading.Tasks;
 using static Defines;
 public class ModifierFactory
 {
-
+    
     ModifierDataManager modifierDataManager;
     public static ModifierFactory _instance;
+    ModifierPooler modifierPooler;
     ModifierFactory()
     {
     }
@@ -18,6 +19,7 @@ public class ModifierFactory
         if (modifierDataManager == null)
         {
             modifierDataManager = await ModifierDataManager.CreateAsync();
+            modifierPooler = ModifierManager.instance.GetModifierPooler();
         }
     }
     public static async UniTask<ModifierFactory> CreateAsync()
@@ -38,7 +40,8 @@ public class ModifierFactory
 
     Modifier GetCopyModifier(Modifier modifier)
     {
-        if(modifier == null)
+        modifierPooler = ModifierManager.instance.GetModifierPooler();
+        if (modifier == null)
         {
             Debug.Log("Modifier Null! ModifierFactory_GetCopyModifier");
             return null;
@@ -53,7 +56,6 @@ public class ModifierFactory
                     modifier.Copy(newStat);
                 }
                 return newStat;
-            
             case ModifierType.BuffModifier:
                 BuffModifier newBuff = new BuffModifier();
                 if (modifier is BuffModifier)
@@ -75,13 +77,6 @@ public class ModifierFactory
                     modifier.Copy(newAction);
                 }
                 return newAction;
-            /*case ModifierType.ItemModifier:
-                ItemModifier newItem = new ItemModifier();
-                if (modifier is ItemModifier)
-                {
-                    modifier.Copy(newItem);
-                }
-                return newItem;*/
             default:
                 Debug.Log("StatType Error in GetEmptyModifier_ModifierFactory");
                 return null;

@@ -76,4 +76,9 @@ public class ModifierManager : MonoBehaviour
         }
         return modifierPooler;
     }
+
+    public Modifier Get_Modifier(ModifierType type,string id)
+    {
+        return modifierPooler.GetModifier(type,id);
+    }
 }

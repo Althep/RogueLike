@@ -9,6 +9,7 @@ public class PlayerEntity : LivingEntity
     FogOfWarManager fowManager;
 
     List<Vector2Int> previousView = new List<Vector2Int>();
+    [SerializeField] List<string> items = new List<string>();
     #region Initiate
     private void Awake()
     {
@@ -130,7 +131,29 @@ public class PlayerEntity : LivingEntity
 
     public void AddItem(ItemBase item)
     {
-        inventory.AddinInventory(item);
+        bool canGet = false;
+        canGet = inventory.AddingInventory(item);
+
+    }
+
+    public void TryGetItem()
+    {
+        if (groundItems==null)
+        {
+            return;
+        }
+        if (groundItems.Count<1)
+        {
+            return;
+        }
+        ItemBase item = groundItems[0].GetItem();
+        Debug.Log($"Item Get {item.id}");
+        items.Add(item.id);
+        bool canGet = inventory.AddingInventory(item);
+        if (canGet)
+        {
+            groundItems[0].Return();
+        }
     }
 
     public void InteractDoor(Vector2Int targetPos)
@@ -149,6 +172,7 @@ public class PlayerEntity : LivingEntity
         Vector2Int playerPos = new Vector2Int((int)transform.position.x+dir.x, (int)transform.position.y+dir.y);
         int vision = (int)GetEntityStat(ModifierTriggerType.OnMove)[StatType.Vision];
         UpdateFoV(playerPos,vision);
+        ItemCheck(destination);
     }
     public void UpdateFoV(Vector2Int playerPos, int viewRadius)
     {
@@ -179,4 +203,6 @@ public class PlayerEntity : LivingEntity
 
         previousView = currentView;
     }
+
+    
 }

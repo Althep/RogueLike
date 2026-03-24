@@ -42,7 +42,7 @@ public abstract class MapEntity:MonoBehaviour
         return fogOfWar;
     }
 
-    public void Return()
+    public virtual void Return()
     {
         
     }

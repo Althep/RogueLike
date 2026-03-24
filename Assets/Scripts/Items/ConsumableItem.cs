@@ -5,6 +5,14 @@ public class ConsumableItem : ItemBase
 {
     public Defines.ConsumableType consumableType;
 
+    public override ItemBase Clone()
+    {
+        ConsumableItem newConsum = ItemManager.instance.ItemMake(id) as ConsumableItem;
+        CopyBaseProperties(newConsum);
+        newConsum.consumableType = consumableType;
+        return newConsum;
+    }
+
     public override Enum GetSpecificType()
     {
         return consumableType;

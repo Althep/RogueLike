@@ -28,4 +28,10 @@ public class ItemEntity : MapEntity
     {
         item = null;
     }
+
+    public ItemBase GetItem()
+    {
+        return item;
+    }
+    
 }

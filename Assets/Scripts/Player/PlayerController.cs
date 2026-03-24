@@ -64,6 +64,6 @@ public class PlayerController : MonoBehaviour
     public void Set_PlayerPos(Vector2Int pos)
     {
         playerObj.transform.position = (Vector2)pos;
-        //playerEntity.UpdateFoV(pos, (int)playerEntity.GetEntityStat(Defines.ModifierTriggerType.OnMove)[Defines.StatType.Vision]);
+        playerEntity.UpdateFoV(pos, (int)playerEntity.GetEntityStat(Defines.ModifierTriggerType.OnMove)[Defines.StatType.Vision]);
     }
 }
