@@ -6,13 +6,18 @@ using System.Collections.Generic;
 public class UI_VirticalSelect : UI_InputUIBase
 {
     public int selectedNumber = 0;
-    [SerializeField]UI_Base[] childs;
-    [SerializeField]UI_Base selectedButton;
+    [SerializeField]protected UI_Base[] childs;
+    [SerializeField]protected UI_Base selectedButton;
     public GameObject selectPanel;
 
     private void Awake()
     {
         myInputType = Defines.InputType.VirticalUI;
+        if(selectPanel == null)
+        {
+            selectPanel = UIManager.instance.Get_PoolUI(UIDefines.UI_PrefabType.Confirm, this.gameObject);
+           
+        }
         if (InputManager.instance!=null)
         {
             Set_Input();
@@ -32,7 +37,7 @@ public class UI_VirticalSelect : UI_InputUIBase
     {
         
     }
-    void SetButtons()
+    protected void SetButtons()
     {
         childs = transform.GetComponentsInChildren<UI_Base>().Where(c => c.gameObject!=this.gameObject).ToArray();
         selectedButton = childs[0];
@@ -41,7 +46,13 @@ public class UI_VirticalSelect : UI_InputUIBase
     public void ChangeSelection(int direction)
     {
         Debug.Log($"Change Selection {direction}");
-        selectedNumber+=direction;
+        selectedNumber += direction;
+        Set_Select(selectedNumber);
+    }
+
+    public void Set_Select(int index)
+    {
+        selectedNumber = index;
         if (selectedNumber<0)
         {
             selectedNumber = childs.Length-1;

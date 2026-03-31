@@ -241,7 +241,8 @@ public static class Defines
         Exp,
         Regeneration,
         Tir,
-        ExtraLife
+        ExtraLife,
+        AwakeRate
     }
     public enum DamageType
     {
@@ -364,6 +365,15 @@ public static class Defines
     {
         Solo,
         Group
+    }
+
+    public enum MonsterState
+    {
+        Idle,
+        Sleep,
+        Chase,
+        Patrol,
+        Attack
     }
     #endregion
 }

@@ -8,6 +8,7 @@ public class UIPooler : MonoBehaviour
     [SerializeField] GameObject mainSelectPrefab;
     [SerializeField] GameObject itemSelectPrefab;
     [SerializeField] GameObject selectViewPrefab;
+    [SerializeField] GameObject inventorySlotPrefab;
     Dictionary<UIDefines.UI_PrefabType, Queue<IPoolUI>> ui_pool = new Dictionary<UIDefines.UI_PrefabType, Queue<IPoolUI>>();
     Dictionary<UIDefines.UI_PrefabType, List<IPoolUI>> ui_active = new Dictionary<UIDefines.UI_PrefabType, List<IPoolUI>>();
 
@@ -45,6 +46,10 @@ public class UIPooler : MonoBehaviour
         if(!ui_Prefabs.ContainsKey(UIDefines.UI_PrefabType.SelectView) && selectViewPrefab != null)
         {
             ui_Prefabs.Add(UIDefines.UI_PrefabType.SelectView, selectViewPrefab);
+        }
+        if(!ui_Prefabs.ContainsKey(UIDefines.UI_PrefabType.InventorySlot) && inventorySlotPrefab!=null)
+        {
+            ui_Prefabs.Add(UIDefines.UI_PrefabType.InventorySlot, inventorySlotPrefab);
         }
         foreach (var key in ui_Prefabs.Keys)
         {

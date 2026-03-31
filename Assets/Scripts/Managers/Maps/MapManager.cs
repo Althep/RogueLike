@@ -7,6 +7,7 @@ using Cysharp.Threading.Tasks;
 
 public class MapManager : MonoBehaviour
 {
+    public static MapManager instance;
     private Dictionary<MapMakeType, MapMaker> _mapMaker;
     private Dictionary<MapMakeType, MapMaker> mapMakers => _mapMaker ??= new()
     {
@@ -65,6 +66,10 @@ public class MapManager : MonoBehaviour
         if (itemManager == null)
         {
             itemManager = GameManager.instance.Get_ItemManager();
+        }
+        if(instance == null)
+        {
+            instance = this;
         }
         mapLayer = new MapLayer(60, 60);
     }
@@ -281,6 +286,22 @@ public class MapManager : MonoBehaviour
             }
         }
         final.Add(newTarget);
+        return final;
+    }
+
+    public List<Vector2Int> Get_AroundOnlyTile(Vector2Int target)
+    {
+        List<Vector2Int> around = GetAroundTile(target);
+        List<Vector2Int> final = new List<Vector2Int>();
+
+        foreach(var p in around)
+        {
+            if(enviromentData[p] == TileType.Tile)
+            {
+                final.Add(p);
+            }
+        }
+
         return final;
     }
 
@@ -521,6 +542,7 @@ public class MapManager : MonoBehaviour
         mapLayer[pos.x, pos.y] = (byte)GetTypeCost(pos);
         mapLayer[dest.x, dest.y] = (byte)(GetTypeCost(dest));
     }
+
     #region AddMapData
     public void AddMapData(Vector2Int pos, LivingEntity entity)
     {

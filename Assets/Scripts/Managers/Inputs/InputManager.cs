@@ -45,6 +45,7 @@ public class InputManager : MonoBehaviour
             instance = this;
         }
         InitControllers();
+        EventManager.instance.AddListnerToSceneChange(OnSceneChange);
     }
     public void InitControllers()
     {

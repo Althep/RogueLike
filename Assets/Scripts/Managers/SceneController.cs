@@ -30,7 +30,7 @@ public class SceneController: MonoBehaviour
         if (scenes.ContainsKey(scene))
         {
             SceneManager.LoadScene(scenes[scene]);
-            InputManager.instance.OnSceneChange();
+            EventManager.instance.OnSceneChange.Invoke();
         }
         else
         {
@@ -44,7 +44,7 @@ public class SceneController: MonoBehaviour
         if (scenes.ContainsKey(scene))
         {
             SceneManager.LoadScene(scenes[scene]);
-            InputManager.instance.OnSceneChange();
+            EventManager.instance.OnSceneChange.Invoke();
         }
         else
         {
@@ -76,7 +76,8 @@ public class SceneController: MonoBehaviour
             await asyncPostAction.Invoke();
         }
         currentScene = sceneType;
-        InputManager.instance.OnSceneChange();
+        //InputManager.instance.OnSceneChange();
+        EventManager.instance.OnSceneChange.Invoke();
         Debug.Log($"씬로드 완료 및 후처리 완료 :{sceneType}");
     }
 

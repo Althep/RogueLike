@@ -33,6 +33,14 @@ public class UIDataManager : AsyncDataManager<UIDataManager>
         }
         SetUIRoot();
         FindAndBindUIs();
+
+        EventManager.instance.AddListnerToSceneChange(OnSceneChange);
+    }
+
+    public void OnSceneChange()
+    {
+        SetUIRoot();
+        FindAndBindUIs();
     }
 
     public async UniTask ReadInputUIBinds(List<Dictionary<string,object>> data)

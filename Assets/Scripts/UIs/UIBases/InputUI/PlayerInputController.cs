@@ -34,7 +34,7 @@ public class PlayerInputController : UI_InputUIBase
     #region UI
     public void InventoryKey()
     {
-
+        UIManager.instance.Pop_Up_UI("Dungeon_InventoryButton");
     }
 
     public void SkillUIKey()

@@ -105,7 +105,6 @@ public class RaceSelectPanel : SelectSubPanel
         }
     }
 
-    // SelectPanels에게 자신의 버튼 리스트를 반환
     public List<UI_Base> GetCellList()
     {
         List<UI_Base> list = new List<UI_Base>();

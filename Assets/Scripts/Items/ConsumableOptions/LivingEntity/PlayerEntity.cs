@@ -132,7 +132,7 @@ public class PlayerEntity : LivingEntity
     public void AddItem(ItemBase item)
     {
         bool canGet = false;
-        canGet = inventory.AddingInventory(item);
+        canGet = inventory.TryAddInventory(item);
 
     }
 
@@ -149,7 +149,7 @@ public class PlayerEntity : LivingEntity
         ItemBase item = groundItems[0].GetItem();
         Debug.Log($"Item Get {item.id}");
         items.Add(item.id);
-        bool canGet = inventory.AddingInventory(item);
+        bool canGet = inventory.TryAddInventory(item);
         if (canGet)
         {
             groundItems[0].Return();
@@ -204,5 +204,8 @@ public class PlayerEntity : LivingEntity
         previousView = currentView;
     }
 
-    
+    public void Set_InventoryUI(UI_Inventory inventoryUI)
+    {
+        inventory.Set_InventoryUI(inventoryUI);
+    }
 }

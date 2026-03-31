@@ -6,20 +6,21 @@ using System.Collections.Generic;
 public class EventManager : MonoBehaviour
 {
     public int Turn;
+
     public static EventManager instance;
 
     public UnityEvent OnPlayerAction = new UnityEvent();
     public UnityEvent OnFloorChange = new UnityEvent();
     public UnityEvent OnTurnEnd = new UnityEvent();
-
+    public UnityEvent OnSceneChange = new UnityEvent();
     List<BuffInstance> activeBuffs = new List<BuffInstance>();
     Queue<BuffInstance> InactiveBuffs = new Queue<BuffInstance>();
     private void Awake()
     {
-
+        Init();
     }
 
-    public void Onit()
+    public void Init()
     {
         if (instance == null)
         {
@@ -82,7 +83,10 @@ public class EventManager : MonoBehaviour
     {
         OnTurnEnd.AddListener(action.Invoke);
     }
-
+    public void AddListnerToSceneChange(Action action)
+    {
+        OnSceneChange.AddListener(action.Invoke);
+    }
     public BuffInstance GetBuffInstance()
     {
         BuffInstance result;

@@ -70,7 +70,15 @@ public class UIManager : MonoBehaviour
     public void Pop_Up_UI(string name)
     {
         GameObject go = uidataManager.GetTargetToName(name);
-        if(go != null)
+        if(go == null)
+        {
+            return;
+        }
+        if (go.activeSelf)
+        {
+            go.SetActive(false);
+        }
+        else
         {
             go.SetActive(true);
         }
@@ -101,5 +109,25 @@ public class UIManager : MonoBehaviour
             _SKManager = transform.GetComponent<StringKeyManager>();
         }
         return _SKManager;
+    }
+
+    public void Set_ObjSize(GameObject parent,GameObject child)
+    {
+        RectTransform selectedRect = parent.GetComponent<RectTransform>();
+        RectTransform selectObjRect = child.GetComponent<RectTransform>();
+
+        if (selectedRect != null && selectObjRect != null)
+        {
+            // [핵심 2] Stretch(꽉 채우기) 앵커 설정
+            // Awake 시점에 부모 크기가 0이더라도, 이후 레이아웃이 계산되어 부모 크기가 커지면 자동으로 맞춰집니다.
+            selectObjRect.anchorMin = Vector2.zero; // (0, 0)
+            selectObjRect.anchorMax = Vector2.one;  // (1, 1)
+            selectObjRect.pivot = new Vector2(0.5f, 0.5f);
+
+            // 앵커를 Stretch로 맞췄기 때문에 sizeDelta와 anchoredPosition을 0으로 주면 
+            // 여백 없이 부모의 크기와 100% 동일해집니다.
+            selectObjRect.sizeDelta = Vector2.zero;
+            selectObjRect.anchoredPosition = Vector2.zero;
+        }
     }
 }

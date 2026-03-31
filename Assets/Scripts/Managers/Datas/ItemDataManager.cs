@@ -195,7 +195,7 @@ public class ItemDataManager : AsyncDataManager<ItemDataManager>
         }
     }
 
-
+    /*
     async UniTask ReadConsumData(List<Dictionary<string,object>> originData)
     {
         for(int i = 0; i<originData.Count; i++)
@@ -205,8 +205,8 @@ public class ItemDataManager : AsyncDataManager<ItemDataManager>
             if (!itemDatas.ContainsKey(name))
             {
                 ConsumableItem consum = new();
-                consum.id = id;
-                consum.name = name;
+                consum.id = name;
+                //consum.name = name;
                 Utils.TryConvertEnum<ConsumableType>(originData[i], "ItemType", ref consum.consumableType);
                 Utils.TrySetValue(originData[i], "Tier", ref consum.tier);
                 Utils.TrySetValue(originData[i], "Weight", ref consum.weight);
@@ -221,7 +221,64 @@ public class ItemDataManager : AsyncDataManager<ItemDataManager>
         }
         
     }
+    */
+    async UniTask ReadConsumData(List<Dictionary<string, object>> originData)
+    {
+        for (int i = 0; i < originData.Count; i++)
+        {
 
+            string id = null;
+            string name = null;
+            Utils.TrySetValue<string>(originData[i], "ID", ref id);
+            Utils.TrySetValue<string>(originData[i], "Name", ref name);
+
+
+            if (string.IsNullOrEmpty(name))
+            {
+                await Utils.WaitYield(i);
+                continue;
+            }
+
+            if (!itemDatas.ContainsKey(name))
+            {
+                ConsumableItem consum = new ConsumableItem();
+                consum.id = name;             
+                consum.name = name;           
+                consum.category = ItemCategory.Consumable;
+
+                // 추가 데이터 파싱
+                Utils.TryConvertEnum<ConsumableType>(originData[i], "ItemType", ref consum.consumableType);
+                Utils.TrySetValue<int>(originData[i], "Tier", ref consum.tier);
+                Utils.TrySetValue<float>(originData[i], "Weight", ref consum.weight);
+
+                consum.options = new List<Modifier>();
+
+                itemDatas.Add(name, consum);
+            }
+
+            // 2. Modifier 데이터 추가 부분
+            string modifierTypeStr = null;
+            if (Utils.TrySetValue<string>(originData[i], "ModifierType", ref modifierTypeStr))
+            {
+                ModifierType type = Utils.ConvertToEnum<ModifierType>(modifierTypeStr);
+
+                if (modifierPooler != null)
+                {
+                    Modifier mod = modifierPooler.GetModifier(type, id);
+                    if (mod != null)
+                    {
+                        itemDatas[name].options.Add(mod);
+                    }
+                }
+                else
+                {
+                    Debug.LogWarning($"ModifierPooler가 Null입니다! 아이템: {name}");
+                }
+            }
+
+            await Utils.WaitYield(i);
+        }
+    }
     async UniTask ReadMiscData(List<Dictionary<string,object>> originData)
     {
         for(int i = 0; i < originData.Count; i++)

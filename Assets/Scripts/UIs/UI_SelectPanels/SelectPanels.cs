@@ -25,11 +25,13 @@ public class SelectPanels : UI_GridSelect
     private void Awake()
     {
         myInputType = Defines.InputType.GridUI;
-        Init();
+        
         if(SelectObj == null)
         {
             SelectObj = UIManager.instance.Get_PoolUI(UIDefines.UI_PrefabType.SelectView, this.gameObject);
         }
+        Init();
+
     }
     private void OnEnable()
     {
@@ -60,6 +62,14 @@ public class SelectPanels : UI_GridSelect
     {
         raceSelect.Init();
 
+        if (_grid != null && _grid.Count > 0 && _grid[0].Count > 0)
+        {
+            _currentCol = 0;
+            _currentRow = 0;
+
+            // 방향 이동량(Vector2Int.zero)을 0으로 넘겨주어, 위치값 변경 없이 현재(0,0) 위치로 UI만 갱신하도록 만듭니다.
+            ChangeSelection(Vector2Int.zero);
+        }
 
     }
 
@@ -117,25 +127,27 @@ public class SelectPanels : UI_GridSelect
         {
             selected.Excute();
         }
-        
-        SelectObj.transform.SetParent(selected.transform);
-        SelectObj.transform.localPosition = Vector2.zero;
+
         CurrentSelected = selected;
         RectTransform selectedRect = selected.GetComponent<RectTransform>();
         RectTransform selectObjRect = SelectObj.GetComponent<RectTransform>();
 
         if (selectedRect != null && selectObjRect != null)
         {
-            // 앵커를 중앙으로 맞추고 크기를 동일하게 설정
-            selectObjRect.anchorMin = new Vector2(0.5f, 0.5f);
-            selectObjRect.anchorMax = new Vector2(0.5f, 0.5f);
+            // 1. [스케일 왜곡 방지] false를 넣어 로컬 트랜스폼 값을 깔끔하게 유지합니다.
+            SelectObj.transform.SetParent(selected.transform, false);
+
+            // 2. [가려짐 방지] 부모 객체 내에서 가장 마지막 순서로 보내 최상단에 렌더링되게 합니다.
+            SelectObj.transform.SetAsLastSibling();
+
+            selectObjRect.anchorMin = Vector2.zero; // (0, 0)
+            selectObjRect.anchorMax = Vector2.one;  // (1, 1)
             selectObjRect.pivot = new Vector2(0.5f, 0.5f);
 
-            // 대상의 실제 가로, 세로 크기를 복사
-            selectObjRect.sizeDelta = selectedRect.rect.size;
+            // Stretch 앵커이므로 여백과 위치를 0으로 주면 부모와 100% 동일한 크기가 됩니다.
+            selectObjRect.sizeDelta = Vector2.zero;
+            selectObjRect.anchoredPosition = Vector2.zero;
         }
-
-        Debug.Log($"{selected.gameObject.name}");
     }
 
     

@@ -72,25 +72,39 @@ public class ModifierDataManager : AsyncDataManager<ModifierDataManager>
         {
             case ModifierType.StatModifier:
                 StatModifier newStat = new StatModifier();
+                newStat.id = id;
+                newStat.modifierType = type;
                 Modifiers.Add(id, newStat);
                 return newStat;
 
             case ModifierType.BuffModifier:
                 BuffModifier newBuff = new BuffModifier();
+                newBuff.id = id;
+                newBuff.modifierType = type;
                 Modifiers.Add(id, newBuff);
                 return newBuff;
+
             case ModifierType.DamageModifier:
                 DamageModifier newDamage = new DamageModifier();
+                newDamage.id = id;
+                newDamage.modifierType = type;
                 Modifiers.Add(id, newDamage);
                 return newDamage;
+
             case ModifierType.ActionModifier:
                 ActionModifier newAction = new ActionModifier();
+                newAction.id = id;
+                newAction.modifierType = type;
                 Modifiers.Add(id, newAction);
                 return newAction;
+
             case ModifierType.ItemModifier:
                 ItemModifier newItem = new ItemModifier();
+                newItem.id = id;
+                newItem.modifierType = type;
                 Modifiers.Add(id, newItem);
                 return newItem;
+
             default:
                 Debug.Log("StatType Error in GetEmptyModifier_ModifierFactory");
                 return null;

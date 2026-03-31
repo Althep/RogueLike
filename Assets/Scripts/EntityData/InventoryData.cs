@@ -8,45 +8,50 @@ using static UnityEditor.Progress;
 public class InventoryData
 {
     [SerializeField]
-    public List<ItemBase> inventory = new List<ItemBase>();
+
     public int maxInventory = 40;
     private ItemManager itemManager;
-    //public InventoryItemPanel inventoryUI;
+    public ItemBase[] inventory = new ItemBase[40];
+    UI_Inventory inventoryUI;
+
     int gold;
 
-    
 
-    public bool AddingInventory(ItemBase item)
+
+    public bool TryAddInventory(ItemBase item)
     {
         bool canGet = false;
+        int index = Get_EmptyInventoryIndex();
         switch (item.category)
         {
             case Defines.ItemCategory.Equipment:
-                if (InventoryCountCheck())
+                if (InventoryCountCheck(index))
                 {
-                    AddInventory(item);
-                   canGet = true;
+                    AddInventory(item, index);
+                    canGet = true;
                 }
                 break;
             case Defines.ItemCategory.Consumable:
-                if (ConsumableIdCheck(item))
+                index = ConsumableIdCheck(item);
+                if (index !=-1)
                 {
-                    Add_ExistConsumItem(item);
+                    Add_ExistConsumItem(item, index);
                     canGet = true;
                 }
                 else
                 {
-                    if (InventoryCountCheck())
+                    index = Get_EmptyInventoryIndex();
+                    if (InventoryCountCheck(index))
                     {
-                        AddInventory(item);
+                        AddInventory(item, index);
                         canGet = true;
                     }
                 }
                 break;
             case Defines.ItemCategory.Misc:
-                if (InventoryCountCheck())
+                if (InventoryCountCheck(index))
                 {
-                    AddInventory(item);
+                    AddInventory(item, index);
                     canGet = true;
                 }
                 break;
@@ -56,36 +61,69 @@ public class InventoryData
         return canGet;
     }
 
-    public void AddInventory(ItemBase item)
+    void AddInventory(ItemBase item, int index)
     {
         ItemBase copiedItem = item.Clone();
 
-        inventory.Add(copiedItem);
-
+        inventory[index] = copiedItem;
+        UpdateInventory(index);
     }
 
 
-    public bool InventoryCountCheck()
+    int Get_EmptyInventoryIndex()
     {
-        if (inventory.Count+1<maxInventory)
+        for (int i = 0; i<inventory.Length; i++)
+        {
+            if (inventory[i] == null)
+            {
+                return i;
+            }
+        }
+        Debug.Log("Count over!");
+        return -1;
+    }
+
+    bool InventoryCountCheck(int index)
+    {
+        if (index!=-1)
         {
             return true;
         }
         return false;
     }
-
-    public bool ConsumableIdCheck(ItemBase item)
+    int ConsumableIdCheck(ItemBase item)
     {
-        if(inventory.Exists(i => i.id == item.id))
+        for (int i = 0; i<inventory.Length; i++)
         {
-            return true;
+            if (inventory[i]== null)
+            {
+                continue;
+            }
+            if (inventory[i].id == item.id)
+            {
+                return i;
+            }
         }
-        return false;
+        return -1;
     }
 
-    public void Add_ExistConsumItem(ItemBase item)
+    void Add_ExistConsumItem(ItemBase item, int index)
     {
         ItemBase target = inventory.First(i => i.id == item.id);
         target.itemCount+=item.itemCount;
+        UpdateInventory(index);
+    }
+
+    public void Set_InventoryUI(UI_Inventory inventorySc)
+    {
+        inventoryUI = inventorySc;
+    }
+    public void UpdateInventory(int index)
+    {
+        if (inventoryUI == null)
+        {
+            return;
+        }
+        inventoryUI.UpdateItemSlot(index);
     }
 }

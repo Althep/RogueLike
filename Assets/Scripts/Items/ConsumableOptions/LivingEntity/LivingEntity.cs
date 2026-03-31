@@ -11,7 +11,7 @@ public class LivingEntity : MapEntity
     //private Dictionary<ModifierTriggerType, ModifierContext> modifierContext = new Dictionary<ModifierTriggerType, ModifierContext>();
     private Dictionary<SlotType, EquipItem> equipments = new Dictionary<SlotType, EquipItem>();
     [SerializeField] protected SPUM_MatchingList spriteMatching;
-    Astar pathFinder;
+    protected Astar pathFinder;
 
     protected Vector2Int destination;
 
@@ -55,6 +55,10 @@ public class LivingEntity : MapEntity
         //modifierController.InitContext(this);
         myObj = this.gameObject;
         InitStat();
+        if(pathFinder == null)
+        {
+            pathFinder = new Astar(this.gameObject);
+        }
     }
 
     protected virtual void InitStat()

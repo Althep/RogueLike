@@ -14,9 +14,8 @@ public abstract class ItemBase
     public Defines.ItemCategory category;
     public float weight;
     public List<Modifier> options = new List<Modifier>();
-    LivingEntity entity;
 
-    public void OnUse()
+    public void OnUse(LivingEntity entity)
     {
         List<BuffModifier> buffs = options.OfType<BuffModifier>().ToList();
         
@@ -65,7 +64,6 @@ public abstract class ItemBase
         cloneObj.weight = this.weight;
 
         // 엔티티 참조는 그대로 넘겨주거나 null로 초기화합니다. (상황에 맞게 선택)
-        cloneObj.entity = this.entity;
 
         // ?? 핵심: 리스트 내부의 옵션들까지 '깊은 복사' 수행
         cloneObj.options = new List<Modifier>();

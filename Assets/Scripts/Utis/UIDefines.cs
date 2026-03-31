@@ -15,7 +15,8 @@ public static class UIDefines
         Confirm,
         MainSelect,
         ItemSelect,
-        SelectView
+        SelectView,
+        InventorySlot
     }
 
 }

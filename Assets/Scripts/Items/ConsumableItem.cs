@@ -7,7 +7,7 @@ public class ConsumableItem : ItemBase
 
     public override ItemBase Clone()
     {
-        ConsumableItem newConsum = ItemManager.instance.ItemMake(id) as ConsumableItem;
+        ConsumableItem newConsum = ItemManager.instance.ItemMake(name) as ConsumableItem;
         CopyBaseProperties(newConsum);
         newConsum.consumableType = consumableType;
         return newConsum;

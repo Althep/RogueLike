@@ -47,6 +47,7 @@ public class ItemFactory
         }
         int tier = GetRandomTier(type);
         string key = itemDataManager.GetRandomID(type, tier);
+        Debug.Log($"Random Item ID {key}");
         return GetItemScript(key);
     }
     
@@ -115,7 +116,6 @@ public class ItemFactory
         ItemBase item;
         switch (origin.category)
         {
-
             case Defines.ItemCategory.Equipment:
                 item = new EquipItem();
                 if(origin is EquipItem)
@@ -156,12 +156,11 @@ public class ItemFactory
 
             // Pool에서 해당 타입 객체 가져오기
             PoolScriptType poolType = (PoolScriptType)Enum.Parse(typeof(PoolScriptType), modType.ToString());
-            IPoolScript pooled = pooler.GetModifier(modType,origin.id);
+            IPoolScript pooled = pooler.GetModifier(modType, modi.id);
 
             if (pooled is Modifier newOne)
             {
-                
-                modi.Copy(newOne); // origin 데이터를 풀에서 꺼낸 객체에 덮어쓰기
+                modi.Copy(newOne);
                 item.options.Add(newOne);
             }
             else

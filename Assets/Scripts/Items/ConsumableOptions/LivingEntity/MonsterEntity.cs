@@ -7,7 +7,9 @@ public class MonsterEntity : LivingEntity
     //[SerializeField]protected MonsterStat monsterStat;
 
     [SerializeField] int MaxHP = 0;
-
+    [SerializeField] int actPoint = 0;
+    [SerializeField] MonsterState myState;
+    MonsterStateMachine myStateMachine;
     private void Awake()
     {
         OnAwake();
@@ -22,6 +24,10 @@ public class MonsterEntity : LivingEntity
         base.Init();
         modifierController.SetMyEntity(this);
         spriteRenderer = GetComponentsInChildren<SpriteRenderer>();
+        if(myStateMachine == null)
+        {
+            myStateMachine = new MonsterStateMachine(pathFinder, this);
+        }
     }
     public void InitMonster()
     {
@@ -39,6 +45,19 @@ public class MonsterEntity : LivingEntity
         base.SetMyStat(stat);
         Debug.Log("Set My Stat!");
         InitMonster();
+    }
+
+    public void Add_ActPoint(int point)
+    {
+        actPoint+=point;
+    }
+    public int Get_ActPoint()
+    {
+        return actPoint;
+    }
+    public void Set_MyState(MonsterState state)
+    {
+        myState = state;
     }
     public MonsterEntity CopyData(MonsterEntity entity)
     {

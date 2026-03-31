@@ -65,6 +65,7 @@ public class ModifierPooler
     public IPoolScript CreateNew(ModifierType type, string id)
     {
         IPoolScript modifier = null;
+        Debug.Log($"Create New Modifier Script {id}");
         if(modifierFactory == null)
         {
             Debug.Log("모디파이어 팩토리 널!");
