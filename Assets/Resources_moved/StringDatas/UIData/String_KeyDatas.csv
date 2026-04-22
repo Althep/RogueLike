@@ -1,0 +1,165 @@
+KeyName,En,Kr
+NewGame,New Game,새 게임
+LoadGame,Load Game,이어하기
+Options,Options,옵션
+Exit,Exit,끝내기
+Clump,Clump,클럼프
+Rat,Rat,쥐
+Goblin,Goblin,고블린
+CaveOgre,Cave Ogre,동굴오거
+Kobold,Kobold,코볼트
+KoboldMagician,Kobold Magician,코볼트 마법사
+Orc,Orc,오크
+OrcMagician,Orc Magician,오크 마법사
+Ogre,Ogre,오거
+OgreMagician,Ogre Magician,오크 마법사
+IceBeast,Ice Beast,아이스 비스트
+Imp,Imp,임프
+FireElemental,FireElemental,불의 정령
+AssassinBug,AssassinBug,어쌔신 버그
+Centaur,Centaur,켄타우로스
+CentaurWarrior,Centaur Warrior,켄토우로스 전사
+Slime,Slime,슬라임
+Troll,Troll,트롤
+DungeonBorn,DungeonBorn,던전 본
+HellHound,HellHound,헬하운드
+Succubus,Succubus,서큐버스
+FloatingEye,FloatingEye,주시자
+FierDrake,FierDrake,파이어 드레이크
+IceDrake,IceDrake,아이스 드레이크
+GrayDrake,GrayDrake,그레이 드레이크
+Elf,Elf,엘프
+ElfMage,ElfMage,엘프 메이지
+ElfKnight,ElfKnight,엘프 나이트
+GiantGolem,GiantGolem,자이언트 골렘
+ShadowStalker,ShadowStalker,그림자 추적자
+ThunderDragon,ThunderDragon,썬더 드래곤
+FireDragon,FireDragon,파이어 드래곤
+IceDragon,IceDragon,아이스 드래곤
+Ballrog,Ballrog,발록
+Hp,Hp,체력
+MaxHP,MaxHP,최대체력
+MP,MP,마나
+MaxMP,MaxMP,최대마나
+Str,Str,힘
+Dex,Dex,민첩
+Int,Int,지능
+Evasion,Evasion,회피율
+Defense,Defense,방어율
+DamageReduce,DamageReduce,대미지감소
+ShieldDefense,ShieldDefense,방패막기
+Damage,Damage,대미지
+Accrueancy,Accrueancy,명중률
+AttackRange,AttackRange,공격범위
+SpellDamage,SpellDamage,마법 공격력
+SpellAccurancy,SpellAccurancy,마법 명중률
+SpellSpeed,SpellSpeed,시전 속도
+Disruption,Disruption,방해도
+FireResist,FireResist,화염 저항력
+IceResist,IceResist,냉기 저항력
+MagicResist,MagicResist,마법 저항력
+ThunderResist,ThunderResist,번개 저항력
+Vision,Vision,시야범위
+Sound,Sound,소음도
+MoveSpeed,MoveSpeed,이동 속도
+AttackSpeed,AttackSpeed,공격 속도
+MaxExp,MaxExp,필요 경험치
+Exp,Exp,경험치
+Regeneration,Regeneration,재생도
+Tir,Tir,티어
+ExtraLife,ExtraLife,추가생명
+AwakeRate,AwakeRate,기상확률
+Elf,Elf,엘프
+Dwarf,Dwarf,드워프
+Human,Human,인간
+Orc,Orc,오크
+SpellBane,SpellBane,스펠베인
+DungeonBorn,DungeonBorn,던전본
+StoneBorn,StoneBorn,돌의 아이
+Rabbitfolk,Rabbitfolk,토끼발
+Warrior,Warrior,전사
+Hunter,Hunter,사냥꾼
+Rogue,Rogue,도적
+Mage,Mage,마법사
+BattleMaster,BattleMaster,전투달인
+Assassin,Assassin,암살자
+Wonderer,Wonderer,방랑자
+Engineer,Engineer,공학자
+CurePotion,CurePotion,치유 물약
+HealingPotion,HealingPotion,회복 물약
+PoisonPotion,PoisonPotion,독 물약
+DizzyPotion,DizzyPotion,혼란의 물약
+StrengthPotion,StrengthPotion,힘의 물약
+AgilityPotion,AgilityPotion,민첩의 물약
+IntelligencePotion,IntelligencePotion,지능의 물약
+WarriorPotion,WarriorPotion,전사의 물약
+MpHealingPotion,MpHealingPotion,마나 회복 물약
+InvisiblePotion,InvisiblePotion,투명화 물약
+RandomPotion,RandomPotion,무작위 효과 물약
+MutatePotion,MutatePotion,돌연변이 물약
+QuicknessPotion,QuicknessPotion,신속의 물약
+EagleEyePotion,EagleEyePotion,독수리의 눈 물약
+FireResistPotion,FireResistPotion,화염 저항의 물약
+IceResistPotion,IceResistPotion,냉기 저항의 물약
+RegenerationPotion,RegenerationPotion,재생의 물약
+GhostPotion,GhostPotion,유령화의 물약
+TrollsBlood,TrollsBlood,트롤의 피
+VamfierBlood,VamfierBlood,흡혈귀의 피
+PhoenixTears,PhoenixTears,불사조의 눈물
+ElixirOfApex,ElixirOfApex,정점의 영약
+ElixirOfSoul,ElixirOfSoul,영혼의 영약
+ElixirOfAccelerate,ElixirOfAccelerate,가속의 영약
+IdentifyScroll,IdentifyScroll,확인의 두루마리
+CurseScroll,CurseScroll,저주의 두루마리
+PurificationScroll,PurificationScroll,정화의 두루마리
+LongScroll,LongScroll,긴 두루마리
+TellevisionScroll,TellevisionScroll,시야의 두루마리
+ArmorrReinforceScroll,ArmorrReinforceScroll,방어구 강화의 두루마리
+WeaponReinforceScroll,WeaponReinforceScroll,무기 강화의 두루마리
+ParchmentOfNagging,ParchmentOfNagging,재잘거리는 양피지
+BlinkScroll,BlinkScroll,순간이동의 두루마리
+TelleprtScroll,TelleprtScroll,공간이동의 두루마리
+InfernoScroll,InfernoScroll,지옥의 두루마리
+XrayScroll,XrayScroll,투과의 두루마리
+SleepScroll,SleepScroll,수면의 두루마리
+SilenceScroll,SilenceScroll,침묵의 두루마리
+WishScroll,WishScroll,소원의 두루마리
+GorgonScroll,GorgonScroll,석화의 두루마리
+VoidScroll,VoidScroll,공허의 두루마리
+Scroll of Essence Extraction,Scroll of Essence Extraction,추출의 두루마리
+CombatKnife,CombatKnife,전투용 단검
+Dagger,Dagger,단검
+ShortSword,ShortSword,숏소드
+Stiletto,Stiletto,스틸레토
+Kris,Kris,크리스
+LongSword,LongSword,장검
+BroadSword,BroadSword,브로드소드
+Falchion,Falchion,팔치온
+GreatSword,GreatSword,그레이트소드
+Claymore,Claymore,클레이모어
+Katana,Katana,카타나
+Club,Club,몽둥이
+Mace,Mace,메이스
+MorningStar,MorningStar,모닝스타
+WarHammer,WarHammer,워해머
+HandAxe,HandAxe,손도끼
+BattleAxe,BattleAxe,전투도끼
+BroadAxe,BroadAxe,브로드액스
+Executioner’s Axe,Executioner’s Axe,처형자의 도끼
+Spear,Spear,창
+Trident,Trident,트라이던트
+Glaive,Glaive,글레이브
+Bardiche,Bardiche,바디셰
+ShortBow,ShortBow,숏보우
+CompositeBow,CompositeBow,컴포짓보우
+Crossbow,Crossbow,크로스보우
+Longbow,Longbow,롱보우
+Rob,Rob,로브
+LeatherArmor,LeatherArmor,가죽값옷
+ChainMail,ChainMail,체인 메일
+ScaleMail,ScaleMail,스케일 메일
+HalfPlate,HalfPlate,하프 플레이트
+PlateMail,PlateMail,플레이트 아머
+GothicPlate,GothicPlate,고딕 플레이트
+Glove,Glove,글러브
+Boots,Boots,부츠

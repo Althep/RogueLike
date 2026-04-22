@@ -25,10 +25,10 @@ public class Astar
     {
         _path.Clear();
 
-        Vector2Int startPos = new Vector2Int((int)_owner.transform.position.x, (int)_owner.transform.position.y);
+        Vector2Int startPos = new Vector2Int(Mathf.RoundToInt(_owner.transform.position.x), Mathf.RoundToInt(_owner.transform.position.y));
 
         // 도착지점이 벽(255)이라면 길을 찾을 수 없음
-        if (_navLayer[dest.x, dest.y] >= 255) return _path;
+        //if (_navLayer[dest.x, dest.y] >= 255) return _path;
 
         PriorityQueue<Node> openList = new PriorityQueue<Node>();
         Dictionary<Vector2Int, Node> allNodes = new Dictionary<Vector2Int, Node>();
@@ -57,7 +57,7 @@ public class Astar
 
                 // 2. MapLayer 인덱서를 통한 벽(255) 및 가중치 확인
                 byte weight = _navLayer[nextPos.x, nextPos.y];
-                if (weight >= 255) continue;
+                if (weight >= 255 && nextPos != dest) continue;
 
                 // 3. 비용 계산: 이전G + 이동비용(10) + 타일 가중치
                 int newG = current.G + moveCost + weight;

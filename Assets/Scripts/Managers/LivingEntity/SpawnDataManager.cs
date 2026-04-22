@@ -40,7 +40,7 @@ public class SpawnDataManager : AsyncDataManager<SpawnDataManager>
     {
         List<Dictionary<string, object>> originData = Utils.TextAssetParse(myAsset);
         await SetSpawnData(originData);
-
+        /*
         foreach(var tier in spawnDatas.Keys)
         {
             List<MonsterSpawnDataBundle> bundles = spawnDatas[tier];
@@ -55,7 +55,7 @@ public class SpawnDataManager : AsyncDataManager<SpawnDataManager>
             }
 
 
-        }
+        }*/
     }
 
 

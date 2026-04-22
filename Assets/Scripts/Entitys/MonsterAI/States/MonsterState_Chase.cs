@@ -12,13 +12,15 @@ public class MonsterState_Chase : MonsterBaseState
     public override Vector2Int Get_Destination(Vector2Int myPos, Vector2Int target)
     {
         List<Node> nods = pathFinder.Get_Path(target);
-        if(nods.Count == 0)
+        if(nods.Count < 2)
         {
+            Debug.Log($"Node Count 0 return myPos {myPos}");
             return myPos;
         }
         else
         {
-            return new Vector2Int(nods[0].x,nods[0].y);
+            Debug.Log($"My Pos {myPos} return pos {nods[1].x },{nods[1].y} ");
+            return new Vector2Int(nods[1].x,nods[1].y);
         }
     }
 }

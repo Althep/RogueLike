@@ -13,10 +13,6 @@ public class Modifier : IPoolScript
     public bool isMulti;
     public float value;
     public ModifierType modifierType;
-    public virtual void Apply(LivingEntity entity)
-    {
-
-    }
 
     public PoolScriptType GetScriptType()
     {
@@ -47,6 +43,18 @@ public class Modifier : IPoolScript
         isMulti = false;
         value = 0;
     }
+
+    public ModifierSaveData SaveData()
+    {
+        ModifierSaveData saveData = new ModifierSaveData {value = value, modifierId = id };
+
+        return saveData;
+    }
+
+    public virtual void Apply(LivingEntity entity)
+    {
+
+    }
 }
 
 public class StatModifier : Modifier
@@ -72,7 +80,7 @@ public class StatModifier : Modifier
         this.isMulti = isMulty;
         this.priority = priority;
     }
-   public override void Apply(LivingEntity entity)
+    public override void Apply(LivingEntity entity)
     {
         ModifierContext context = entity.GetContext(triggerType);
         if (isMulti)
@@ -92,7 +100,7 @@ public class StatModifier : Modifier
             context.stats[stat] += value;
         }
     }
-    
+
     public override void Copy(Modifier newOne)
     {
         base.Copy(newOne);
@@ -125,10 +133,10 @@ public class BuffModifier : Modifier
     }
     public override void Apply(LivingEntity entity)
     {
-
-        duration = UnityEngine.Random.Range(minTime, maxTime+1);
+        int duration = UnityEngine.Random.Range(minTime, maxTime+1);
         EventManager.instance.AddBuff(entity, this, duration);
     }
+    
     void GetStats()
     {
 
@@ -242,7 +250,7 @@ public class ActionModifier: Modifier
         int duration = 0;
         for(int i = 0; i<effects.Count; i++)
         {
-            if(effects[i] is BuffAction buff)
+            if(effects[i] is BuffAction buff && buff.effectName == effectName) //중복 검사&검사 후 중복되어있다면 버프시간 갱신
             {
                 duration = UnityEngine.Random.Range(buff.minTime,buff.maxTime+1);
                 break;
@@ -251,7 +259,7 @@ public class ActionModifier: Modifier
         
         for(int i = 0; i<effects.Count; i++)
         {
-            if (effects[i] is BuffAction buff)
+            if (effects[i] is BuffAction buff && buff.effectName == effectName)
             {
                 buff.SetDuration(duration);
             }
@@ -261,10 +269,7 @@ public class ActionModifier: Modifier
         {
             context.modifierActions.Add(action);
         }
-        else
-        {
-            //버프 시간 갱신등의 아이템 효과 갱신 필요
-        }
+
     }
 
     

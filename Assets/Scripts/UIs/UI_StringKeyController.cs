@@ -4,48 +4,34 @@ using System.Collections.Generic;
 using TMPro;
 public class UI_StringKeyController : MonoBehaviour
 {
-    StringKeyManager skManager;
-    string myKey;
-    string myText;
+    [SerializeField] string myKey;
     TextMeshProUGUI myTmp;
 
     private void Awake()
     {
-        Init();
-    }
-
-    public void Init()
-    {
         Set_MyTMP();
-        skManager = UIManager.instance.GetStringKeyManager();
-        skManager.Add_StringKey(this);
     }
 
     public void Set_MyKey(string key)
     {
-        
         myKey = key;
-        myTmp.text = key;
+        StringKeyManager.Instance.FontUpdate(this);
+        myTmp.text = StringKeyManager.Instance.Get_StringData(key);
     }
 
     public void UpdateText()
     {
-        Set_MyText();
         Set_MyTMP();
     }
 
-    public void Set_MyText()
+    public void Set_MyText(string text)
     {
-        if (skManager == null)
+        if (myKey == null || myTmp == null)
         {
-            skManager = GameManager.instance.Get_StringKeyManager();
-        }
-        if (myKey == null)
-        {
-            Debug.Log($"MyKey Null {this.gameObject.name}");
+            Debug.Log($"MyKey or my TMP Null {this.gameObject.name}");
             return;
         }
-        myText = skManager.Get_StringData(myKey);
+        myTmp.text = text;
     }
     public void Set_MyTMP()
     {
@@ -53,6 +39,17 @@ public class UI_StringKeyController : MonoBehaviour
         {
             myTmp = Utils.GetOrAddComponent<TextMeshProUGUI>(this.gameObject);
         }
-        myTmp.text = myText;
+        StringKeyManager keyManager = StringKeyManager.Instance;
+        keyManager.Add_StringKey(this);
+        
+    }
+
+    public string Get_MyKey()
+    {
+        return myKey;
+    }
+    public TextMeshProUGUI Get_MyTmp()
+    {
+        return myTmp;
     }
 }

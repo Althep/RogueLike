@@ -15,10 +15,13 @@ public class MonsterManager : MonoBehaviour
     [SerializeField] MonsterFactory monsterFactory;
     [SerializeField] DungeonManager dungeonManager;
 
-    List<MapEntity> monsters = new List<MapEntity>();
+    List<MonsterEntity> monsters = new List<MonsterEntity>();
 
     Dictionary<int, float> tierRates = new Dictionary<int, float>();
+
     float spawnPoint = 10;
+
+    PlayerEntity playerEntity;
     private async UniTask Awake()
     {
         if (monsterSpawner == null)
@@ -63,6 +66,10 @@ public class MonsterManager : MonoBehaviour
         {
             dataManager = GameManager.instance.Get_DataManager();
         }
+        if(playerEntity == null)
+        {
+            playerEntity = PlayerController.instance.Get_PlayerEntity();
+        }
         monsterFactory.Init();
     }
     public async UniTask SetUp(List<TextAsset> myAssets)
@@ -78,7 +85,7 @@ public class MonsterManager : MonoBehaviour
         }
         foreach(var asset in myAssets)
         {
-            if (asset.name.Contains("Stat"))
+            if (asset.name.Contains("StatData"))
             {
                 Debug.Log("몬스터 스탯 데이터 리드");
                 await monsterDataManager.SetUp(asset);
@@ -143,7 +150,7 @@ public class MonsterManager : MonoBehaviour
 
         foreach(var bundle in bundleList)
         {
-             List<LivingEntity> faction = GetMonsters(bundle);
+             List<MonsterEntity> faction = GetMonsters(bundle);
             mapManager.SetMonsterRandomPosition(faction);
             monsters.AddRange(faction);
         }
@@ -151,12 +158,12 @@ public class MonsterManager : MonoBehaviour
 
         await UniTask.Yield();
     }
-    List<LivingEntity> GetMonsters(MonsterSpawnDataBundle spawnData)
+    List<MonsterEntity> GetMonsters(MonsterSpawnDataBundle spawnData)
     {
-        List<LivingEntity> faction = new();
+        List<MonsterEntity> faction = new();
         foreach(var key in spawnData.spawnDatas.Keys)
         {
-            List<LivingEntity> monster = monsterSpawner.MonsterSpawn(spawnData.spawnDatas[key]);
+            List<MonsterEntity> monster = monsterSpawner.MonsterSpawn(spawnData.spawnDatas[key]);
             faction.AddRange(monster);
         }
         return faction;
@@ -188,9 +195,9 @@ public class MonsterManager : MonoBehaviour
 
     public void AddToMonsterList(MapEntity go)
     {
-        if (!monsters.Contains(go))
+        if (!monsters.Contains(go) && go is MonsterEntity monster)
         {
-            monsters.Add(go);
+            monsters.Add(monster);
         }
     }
     
@@ -221,4 +228,34 @@ public class MonsterManager : MonoBehaviour
     }
     #endregion
 
+    public async UniTask OnTurnEnd(float actPoint)
+    {
+        int ap = (int)actPoint;
+        for(int i = 0; i <monsters.Count; i++)
+        {
+            monsters[i].Add_ActPoint(ap);
+            await monsters[i].ReadyAction();
+            Debug.Log($"Act Point to {monsters[i].gameObject.name}");
+        }
+
+
+    }
+
+
+    public void RemoveMonster(LivingEntity entity)
+    {
+        if (!monsters.Contains(entity))
+        {
+            Debug.Log("Monster Don;t Contained");
+            return;
+        }
+        if(entity is MonsterEntity monster)
+        {
+            monsters.Remove(monster);
+        }
+        else
+        {
+            Debug.Log("Entity is not Monster Entity");
+        }
+    }
 }

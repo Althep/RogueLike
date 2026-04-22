@@ -1,6 +1,8 @@
 using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
+using Unity.VisualScripting;
+
 public class UI_InventorySlot : UI_Buttons
 {
     [SerializeField]int index;
@@ -10,7 +12,7 @@ public class UI_InventorySlot : UI_Buttons
 
     Image icon;
     TextMeshProUGUI itemCountText;
-    TextMeshProUGUI itemNameText;
+    UI_StringKeyController itemNameController;
     private void Awake()
     {
         Init();
@@ -36,9 +38,9 @@ public class UI_InventorySlot : UI_Buttons
         {
             itemCountText = ItemCountGo.transform.GetComponent<TextMeshProUGUI>();
         }
-        if(itemNameText == null)
+        if(itemNameController == null)
         {
-            itemNameText = ItemNameGo.transform.GetComponent<TextMeshProUGUI>();
+            itemNameController = ItemNameGo.transform.GetComponent<UI_StringKeyController>();
         }
         AllChangeActive(false);
         
@@ -100,36 +102,36 @@ public class UI_InventorySlot : UI_Buttons
 
     public void SlotDataUpdate(ConsumableItem consum)
     {
-        Sprite sprite = SpriteManager.instance.GetSprite(consum.id);
+        Sprite sprite = SpriteManager.instance.Get_Sprite(consum.id);
         if(sprite != null)
         {
             icon.sprite = sprite;
         }
         
         itemCountText.text = consum.itemCount.ToString();
-        itemNameText.text = consum.name.ToString();
+        itemNameController.Set_MyKey(consum.name);
         Debug.Log("ConsumUpdate");
     }
 
     public void SlotDataUpdate(EquipItem equip)
     {
-        Sprite sprite = SpriteManager.instance.GetSprite(equip.id);
+        Sprite sprite = SpriteManager.instance.Get_Sprite(equip.id);
         if (sprite != null)
         {
             icon.sprite = sprite;
         }
-        itemNameText.text = equip.name;
+        itemNameController.Set_MyKey(equip.name);
         Debug.Log("EquipUpdate");
     }
 
     public void SlotDataUpdate(MiscItem misc)
     {
-        Sprite sprite = SpriteManager.instance.GetSprite(misc.id);
+        Sprite sprite = SpriteManager.instance.Get_Sprite(misc.id);
         if (sprite != null)
         {
             icon.sprite = sprite;
         }
-        itemNameText.text = misc.name;
+        itemNameController.Set_MyKey(misc.name);
         Debug.Log("MiscUpdate");
     }
     public override void Excute()

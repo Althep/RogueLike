@@ -63,12 +63,19 @@ public class CombatManager : MonoBehaviour
 
         // 명중 확률 계산
         float chance = (float)(hitRoll + roll) / (hitRoll + roll + evadeRoll);
-
+        bool isHit = UnityEngine.Random.value < chance;
+        if (isHit)
+        {
+            if(target is MonsterEntity monster)
+            {
+                monster.Set_LastAttacker(attacker);
+            }
+        }
         // 최소 명중률 적용 (후반부도 너무 낮지 않게)
         //float minHitChance = 0.55f;
         //chance = Mathf.Max(chance, minHitChance);
 
-        return UnityEngine.Random.value < chance;
+        return isHit;
     }
 
     public float CalculateMeleeAttackDamage(LivingEntity attacker, LivingEntity target, bool isCritical)
@@ -113,7 +120,9 @@ public class CombatManager : MonoBehaviour
 
         totalDamage += attributeBonus;
         totalDamage -= targetData[StatType.DamageReduce];
-
+        int randomDamage = Mathf.RoundToInt(UnityEngine.Random.Range(0, totalDamage));
+        Debug.Log($"Random damage : {randomDamage}");
+        GetDamage(attacker,target,randomDamage);
         return Mathf.Max(0, totalDamage);        
     }
     public int CalculateElementResist(LivingEntity target, DamageType damageType)
@@ -144,6 +153,10 @@ public class CombatManager : MonoBehaviour
         return resist * damageReduce;
     }
 
-
+    public void GetDamage(LivingEntity attacker,LivingEntity targetEntity,int damage)
+    {
+        targetEntity.GetDamage(attacker,damage);
+        Debug.Log($"Excute GetDamage{targetEntity.id}");
+    }
 
 }

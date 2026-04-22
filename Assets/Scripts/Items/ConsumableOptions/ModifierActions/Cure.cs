@@ -19,7 +19,7 @@ public class Cure : ModifierAction
 
     public override void Excute(LivingEntity entity)
     {
-        Dictionary<ModifierTriggerType,List<Modifier>> modList = entity.GetModifiers();
+        Dictionary<ModifierTriggerType,List<Modifier>> modList = entity.GetBuffs();
         List<Modifier> debuffs = new List<Modifier>();
         foreach(var modi in modList.Keys)
         {
@@ -33,7 +33,7 @@ public class Cure : ModifierAction
         }
         for(int i = 0; i<debuffs.Count; i++)
         {
-            entity.RemoveModifier(debuffs[i]);
+            entity.Remove_BuffModifier(debuffs[i]);
         }
     }
 

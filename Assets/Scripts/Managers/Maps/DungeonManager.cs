@@ -49,12 +49,42 @@ public class DungeonManager : MonoBehaviour
         return tierCalculator;
     }
 
-    void OnFloorChange()
+    public void ChangeFloor(int changes)
     {
-        floor++;
+        floor+=changes;
+        Debug.Log("floor Changed");
+        OnFloorChange();
+    }
+    public void OnFloorChange()
+    {
+        if(floor <= 0)
+        {
+            Debug.Log("Game End");
+        }
+        if (visitiedFloor.Contains(floor))
+        {
+            VisitedFloor();
+        }
+        else
+        {
+            VisitNewFloor();
+        }
+    }
+    public void VisitNewFloor()
+    {
+        if (visitiedFloor.Contains(floor))
+        {
+            Debug.Log("Floor Error Floor Already Visited");
+            return;
+        }
+        visitiedFloor.Add(floor);
         monsterManager.OnFloorChange();
         itemManager.OnFloorChange();
         mapManager.CalculateInitialCost();
+    }
+    void VisitedFloor()
+    {
+        
     }
 
     public async UniTask GenerateDungeon()

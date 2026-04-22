@@ -3,6 +3,7 @@ using UnityEngine;
 public class TileEntity : MapEntity
 {
     public GameObject upperObj;
+    public int spriteIndex = 0;
     private void Awake()
     {
         
@@ -23,4 +24,5 @@ public class TileEntity : MapEntity
         upperObj = null;
     }
 
+    
 }

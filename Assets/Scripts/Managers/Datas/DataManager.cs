@@ -20,6 +20,7 @@ public class DataManager
     public MonsterManager monsterManager;
     public EffectDataManager effectDataManager;
     public UIDataManager uiDataManager;
+    public StringKeyManager stringkeyManager;
     #region 어드레서블 데이터 이름
     #region 아이템
     string ConsumItem;
@@ -75,6 +76,10 @@ public class DataManager
         {
             uiDataManager = await UIDataManager.CreateAsync();
         }
+        if(stringkeyManager == null)
+        {
+            stringkeyManager = StringKeyManager.Instance;
+        }
         await itemDataManager.Init();
         await startDataManager.Init();
         await DataRead();
@@ -97,6 +102,7 @@ public class DataManager
         await startDataMgr.SetUp(allAssets.Where(a => a.name.StartsWith("Start_")).ToList());
         await monsterManager .SetUp(allAssets.Where(a => a.name.StartsWith("Monster_")).ToList());
         await uiDataManager.SetUp(allAssets.Where(a => a.name.StartsWith("UI_")).ToList());
+        stringkeyManager.SetUp(allAssets.FirstOrDefault(a=> a.name.StartsWith("String_")));
         Debug.Log("모든 하위 매니저에게 데이터 배분 완료");
     }
 

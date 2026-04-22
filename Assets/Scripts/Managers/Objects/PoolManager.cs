@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using Cysharp.Threading.Tasks;
 public class PoolManager : MonoBehaviour
 {
+    public static PoolManager instance;
     ObjectPooler pooler;
     [SerializeField]GameObject tilePrepab;
     [SerializeField] GameObject wallPrefab;
@@ -25,6 +26,10 @@ public class PoolManager : MonoBehaviour
     
     private void Init()
     {
+        if(PoolManager.instance == null)
+        {
+            PoolManager.instance = this;
+        }
         if(pooler == null)
         {
             pooler = new ObjectPooler(tilePrepab,wallPrefab,doorPrefab,shallowWaterPrefab,deepWaterPrefab,upStairPrefab,downStairPrefab,playerPrefab,monsterPrefab,itemPrefab);

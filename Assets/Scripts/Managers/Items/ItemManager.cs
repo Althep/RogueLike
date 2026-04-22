@@ -44,15 +44,15 @@ public class ItemManager :MonoBehaviour
     {
         GameObject go = poolManager.ObjectPool(Defines.TileType.Item);
         ItemEntity entity = go.transform.GetComponent<ItemEntity>();
-        entity.item = itemFactory.GetRandomItem();
+        entity.Set_ItemData(itemFactory.GetRandomItem());
         return go;
     }
     public GameObject MakeRandomItem(Vector2 pos)
     {
         GameObject go = poolManager.ObjectPool(Defines.TileType.Item);
         ItemEntity entity = go.GetComponent<ItemEntity>();
-        entity.item = itemFactory.GetRandomItem();
-        entity.id = entity.item.name;
+        entity.Set_ItemData(itemFactory.GetRandomItem());
+        entity.id = entity.GetItem().name;
         Vector3 targetPos = new Vector3(pos.x, pos.y, -1);
         go.transform.position = targetPos;
         

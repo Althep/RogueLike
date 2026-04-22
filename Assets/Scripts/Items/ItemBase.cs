@@ -74,4 +74,17 @@ public abstract class ItemBase
             cloneObj.options.Add(copied);
         }
     }
+
+    public virtual ItemSaveData SaveData()
+    {
+        ItemSaveData itemSaveData = new ItemSaveData();
+        List<ModifierSaveData> myModifiers = new List<ModifierSaveData>();
+        for(int i = 0; i<options.Count; i++)
+        {
+            myModifiers.Add(options[i].SaveData());
+        }
+        itemSaveData.itemModifiers = myModifiers;
+
+        return itemSaveData;
+    }
 }

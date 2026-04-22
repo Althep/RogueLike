@@ -29,7 +29,7 @@ public class MonsterStat : EntityStat
         MonsterStat newStat = new MonsterStat();
         foreach (StatType stat in baseStat.Keys)
         {
-            newStat.SetBaseStat(stat, baseStat[stat]);
+            newStat.AddBaseStat(stat, baseStat[stat]);
         }
         newStat.level = level;
         newStat.SetName(entityName);

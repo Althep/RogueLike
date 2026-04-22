@@ -22,4 +22,12 @@ public class UpStairEntity : MapEntity
     {
         stairNumer = 0;
     }
+
+    public override SpecialObjectData Get_SaveData()
+    {
+        SpecialObjectData saveData = new SpecialObjectData { x = posKey.x, y=posKey.y, tileType = this.GetMyType() };
+        saveData.x = posKey.x;
+        saveData.y = posKey.y;
+        return saveData;
+    }
 }

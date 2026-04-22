@@ -2,16 +2,20 @@ using UnityEngine;
 using System;
 using System.Collections.Generic;
 using static Defines;
-
 public class MonsterStateMachine
 {
     Dictionary<MonsterState, MonsterBaseState> states = new Dictionary<MonsterState, MonsterBaseState>();
 
     Astar pathFindger;
     MonsterEntity myEntity;
-
-    MonsterState currentState;
+    public MonsterState currentState { get; private set; }
     MonsterBaseState currentMachine;
+
+    // ?? [핵심 변경 1] MapEntity가 아닌 ITargetable로 타겟을 관리합니다.
+    public ITargetable currentTarget { get; private set; }
+
+    // 이벤트로 들은 소리 위치를 기억하는 가짜 타겟
+    private LocationTarget heardTarget = null;
 
     public MonsterStateMachine(Astar astar, MonsterEntity myEntity)
     {
@@ -26,150 +30,140 @@ public class MonsterStateMachine
 
     public void InitState()
     {
-        ChangeState(MonsterState.Idle); // 초기 상태 설정 예시
+        ChangeState(MonsterState.Idle);
     }
 
-    // [핵심 조립 포인트] 플로우차트의 흐름을 그대로 구현한 상태 결정 함수
-    public void UpdateMonsterState(LivingEntity target)
+    // [추가] 외부(SoundEventManager 등)에서 소리를 들었을 때 이 함수를 호출해 줍니다.
+    public void OnHearSound(Vector2Int soundPos)
     {
-        // 1. 공격 행동력 체크 (AttackSpeed < ActPoint)
-        if (CheckAttackSpeed())
+        heardTarget = new LocationTarget(soundPos); // 순회 없이 좌표만 생성해서 기억!
+    }
+
+    public Vector2Int Get_Destination()
+    {
+        // 타겟이 없으면 제자리 반환, 있으면 타겟의 GridPos 반환
+        if (currentTarget == null || !currentTarget.IsValid) return myEntity.GridPos;
+        return states[currentState].Get_Destination(myEntity.GridPos, currentTarget.GridPos);
+    }
+
+    // ?? [핵심 변경 2] 인자로 타겟을 받지 않고, 내부에서 우선순위에 따라 타겟을 결정합니다.
+    public void UpdateMonsterState()
+    {
+        // --- 1. 타겟 설정 (우선순위: 눈앞의 적 > 들었던 소리) ---
+
+        // Player 싱글톤이나 맵매니저에서 플레이어 객체를 가져옵니다 (단 1번의 참조)
+        PlayerEntity player = GameManager.instance.Get_PlayerEntity();
+
+        if (player != null && IsInVision(player))
         {
-            // 플로우차트의 첫 번째 InVision (사거리 및 시야 내에 있어 공격 가능한가?)
-            if (IsAttackable(target))
-            {
-                ChangeState(MonsterState.Attack);
-                return; // 상태 결정 완료, 함수 종료
-            }
+            currentTarget = player; // 시야에 있으면 진짜 플레이어로 타겟 재할당 (캐스팅 불필요)
+            heardTarget = null;     // 플레이어를 발견했으므로 소리 기억은 지움
+        }
+        else if (heardTarget != null)
+        {
+            currentTarget = heardTarget; // 안 보이지만 소리를 들었다면 가짜 타겟(좌표)을 할당
+        }
+        else
+        {
+            currentTarget = null; // 아무 일도 없음
         }
 
-        // 2. 공격을 못 하거나, 공격 행동력이 부족한 경우 이동 행동력 체크 (MoveCheck)
-        if (CheckMoveSpeed()) // MoveSpeed < ActPoint (True 분기)
+
+        // --- 2. 상태 결정 흐름 (Early Return 패턴) ---
+
+        // 타겟이 존재할 때
+        if (currentTarget != null && currentTarget.IsValid)
         {
-            if (IsInVision(target))
+            // 공격 가능 여부 (행동력 보유 && 실제 엔티티 && 사거리 내)
+            if (CheckAttackSpeed() && IsAttackable(currentTarget))
             {
-                ChangeState(MonsterState.Chase);
+                ChangeState(MonsterState.Attack);
+                return;
             }
-            else
+
+            // 이동 가능 여부 (행동력 보유)
+            if (CheckMoveSpeed())
             {
-                if (IsHearSound(target))
+                // 타겟이 진짜 생명체(MapEntity)라면 쫓아가고, 가짜 타겟(소리 좌표)이면 정찰 감
+                if (currentTarget is MapEntity)
+                {
+                    ChangeState(MonsterState.Chase);
+                }
+                else if (currentTarget is LocationTarget)
                 {
                     ChangeState(MonsterState.Patrol);
                 }
-                else
-                {
-                    if (IsSleep())
-                    {
-                        ChangeState(MonsterState.Sleep);
-                    }
-                    else
-                    {
-                        ChangeState(MonsterState.Idle);
-                    }
-                }
+                return;
             }
         }
-        else // MoveSpeed < ActPoint (False 분기)
+
+        // 타겟이 없거나 행동력이 없을 때
+        if (IsSleep())
         {
-            if (IsHearSound(target))
-            {
-                ChangeState(MonsterState.Patrol);
-            }
-            else
-            {
-                if (IsSleep())
-                {
-                    ChangeState(MonsterState.Sleep);
-                }
-                else
-                {
-                    ChangeState(MonsterState.Idle);
-                }
-            }
+            ChangeState(MonsterState.Sleep);
+            return;
         }
+
+        ChangeState(MonsterState.Idle);
     }
 
     public void ChangeState(MonsterState state)
     {
-        if (currentState == state) return; // 이미 같은 상태면 무시
+        if (currentState == state) return;
 
+        Debug.Log($"Change State: {currentState} -> {state}");
         currentState = state;
         currentMachine = states[state];
         myEntity.Set_MyState(currentState);
-        // 여기에 currentMachine.Enter() 같은 상태 진입 코드를 추가하면 좋습니다.
     }
 
     public bool CheckAttackSpeed()
     {
-        Dictionary<StatType, float> stat = myEntity.GetEntityStat(ModifierTriggerType.Passive);
+        var stat = myEntity.GetEntityStat(ModifierTriggerType.Passive);
         return myEntity.Get_ActPoint() >= stat[StatType.AttackSpeed];
     }
 
     public bool CheckMoveSpeed()
     {
-        Dictionary<StatType, float> stat = myEntity.GetEntityStat(ModifierTriggerType.Passive);
+        var stat = myEntity.GetEntityStat(ModifierTriggerType.Passive);
         return myEntity.Get_ActPoint() >= stat[StatType.MoveSpeed];
     }
 
-    // 오타 수정: IsHearSond -> IsHearSound
-    public bool IsHearSound(LivingEntity target)
+    // ?? [핵심 변경 3] transform.position이 아닌 순수 정수 GridPos를 사용하여 연산 최적화
+    public bool IsAttackable(ITargetable target)
     {
-        bool isHear = false;
-        // TODO: 청각 감지 로직 구현 필요 (예: 일정 범위 내의 소음 이벤트 체크)
-        return isHear;
+        if (target == null || !target.IsValid) return false;
+
+        // 패턴 매칭: 타겟이 LocationTarget(단순 허공 좌표)라면 공격할 수 없음
+        if (!(target is MapEntity)) return false;
+
+        float attackRange = myEntity.GetEntityStat(ModifierTriggerType.Passive)[StatType.AttackRange];
+
+        // GridPos 기반 거리 계산 (루트 연산 없이 빠름)
+        float distSqr = ((Vector2)myEntity.GridPos - (Vector2)target.GridPos).sqrMagnitude;
+
+        return distSqr < (attackRange * attackRange) && MapManager.instance.CheckLineOfSight(myEntity.GridPos, target.GridPos);
     }
 
-    public bool IsAttackable(LivingEntity target)
+    public bool IsInVision(ITargetable target)
     {
-        if (target == null) return false;
+        if (target == null || !target.IsValid) return false;
 
-        Dictionary<StatType, float> attackStat = myEntity.GetEntityStat(ModifierTriggerType.Passive);
-        float attackRange = attackStat[StatType.AttackRange];
+        float vision = myEntity.GetEntityStat(ModifierTriggerType.Passive)[StatType.Vision];
 
-        Vector2Int myPos = new Vector2Int((int)myEntity.transform.position.x, (int)myEntity.transform.position.y);
-        Vector2Int targetPos = new Vector2Int((int)target.transform.position.x, (int)target.transform.position.y);
-        float distance = Vector2.Distance(myPos, targetPos);
+        // GridPos 기반 거리 계산
+        float distSqr = ((Vector2)myEntity.GridPos - (Vector2)target.GridPos).sqrMagnitude;
 
-        return distance < attackRange && MapManager.instance.CheckLineOfSight(myPos, targetPos);
-    }
-
-    public bool IsInVision(LivingEntity target)
-    {
-        if (target == null) return false;
-
-        Dictionary<StatType, float> passiveStat = myEntity.GetEntityStat(ModifierTriggerType.Passive);
-        float vision = passiveStat[StatType.Vision];
-
-        Vector2Int myPos = new Vector2Int((int)myEntity.transform.position.x, (int)myEntity.transform.position.y);
-        Vector2Int targetPos = new Vector2Int((int)target.transform.position.x, (int)target.transform.position.y);
-        float distance = Vector2.Distance(myPos, targetPos);
-
-        return distance < vision && MapManager.instance.CheckLineOfSight(myPos, targetPos);
+        return distSqr < (vision * vision) && MapManager.instance.CheckLineOfSight(myEntity.GridPos, target.GridPos);
     }
 
     public bool IsSleep()
     {
-        // 1. 현재 수면 상태가 아니라면 자고 있는 것이 아님
-        if (currentState != MonsterState.Sleep)
-        {
-            return false;
-        }
+        if (currentState != MonsterState.Sleep) return false;
 
-        // 2. 수면 상태라면 깨어날지 말지 확률 계산
-        Dictionary<StatType, float> stat = myEntity.GetEntityStat(ModifierTriggerType.Passive);
-        int awakeRate = (int)stat[StatType.AwakeRate];
-
-        // 예외 처리: awakeRate가 0 이하일 경우 0 나누기 에러 방지 및 절대 못 깸 처리
+        int awakeRate = (int)myEntity.GetEntityStat(ModifierTriggerType.Passive)[StatType.AwakeRate];
         if (awakeRate <= 0) return true;
 
-        // [버그 수정] Random.Range(0, awakeRate)는 0부터 awakeRate-1까지의 값을 반환합니다.
-        int rate = UnityEngine.Random.Range(0, 100);
-
-        if (rate<awakeRate)
-        {
-            return false;
-        }
-
-        return true; // 계속 수면
+        return UnityEngine.Random.Range(0, 100) >= awakeRate;
     }
 }

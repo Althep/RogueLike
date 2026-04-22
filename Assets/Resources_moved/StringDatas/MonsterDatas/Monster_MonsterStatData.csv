@@ -1,4 +1,4 @@
-MonsterID,Name,Tir,MaxHP,MaxMp,Str,Dex,Int,Evasion,Defense,DamageReduce,Damage,Accurancy,AttackRange,SpellDamage,SpellAccurancy,Disruption,FireResist,IceResist,ThunderResist,MagicResist,Vision,Sound,MoveSpeed,AttackSpeed,Exp,AwakeRate
+MonsterID,Name,Tir,MaxHP,MaxMP,Str,Dex,Int,Evasion,Defense,DamageReduce,Damage,Accurancy,AttackRange,SpellDamage,SpellAccurancy,Disruption,FireResist,IceResist,ThunderResist,MagicResist,Vision,Sound,MoveSpeed,AttackSpeed,Exp,AwakeRate
 Clump,Clump,1,3,1,3,4,5,2,1,0,1,3,1,0,0,0,0,0,0,0,3,4,10,10,2,40
 Rat,Rat,1,4,1,5,5,5,5,0,0,2,3,1,0,0,0,0,0,0,0,5,5,15,10,2,40
 Goblin,Goblin,1,7,1,7,7,7,3,3,0,3,3,1,1,1,0,0,0,0,0,7,7,10,10,3,40

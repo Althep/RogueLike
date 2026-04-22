@@ -52,4 +52,12 @@ public class DoorEntity : MapEntity
     {
         isOpen = false;
     }
+
+    public override SpecialObjectData Get_SaveData()
+    {
+        SpecialObjectData saveData = new SpecialObjectData { x = posKey.x, y=posKey.y, tileType = this.GetMyType(),state = isOpen };
+        saveData.x = posKey.x;
+        saveData.y = posKey.y;
+        return saveData;
+    }
 }

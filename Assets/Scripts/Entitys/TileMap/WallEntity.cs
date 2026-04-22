@@ -2,7 +2,7 @@ using UnityEngine;
 
 public class WallEntity : MapEntity
 {
-    
+    public int spriteIndex = 0;
 
     protected override void Init()
     {
@@ -21,4 +21,6 @@ public class WallEntity : MapEntity
     {
         
     }
+
+    
 }

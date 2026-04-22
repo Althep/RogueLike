@@ -10,12 +10,14 @@ public class PlayerEntity : LivingEntity
 
     List<Vector2Int> previousView = new List<Vector2Int>();
     [SerializeField] List<string> items = new List<string>();
+
+    public bool actable { get; private set; } = true;
     #region Initiate
     private void Awake()
     {
         OnAwake();
     }
-    
+
     protected override void OnAwake()
     {
         base.OnAwake();
@@ -23,7 +25,7 @@ public class PlayerEntity : LivingEntity
         {
             mapManager = GameManager.instance.Get_MapManager();
         }
-        if(fowManager == null)
+        if (fowManager == null)
         {
             fowManager = FogOfWarManager.Instance;
         }
@@ -37,16 +39,16 @@ public class PlayerEntity : LivingEntity
     protected override void InitStat()
     {
         base.InitStat();
-        Dictionary<StatType,float> stats = myStat.GetBase();
+        Dictionary<StatType, float> stats = myStat.GetBase();
         StatType[] statTypes = Utils.Get_Enums<StatType>();
         Debug.Log("PlayerEntityInitStat");
-        foreach(var stat in statTypes)
+        foreach (var stat in statTypes)
         {
-            if(stat == StatType.MaxHP || stat == StatType.MaxMP || stat == StatType.Str || stat == StatType.Dex || stat == StatType.Int||stat == StatType.MoveSpeed || stat == StatType. AttackSpeed||stat == StatType.MaxExp)
+            if (stat == StatType.MaxHP || stat == StatType.MaxMP || stat == StatType.Str || stat == StatType.Dex || stat == StatType.Int||stat == StatType.MoveSpeed || stat == StatType.AttackSpeed||stat == StatType.MaxExp)
             {
                 myStat.AddBaseStat(stat, 10);
             }
-            
+
         }
         myStat.AddBaseStat(StatType.Damage, 1);
         myStat.AddBaseStat(StatType.Accurancy, 1);
@@ -57,7 +59,7 @@ public class PlayerEntity : LivingEntity
         myStat.AddBaseStat(StatType.HP, stats[StatType.MaxHP]);
         myStat.AddBaseStat(StatType.MP, stats[StatType.MaxMP]);
 
-        
+
     }
     #endregion
     public InventoryData GetInventory()
@@ -65,16 +67,17 @@ public class PlayerEntity : LivingEntity
         return inventory;
     }
 
-    public void TryMove(Vector2Int dir)
+    public float TryMove(Vector2Int dir)
     {
-        
+
         Vector2Int target = new Vector2Int(((int)this.transform.position.x+dir.x), (int)(this.transform.position.y+dir.y));
         TileType tileType = mapManager.Get_TargetType(target);
-
+        float actPoint = 0;
         switch (tileType)
         {
             case TileType.Tile:
                 Move_To(dir);
+                actPoint = GetActPoint(ModifierTriggerType.OnMove);
                 break;
             case TileType.Wall:
                 Debug.Log("Wall Direction");
@@ -84,10 +87,12 @@ public class PlayerEntity : LivingEntity
                 if (door.IsOpen())
                 {
                     Move_To(dir);
+                    actPoint = GetActPoint(ModifierTriggerType.OnMove);
                 }
                 else
                 {
                     InteractDoor(target);
+                    actPoint = GetActPoint(ModifierTriggerType.OnMove);
                 }
                 break;
             case TileType.ShallowWater:
@@ -96,28 +101,34 @@ public class PlayerEntity : LivingEntity
                 break;
             case TileType.Upstair:
                 Move_To(dir);
+                actPoint = GetActPoint(ModifierTriggerType.OnMove);
                 break;
             case TileType.DownStair:
                 Move_To(dir);
+                actPoint = GetActPoint(ModifierTriggerType.OnMove);
                 break;
             case TileType.Player:
-                Debug.Log("Map Data Error! Tile Type is Player Entity");
+                actPoint = GetActPoint(ModifierTriggerType.OnMove);
                 break;
             case TileType.Monster:
                 MonsterEntity monster = mapManager.GetMonsterEntity(target) as MonsterEntity;
                 bool isCrit = false;
-                if (CombatManager.instance.TryHit(this, monster,out isCrit))
+                if (CombatManager.instance.TryHit(this, monster, out isCrit))
                 {
                     int damage = (int)CombatManager.instance.CalculateMeleeAttackDamage(this, monster, isCrit);
                     Debug.Log(damage);
+
+                    actPoint = GetActPoint(ModifierTriggerType.OnAttack);
                 }
                 break;
             case TileType.Item:
                 Move_To(dir);
+                actPoint = GetActPoint(ModifierTriggerType.OnMove);
                 break;
             default:
                 break;
         }
+        /*
         if (mapManager.CanMove(target))
         {
             Move_To(dir);
@@ -126,6 +137,8 @@ public class PlayerEntity : LivingEntity
         {
 
         }
+        */
+        return actPoint;
 
     }
 
@@ -156,22 +169,23 @@ public class PlayerEntity : LivingEntity
         }
     }
 
-    public void InteractDoor(Vector2Int targetPos)
+    public float InteractDoor(Vector2Int targetPos)
     {
         DoorEntity door = mapManager.GetDoorEntity(targetPos);
-        if(door == null)
+        if (door == null)
         {
             Debug.Log("Door Didn't Contain");
-            return;
+            return 0;
         }
         door.Interaction();
+        return GetActPoint(ModifierTriggerType.OnMove);
     }
     protected override void Move_To(Vector2Int dir)
     {
         base.Move_To(dir);
         Vector2Int playerPos = new Vector2Int((int)transform.position.x+dir.x, (int)transform.position.y+dir.y);
         int vision = (int)GetEntityStat(ModifierTriggerType.OnMove)[StatType.Vision];
-        UpdateFoV(playerPos,vision);
+        UpdateFoV(playerPos, vision);
         ItemCheck(destination);
     }
     public void UpdateFoV(Vector2Int playerPos, int viewRadius)
@@ -208,4 +222,40 @@ public class PlayerEntity : LivingEntity
     {
         inventory.Set_InventoryUI(inventoryUI);
     }
+
+    public float GetActPoint(ModifierTriggerType trigger)
+    {
+        float actPoint = 10;
+        float normalAction = 10;
+        switch (trigger)
+        {
+            case ModifierTriggerType.OnEquip:
+                actPoint = normalAction;
+                break;
+            case ModifierTriggerType.OnUseItem:
+                actPoint = normalAction;
+                break;
+            case ModifierTriggerType.OnUnequip:
+                actPoint = normalAction;
+                break;
+            case ModifierTriggerType.OnAttack:
+                actPoint = GetEntityStat(trigger)[StatType.AttackSpeed];
+                break;
+            case ModifierTriggerType.OnSpellCast:
+                actPoint = GetEntityStat(trigger)[StatType.SpellSpeed];
+                break;
+            case ModifierTriggerType.OnMove:
+                actPoint = GetEntityStat(trigger)[StatType.MoveSpeed];
+                break;
+            default:
+                break;
+        }
+
+        return actPoint;
+    }
+    public void ChangeActable(bool actable)
+    {
+        this.actable = actable;
+    }
+
 }

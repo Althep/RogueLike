@@ -106,7 +106,7 @@ public class StatBuff : BuffAction
         {
             GetMyModifier();
         }
-        target.AddModifier(modifier);
+        target.Add_Buff(modifier);
         EventManager.instance.AddBuff(target, modifier, duration);
     }
     public int SetDuration()

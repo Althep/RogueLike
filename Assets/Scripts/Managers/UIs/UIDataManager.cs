@@ -55,7 +55,8 @@ public class UIDataManager : AsyncDataManager<UIDataManager>
     } 
     void SetUIRoot()
     {
-        Canvas canvasObj = UnityEngine.Object.FindAnyObjectByType<Canvas>();
+        GameObject mainCanvasGo = GameObject.FindWithTag("MainCanvas");
+        Canvas canvasObj = mainCanvasGo.transform.GetComponent<Canvas>();
         UIRoot = canvasObj.transform;
     }
     void FindAndBindUIs()

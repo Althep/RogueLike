@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Reflection;
 using System.IO;
 using UnityEngine;
-
+using Newtonsoft.Json;
 
 public class SaveDataManager : MonoBehaviour
 {

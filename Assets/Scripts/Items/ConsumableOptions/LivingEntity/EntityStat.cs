@@ -11,6 +11,7 @@ public class EntityStat
     protected int level;
     protected string entityId;
     protected string entityName;
+    bool isDead;
     public EntityStat()
     {
         StatType[] types = Utils.Get_Enums<StatType>();
@@ -20,8 +21,10 @@ public class EntityStat
             finalStat.Add(stat, 0);
             
         }
+        isDead = false;
+        baseStat[StatType.HP] = baseStat[StatType.MaxHP];
     }
-    public void SetBaseStat(StatType type, float value)
+    public void AddBaseStat(StatType type, float value)
     {
         if (baseStat.ContainsKey(type))
         {
@@ -31,7 +34,27 @@ public class EntityStat
         {
             baseStat.Add(type, value);
         }
+        
+    }
 
+    public int Get_Level()
+    {
+        return level;
+    }
+    public void Add_Level()
+    {
+        level++;
+    }
+    public void SetBaseStat(StatType type, float value)
+    {
+        if (baseStat.ContainsKey(type))
+        {
+            baseStat[type] = value;
+        }
+        else
+        {
+            baseStat.Add(type, value);
+        }
     }
     public void SetID(string id)
     {
@@ -73,17 +96,7 @@ public class EntityStat
     {
         return baseStat[stat];
     }
-    public void AddBaseStat(StatType stat,float value)
-    {
-        if (!baseStat.ContainsKey(stat))
-        {
-            baseStat.Add(stat, value);
-        }
-        else
-        {
-            baseStat[stat]+=value;
-        }
-    }
+
     public virtual EntityStat CopyStat() 
     {
         EntityStat newStat = new EntityStat();
@@ -122,5 +135,10 @@ public class EntityStat
                 break;
         }
         return damage;
+    }
+
+    public bool IsDead()
+    {
+        return isDead;
     }
 }

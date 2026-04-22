@@ -26,6 +26,6 @@ public class MonsterBaseState
 
     public virtual Vector2Int Get_Destination(Vector2Int myPos, Vector2Int target)
     {
-        return myPos;
+        return target;
     }
 }
