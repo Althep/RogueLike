@@ -39,7 +39,7 @@ public class ItemManager :MonoBehaviour
             mapManager = GameManager.instance.Get_MapManager();
         }
     }
-
+    #region ItemMake
     public GameObject MakeItem()
     {
         GameObject go = poolManager.ObjectPool(Defines.TileType.Item);
@@ -65,11 +65,12 @@ public class ItemManager :MonoBehaviour
         fieldItems[keyPos].Add(entity);
         return go;
     }
+    
     public async UniTask OnVisitNewFloor()
     {
         int tileCount = mapManager.GetEmptyPosList().Count;
         int itemCount = tileCount/itemGenPerTile;
-        
+        Debug.Log($"itemCount : {itemCount}");
         for(int i = 0; i < itemCount; i++)
         {
             Vector2 targetPos = mapManager.GetRandomTilePos();
@@ -77,6 +78,13 @@ public class ItemManager :MonoBehaviour
             await Utils.WaitYield(i);
         }
     }
+    public ItemBase ItemMake(string id)
+    {
+        return itemFactory.GetItemScript(id);
+    }
+    #endregion
+
+    
     public ItemFactory Get_ItemFactory()
     {
         if(itemFactory == null)
@@ -86,10 +94,7 @@ public class ItemManager :MonoBehaviour
         return itemFactory;
     }
 
-    public ItemBase ItemMake(string id)
-    {
-        return itemFactory.GetItemScript(id);
-    }
+    
 
     public void AddStartItems(List<string> itemNames)
     {
@@ -108,9 +113,20 @@ public class ItemManager :MonoBehaviour
         */
     }
 
-    public void OnFloorChange()
+    public async UniTask OnFloorChange()
     {
+        bool isVisitied = SaveDataManager.instance.IsSaved();
         itemFactory.OnFloorChange();
+        if (isVisitied)
+        {
+
+        }
+        else
+        {
+            Debug.Log("Visit New Floor");
+            await OnVisitNewFloor();
+        }
+        //itemFactory.OnFloorChange();
     }
 
     public bool GroundCheck(Vector2Int pos)
@@ -129,4 +145,35 @@ public class ItemManager :MonoBehaviour
         }
         return null;
     }
+    #region Save&Load
+    public List<ItemEntitySaveData> SaveAllItems()
+    {
+        List<ItemEntitySaveData> datas = new List<ItemEntitySaveData>();
+
+
+        foreach(var pos in fieldItems.Keys)
+        {
+            List<ItemEntity> entitys = fieldItems[pos];
+
+            for(int i = 0; i<entitys.Count; i++)
+            {
+                datas.Add(entitys[i].SaveEntity());
+            }
+        }
+
+        return datas;
+    }
+    public ItemBase LoadItem(ItemSaveData saveData)
+    {
+        ItemBase loadedItem = ItemMake(saveData.itemId);
+        loadedItem.itemCount = saveData.itemCount;
+        loadedItem.id = saveData.itemId;
+
+        if(loadedItem is EquipItem equip)
+        {
+
+        }
+        return loadedItem;
+    }
+    #endregion
 }

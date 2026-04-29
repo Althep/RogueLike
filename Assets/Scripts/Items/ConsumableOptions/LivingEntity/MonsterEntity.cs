@@ -186,14 +186,16 @@ public class MonsterEntity : LivingEntity
 
         saveData.id = id;//Id¼Â
 
-        Dictionary<StatType, float> stat = GetMyStat().GetFinal();
+        Dictionary<StatType, float> stat = GetMyStat().GetBase();
 
         int currentHp = Mathf.RoundToInt(stat[StatType.HP]);
 
         saveData.currentHp = currentHp;//hp¼Â
 
-        
-
+        List<BuffSaveData> buffsave = modifierController.BuffSave();
+        List<ModifierSaveData> modifierSaves = modifierController.MutetionSave();
+        saveData.buffs = buffsave;
+        saveData.modifiers = modifierSaves;
         foreach(var key in equipments.Keys)
         {
             ItemSaveData data = equipments[key].SaveData();
@@ -201,6 +203,10 @@ public class MonsterEntity : LivingEntity
         }
 
         List<ItemSaveData> itemSaves = new List<ItemSaveData>();
+        if(inventoryData == null)
+        {
+            return saveData;
+        }
         for(int i = 0; i<inventoryData.inventory.Length; i++)
         {
             if (inventoryData.inventory[i] ==null)

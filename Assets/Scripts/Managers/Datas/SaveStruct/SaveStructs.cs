@@ -2,6 +2,13 @@ using UnityEngine;
 using System.Collections.Generic;
 using static Defines;
 [System.Serializable]
+
+public class FloorSaveData
+{
+    public MapSaveData mapData;
+    public List<ItemEntitySaveData> droppedItems;
+    public List<LivingEntitySaveData> monsterDatas;
+}
 public struct MapSaveData
 {
     public int width;
@@ -26,12 +33,13 @@ public struct BuffSaveData
 {
     public float value;
     public string modifierId;
-    public int leftTime;
+    public int endTurn;
 }
 public class ItemSaveData
 {
     public int spriteIndex;
-    public List<ModifierSaveData> itemModifiers;
+    public int itemCount;
+    public string itemId;
     public List<ModifierSaveData> addOptionsData;
 }
 

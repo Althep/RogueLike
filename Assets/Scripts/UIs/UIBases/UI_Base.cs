@@ -61,7 +61,7 @@ public class UI_Base : MonoBehaviour
 
     
 
-    public static void AddUIEvent(GameObject go, Action<PointerEventData> action, Defines.UIEvents type)
+    public void AddUIEvent(GameObject go, Action<PointerEventData> action, Defines.UIEvents type)
     {
 
         UI_EventController evt = Utils.GetOrAddComponent<UI_EventController>(go);
@@ -87,8 +87,8 @@ public class UI_Base : MonoBehaviour
             default:
                 break;
         }
-
-
+        
+        Debug.Log($"Adding Event {this.gameObject.name}");
     }
 
 }

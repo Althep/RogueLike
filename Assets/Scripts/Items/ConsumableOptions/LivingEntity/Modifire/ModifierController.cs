@@ -282,9 +282,22 @@ public class ModifierController
     {
         return SaveModifierInternal(mutation);
     }
-    public List<ModifierSaveData> BuffSave()
+    public List<BuffSaveData> BuffSave()
     {
-        return SaveModifierInternal(buffs);
+        List<BuffInstance> buffInstances = EventManager.instance.Get_EntityBuffList(myEntity);
+        List<BuffSaveData> buffSaveDatas = new List<BuffSaveData>();
+        if(buffInstances ==null || buffInstances.Count == 0)
+        {
+            return null;
+        }
+
+        for(int i = 0; i<buffInstances.Count; i++)
+        {
+            BuffInstance buffInstance = buffInstances[i];
+            BuffSaveData buffData = new BuffSaveData{modifierId = buffInstance.modifier.id, value = buffInstance.modifier.value, endTurn = buffInstance.endTurn};
+            buffSaveDatas.Add(buffData);
+        }
+        return buffSaveDatas;
     }
 }
 

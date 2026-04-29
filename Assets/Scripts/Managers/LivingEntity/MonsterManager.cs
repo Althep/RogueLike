@@ -22,6 +22,8 @@ public class MonsterManager : MonoBehaviour
     float spawnPoint = 10;
 
     PlayerEntity playerEntity;
+
+    public static MonsterManager Instance;
     private async UniTask Awake()
     {
         if (monsterSpawner == null)
@@ -31,11 +33,16 @@ public class MonsterManager : MonoBehaviour
             monsterSpawner.Init();
         }
         await Init();
+        
         //monsterFactory.Init();
     }
 
     public async UniTask Init()
     {
+        if(MonsterManager.Instance == null)
+        {
+            MonsterManager.Instance = this;
+        }
         if(mapManager == null)
         {
             mapManager = GameManager.instance.Get_MapManager();
@@ -114,7 +121,7 @@ public class MonsterManager : MonoBehaviour
 
     public void OnFloorChange()
     {
-        int floor = dungeonManager.floor;
+        int floor = dungeonManager.Get_Floor();
         tierRates = TierCalculator.GetTierProbabilities(floor, 3, 5, false);
         SpawnPointCalc(floor);
         monsterSpawner.OnFloorChange();
@@ -257,5 +264,16 @@ public class MonsterManager : MonoBehaviour
         {
             Debug.Log("Entity is not Monster Entity");
         }
+    }
+
+    public List<LivingEntitySaveData> SaveAllMonster()
+    {
+        List<LivingEntitySaveData> saveDatas = new List<LivingEntitySaveData>();
+        for(int i = 0; i<monsters.Count; i++)
+        {
+            saveDatas.Add(monsters[i].SaveMonster());
+        }
+
+        return saveDatas;
     }
 }

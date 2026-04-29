@@ -1,11 +1,11 @@
 using UnityEngine;
-
+using System.Collections.Generic;
 public class ItemEntity : MapEntity
 {
 
     ItemBase item;
     public string id;
-
+    [SerializeField] List<string> myModifiers= new List<string>();
     void Start()
     {
         SetSpriteRender();
@@ -43,8 +43,15 @@ public class ItemEntity : MapEntity
     {
         this.item = item;
         spriteRenderer.sprite = SpriteManager.instance.Get_Sprite(item.name);
+        ViewingOptions();
     }
-
+    public void ViewingOptions()
+    {
+        for(int i = 0; i<item.options.Count; i++)
+        {
+            myModifiers.Add(item.options[i].id);
+        }
+    }
     public override void Return()
     {
         base.Return();

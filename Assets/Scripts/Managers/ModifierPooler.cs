@@ -21,6 +21,11 @@ public class ModifierPooler
     public Modifier GetModifier(ModifierType type, string id)
     {
         IPoolScript value;
+        if(id == null)
+        {
+            Debug.Log("id Null!");
+            return null;
+        }
         if (!inactiveModifiers.ContainsKey(type))
         {
             inactiveModifiers.Add(type, new Dictionary<string, Queue<IPoolScript>>());
@@ -65,7 +70,7 @@ public class ModifierPooler
     public IPoolScript CreateNew(ModifierType type, string id)
     {
         IPoolScript modifier = null;
-        Debug.Log($"Create New Modifier Script {id}");
+        //Debug.Log($"Create New Modifier Script {id}");
         if(modifierFactory == null)
         {
             Debug.Log("모디파이어 팩토리 널!");

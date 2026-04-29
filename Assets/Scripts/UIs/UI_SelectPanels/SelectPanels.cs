@@ -201,11 +201,16 @@ public class SelectPanels : UI_GridSelect
     {
         //await AddItemsAsync();
         Debug.Log("던전씬 비동기 로드 시작!");
-        await SceneController.Instance.PrePostAwaits(null, Defines.Scenes.DungeonScene, GameManager.instance.GetDungeonManager().GenerateDungeon);
+        await SceneController.Instance.PrePostAwaits(null, Defines.Scenes.DungeonScene, CreateNewDungeon);
+        //DungeonManager.instance.ChangeFloor(1);
         Debug.Log("던전씬 로드 완료. 던전 생성 시작.");
         
     }
 
+    private async UniTask CreateNewDungeon()
+    {
+        await DungeonManager.instance.ChangeFloor(1);
+    }
     public void AddConfirmPanel()
     {
         List<List<UI_Base>> data = confirmPanel.Get_GridData();

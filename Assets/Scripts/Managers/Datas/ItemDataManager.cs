@@ -173,18 +173,9 @@ public class ItemDataManager : AsyncDataManager<ItemDataManager>
             if (!exist)
             {
                 Modifier modi = modifierFactory.CreateModifier(modifierId);
-
-                /*
-                StatModifier stat = new StatModifier();
-                Utils.TrySetValue<string>(originData[i], "ID", ref stat.id);
-                Utils.TryConvertEnum<ModifierTriggerType>(originData[i], "TriggerType", ref stat.triggerType);
-                Utils.TrySetValue<bool>(originData[i], "IsMulti", ref stat.isMulti);
-                Utils.TrySetValue<float>(originData[i], "Value", ref stat.value);
-                Utils.TrySetValue<int>(originData[i], "Priority", ref stat.priority);
-                Utils.TryConvertEnum<StatType>(originData[i], "StatType", ref stat.stat);
-                itemDatas[Name].options.Add(stat);
-                modifierPooler.GetModifier(stat.modifierType, stat.id);
-                */
+                Utils.TrySetValue(originData[i], "Value", ref modi.value);
+                Debug.Log($"{Name} 모디파이어 ID : {modifierId} 등록 값 : {modi.value} 타입 {modi.modifierType} 스탯 타입{modi.stat} 모디파이어 ID {modi.id}");
+                itemDatas[Name].options.Add(modi);
             }
             Debug.Log($"{Name} 등록 완료");
             await Utils.WaitYield(i);

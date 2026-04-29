@@ -43,7 +43,6 @@ public class MonsterDataManager : AsyncDataManager<MonsterDataManager>
             foreach (var key in originData[i].Keys)
             {
                 // 1. 현재 어떤 Key를 검사하고 있는지 무조건 출력해봅니다.
-                Debug.Log($"검사 중인 데이터 Key : [{key}]");
 
                 if (key == "Name" || key == "MonsterID" || key == "Tier")
                 {
@@ -66,7 +65,7 @@ public class MonsterDataManager : AsyncDataManager<MonsterDataManager>
                     }
                     */
                     monsterStat.SetBaseStat(stat, value);
-                    Debug.Log($"[성공] 몬스터 ID : {id} 몬스터 스탯 : {stat} 값 : {value} 등록 완료");
+                    
                 }
                 else
                 {

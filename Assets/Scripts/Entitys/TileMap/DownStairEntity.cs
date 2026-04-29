@@ -1,6 +1,6 @@
 using UnityEngine;
 
-public class DownStairEntity : MapEntity
+public class DownStairEntity : StairEntity
 {
     public int stairNumber;
 
@@ -26,5 +26,10 @@ public class DownStairEntity : MapEntity
         saveData.x = posKey.x;
         saveData.y = posKey.y;
         return saveData;
+    }
+
+    public override void Interact()
+    {
+        SaveDataManager.instance.SaveAllFloorDatas();
     }
 }

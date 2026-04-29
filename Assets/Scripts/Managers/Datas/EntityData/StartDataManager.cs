@@ -255,13 +255,12 @@ public class StartDataManager : AsyncDataManager<StartDataManager>
             await Utils.WaitYield(i);
         }
     }
-    public async UniTask ReadJobStats(List<Dictionary<string, object>> originData)
+    public async UniTask ReadJobStats(List<Dictionary<string, object>> originData) //직업별 스탯 로드
     {
         for (int i = 0; i < originData.Count; i++)
         {
             Jobs job = Utils.ConvertToEnum<Jobs>( originData[i]["Job"].ToString());
-            string id = originData[i]["ID"].ToString();
-            Debug.Log($"스탯 데이터 매니저 직업 스탯 리딩중 ID : {id}");
+            string id = originData[i]["ID"].ToString(); 
             StatModifier stat = (StatModifier)modifierPooler.GetModifier(ModifierType.StatModifier, id);
             if (!jobTrait_Stat.ContainsKey(job))
             {

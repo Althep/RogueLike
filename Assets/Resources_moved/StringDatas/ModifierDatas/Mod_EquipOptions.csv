@@ -11,7 +11,7 @@ Weapon_MagicAccurancy,StatModifier,MagicAccurancy,FALSE,Passive,50,null
 Weapon_AttackRange,StatModifier,AttackRange,FALSE,Passive,50,null
 Weapon_TwoHand,ActionModifier,SubHand,FALSE,Passive,50,Weapon_TwoHand
 Weapon_SpellSpeed,StatModifier,SpellSpeed,FALSE,Passive,50,null
-Armor_Def,StatModifier,Def,FALSE,Passive,50,null
-Armor_Ev,StatModifier,Ev,FALSE,Passive,50,null
+Armor_Def,StatModifier,Defense,FALSE,Passive,50,null
+Armor_Ev,StatModifier,Evasion,FALSE,Passive,50,null
 Armor_DamageReduce,StatModifier,DamageReduce,FALSE,Passive,50,null
 Armor_Disruption,StatModifier,Disruption,FALSE,Passive,50,null

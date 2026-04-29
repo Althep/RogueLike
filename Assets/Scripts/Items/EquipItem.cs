@@ -23,19 +23,15 @@ public class EquipItem : ItemBase
     public override ItemSaveData SaveData()
     {
         ItemSaveData itemSaveData = new ItemSaveData();
-        List<ModifierSaveData> myModifiers = new List<ModifierSaveData>();
+
         List<ModifierSaveData> addOptions = new List<ModifierSaveData>(); // 장비의 추가 옵션
-        for (int i = 0; i<options.Count; i++)
-        {
-            myModifiers.Add(options[i].SaveData());
-        }
-        
+
         for (int i = 0; i<addOptions.Count; i++)
         {
             addOptions.Add(this.addOptions[i].SaveData());
         }
-
-        itemSaveData.itemModifiers = myModifiers;
+        itemSaveData.itemCount = itemCount;
+        itemSaveData.itemId = id;
         itemSaveData.addOptionsData = addOptions;
         return itemSaveData;
     }

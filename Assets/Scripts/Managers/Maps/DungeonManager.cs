@@ -5,6 +5,7 @@ using System.Linq;
 using Cysharp.Threading.Tasks;
 public class DungeonManager : MonoBehaviour
 {
+    public static DungeonManager instance;
     MapManager mapManager;
     MonsterManager monsterManager;
     ItemManager itemManager;
@@ -13,14 +14,18 @@ public class DungeonManager : MonoBehaviour
     PoolManager poolManager;
     //PlayerController playerController;
     GameObject playerObj;
-    public int floor;
-
+    int floor;
+    bool isVisited = false;
     private void Awake()
     {
         Init();
     }
     private void Init()
     {
+        if(DungeonManager.instance == null)
+        {
+            DungeonManager.instance = this;
+        }
         if(mapManager == null)
         {
             mapManager = GameManager.instance.Get_MapManager();
@@ -49,47 +54,71 @@ public class DungeonManager : MonoBehaviour
         return tierCalculator;
     }
 
-    public void ChangeFloor(int changes)
+    public async UniTask ChangeFloor(int changes)
     {
         floor+=changes;
         Debug.Log("floor Changed");
-        OnFloorChange();
+        await OnFloorChange();
     }
-    public void OnFloorChange()
+    
+    public async UniTask OnFloorChange()
     {
         if(floor <= 0)
         {
             Debug.Log("Game End");
+            return;
         }
-        if (visitiedFloor.Contains(floor))
+        if (IsVisited(floor))
         {
-            VisitedFloor();
+            await VisitedFloor();
         }
         else
         {
-            VisitNewFloor();
+            await VisitNewFloor();
         }
+
     }
-    public void VisitNewFloor()
+    bool IsVisited(int floor)
+    {
+        if (visitiedFloor.Contains(floor))
+        {
+            isVisited = true;
+        }
+        else
+        {
+            isVisited = false;
+        }
+        return isVisited;
+    }
+    public int Get_Floor()
+    {
+        return floor;
+    }
+    public bool Get_Visitied()
+    {
+        return isVisited;
+    }
+    public async UniTask VisitNewFloor()
     {
         if (visitiedFloor.Contains(floor))
         {
             Debug.Log("Floor Error Floor Already Visited");
             return;
         }
+        await GenerateDungeon();
         visitiedFloor.Add(floor);
         monsterManager.OnFloorChange();
-        itemManager.OnFloorChange();
+        await itemManager.OnFloorChange();
         mapManager.CalculateInitialCost();
     }
-    void VisitedFloor()
+    async UniTask VisitedFloor()
     {
         
     }
 
     public async UniTask GenerateDungeon()
     {
-        OnFloorChange();
+        //OnFloorChange();
         float startTime = Time.realtimeSinceStartup;
         await poolManager.PreWarmObjects();
         Debug.Log($"[Profile] 데이터 생성 시간: {Time.realtimeSinceStartup - startTime}s");
@@ -98,8 +127,8 @@ public class DungeonManager : MonoBehaviour
         await mapManager.MapMake();
         Debug.Log($"[Profile] 오브젝트 배치 시간: {Time.realtimeSinceStartup - spawnStart}s");
 
-
-        await itemManager.OnVisitNewFloor();
+        //await itemManager.OnFloorChange();
+        //await itemManager.OnVisitNewFloor();
 
         await monsterManager.MonsterSpawn();
 

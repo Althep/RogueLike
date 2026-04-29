@@ -39,10 +39,10 @@ Blunt_02_opt1,Mace,Weapon_Damage,Damage,6,Blunt,MainHand,2,1
 Blunt_02_opt2,Mace,Weapon_Accurancy,Accuracy,5,Blunt,MainHand,2,1
 Blunt_02_opt3,Mace,Weapon_AttackSpeed,AttackSpeed,0.1,Blunt,MainHand,2,1
 Blunt_03_opt1,MorningStar,Weapon_Damage,Damage,10,Blunt,MainHand,3,1
-Blunt_03_opt2,MorningStar,Weapon_Damage,Accuracy,5,Blunt,MainHand,3,1
+Blunt_03_opt2,MorningStar,Weapon_Accurancy,Accuracy,5,Blunt,MainHand,3,1
 Blunt_03_opt3,MorningStar,Weapon_AttackSpeed,AttackSpeed,0.1,Blunt,MainHand,3,1
 Blunt_04_opt1,WarHammer,Weapon_Damage,Damage,13,Blunt,MainHand,4,1
-Blunt_04_opt2,WarHammer,Weapon_Damage,Accuracy,5,Blunt,MainHand,4,1
+Blunt_04_opt2,WarHammer,Weapon_Accurancy,Accuracy,5,Blunt,MainHand,4,1
 Blunt_04_opt3,WarHammer,Weapon_AttackSpeed,AttackSpeed,0.2,Blunt,MainHand,4,1
 Blunt_05_opt4,WarHammer,Weapon_TwoHand,SubHand,0.2,Blunt,MainHand,4,1
 Axe_01_opt1,HandAxe,Weapon_Damage,Damage,5,Axe,MainHand,1,1
@@ -51,7 +51,7 @@ Axe_02_opt1,BattleAxe,Weapon_Damage,Damage,7,Axe,MainHand,2,1
 Axe_02_opt2,BattleAxe,Weapon_Accurancy,Accuracy,3,Axe,MainHand,2,1
 Axe_02_opt3,BattleAxe,Weapon_TwoHand,SubHand,0,Axe,MainHand,2,1
 Axe_03_opt1,BroadAxe,Weapon_Damage,Damage,7,Axe,MainHand,3,1
-Axe_03_opt2,BroadAxe,Weapon_Damage,Accuracy,4,Axe,MainHand,3,1
+Axe_03_opt2,BroadAxe,Weapon_Accurancy,Accuracy,4,Axe,MainHand,3,1
 Axe_04_opt1,Executioner’s Axe,Weapon_Damage,Damage,11,Axe,MainHand,4,1
 Axe_04_opt2,Executioner’s Axe,Weapon_Accurancy,Accuracy,6,Axe,MainHand,4,1
 Axe_04_opt3,Executioner’s Axe,Weapon_AttackSpeed,AttackSpeed,0.1,Axe,MainHand,4,1

@@ -9,6 +9,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 3908901359807468999}
+  - component: {fileID: 5978011358238660748}
   m_Layer: 0
   m_Name: DownStair
   m_TagString: Untagged
@@ -32,6 +33,26 @@ Transform:
   - {fileID: 7948505693022355571}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &5978011358238660748
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 749073390266080553}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7f83ecad4e23b2549ab8cc794eca3462, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::DownStairEntity
+  myType: 0
+  spriteRenderer: {fileID: 0}
+  equipRenders: []
+  myPos: {x: 0, y: 0}
+  posKey: {x: 0, y: 0}
+  myUIs: {fileID: 0}
+  myUIController: {fileID: 0}
+  stairNumber: 0
 --- !u!1 &3920689335843089756
 GameObject:
   m_ObjectHideFlags: 0
@@ -84,6 +105,8 @@ SpriteRenderer:
   m_RayTracingAccelStructBuildFlagsOverride: 0
   m_RayTracingAccelStructBuildFlags: 1
   m_SmallMeshCulling: 1
+  m_ForceMeshLod: -1
+  m_MeshLodSelectionBias: 0
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
@@ -105,6 +128,7 @@ SpriteRenderer:
   m_AutoUVMaxDistance: 0.5
   m_AutoUVMaxAngle: 89
   m_LightmapParameters: {fileID: 0}
+  m_GlobalIlluminationMeshLod: 0
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: 0

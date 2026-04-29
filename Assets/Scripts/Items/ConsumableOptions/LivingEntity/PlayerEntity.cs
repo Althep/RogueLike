@@ -257,5 +257,10 @@ public class PlayerEntity : LivingEntity
     {
         this.actable = actable;
     }
+    public StairEntity TryGetStair()
+    {
+        StairEntity stair = MapManager.instance.Try_GetStairEntity(Get_PosKey());
 
+        return stair;
+    }
 }

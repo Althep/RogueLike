@@ -187,5 +187,13 @@ public class EventManager : MonoBehaviour
         }
     }
 
+    public List<BuffInstance> Get_EntityBuffList(LivingEntity entity)
+    {
+        if (entityBuffs.ContainsKey(entity))
+        {
+            return entityBuffs[entity];
+        }
+        return null;
+    }
     #endregion
 }

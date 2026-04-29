@@ -3,17 +3,17 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using static Defines;
-public abstract class MapEntity:MonoBehaviour,ITargetable
+public abstract class MapEntity : MonoBehaviour, ITargetable
 {
     public Defines.TileType myType;
 
     protected bool isDead = false;
     protected FogOfWar fogOfWar;
-    [SerializeField]protected SpriteRenderer spriteRenderer;
+    [SerializeField] protected SpriteRenderer spriteRenderer;
     [SerializeField] protected SpriteRenderer[] equipRenders;
     [SerializeField] protected Vector2 myPos;
     [SerializeField] protected Vector2Int posKey;
-    [SerializeField]protected GameObject myUIs;
+    [SerializeField] protected GameObject myUIs;
     [SerializeField] protected EntityUIController myUIController;
     string tileName;
 
@@ -31,8 +31,8 @@ public abstract class MapEntity:MonoBehaviour,ITargetable
         {
             fogOfWar = new FogOfWar(this.gameObject);
         }
-        
-        if(myUIController == null && myUIs !=null)
+
+        if (myUIController == null && myUIs !=null)
         {
             myUIController = myUIs.GetComponent<EntityUIController>();
         }
@@ -40,7 +40,7 @@ public abstract class MapEntity:MonoBehaviour,ITargetable
     public void SetMyPos(Vector2 pos)
     {
         myPos = pos;
-        posKey = new Vector2Int(Mathf.RoundToInt(myPos.x),Mathf.RoundToInt((myPos.y)));
+        posKey = new Vector2Int(Mathf.RoundToInt(myPos.x), Mathf.RoundToInt((myPos.y)));
     }
 
     public void SetMyTileType(Defines.TileType type)
@@ -55,7 +55,7 @@ public abstract class MapEntity:MonoBehaviour,ITargetable
 
     public FogOfWar GetFOW()
     {
-        if(fogOfWar == null)
+        if (fogOfWar == null)
         {
             fogOfWar = new FogOfWar(this.gameObject);
         }
@@ -71,16 +71,15 @@ public abstract class MapEntity:MonoBehaviour,ITargetable
 
     public abstract MapEntity CopyToEmpty();
     public abstract void ResetData();
-    public Defines.TileType GetMyType() 
+    public Defines.TileType GetMyType()
     {
         return myType;
     }
     public virtual Vector2Int Get_PosKey()
     {
-        if(posKey == null)
-        {
-            posKey = new Vector2Int(Mathf.RoundToInt(transform.position.x), Mathf.RoundToInt(transform.position.y));
-        }
+
+        posKey = new Vector2Int(Mathf.RoundToInt(transform.position.x), Mathf.RoundToInt(transform.position.y));
+
 
         return posKey;
     }

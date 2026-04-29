@@ -22,7 +22,7 @@ public class ItemFactory
 
     public void CalcuateItemRates()
     {
-        floor = dm.floor;
+        floor = DungeonManager.instance.Get_Floor();
 
         equipRates = TierCalculator.GetTierProbabilities(floor,3,5, false);
         consumRates = TierCalculator.GetCoreTierWeights(floor,25,5);
@@ -80,7 +80,7 @@ public class ItemFactory
     }
     public void OnFloorChange()
     {
-        floor = dm.floor;
+        floor = DungeonManager.instance.Get_Floor();
         equipRates = TierCalculator.GetTierProbabilities(floor, 3, 5, false);
         consumRates = TierCalculator.GetTierProbabilities(floor, 3, 5, true);
     }
@@ -163,10 +163,11 @@ public class ItemFactory
                 modi.Copy(newOne);
                 item.options.Add(newOne);
             }
+            /*
             else
             {
                 Debug.LogError($"Pool returned wrong type for {modType}");
-            }
+            }*/
         }
         
         return item;

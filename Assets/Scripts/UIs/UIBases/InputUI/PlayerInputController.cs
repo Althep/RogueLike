@@ -91,7 +91,17 @@ public class PlayerInputController : UI_InputUIBase
 
     public void UseStairKey()
     {
-
+        Debug.Log("StairKey 입력!");
+        StairEntity stair = playerEntity.TryGetStair();
+        if(stair!= null)
+        {
+            stair.Interact();
+            Debug.Log("계단 상호작용 !");
+        }
+        else
+        {
+            Debug.Log("계단 가져오지 못함!");
+        }
     }
 
     public void GetItemKey()

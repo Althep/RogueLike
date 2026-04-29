@@ -39,7 +39,7 @@ public class MonsterSpawner
 
     public void OnFloorChange()
     {
-        floor = dungeonManager.floor;
+        floor = dungeonManager.Get_Floor();
         TierCalculator.GetTierProbabilities(floor, 3, 5, false);
     }
     public int GetRandomTier()

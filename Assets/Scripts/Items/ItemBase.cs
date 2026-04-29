@@ -71,6 +71,7 @@ public abstract class ItemBase
         {
             // option.Clone()을 호출하여 Modifier도 새롭게 생성해서 넣습니다.
             Modifier copied = ModifierManager.instance.Get_Modifier(option.modifierType,option.id);
+            Debug.Log($"아이템 데이터 클로닝 아이디{id}, 모디파이어 아이디{copied.id}");
             cloneObj.options.Add(copied);
         }
     }
@@ -83,8 +84,8 @@ public abstract class ItemBase
         {
             myModifiers.Add(options[i].SaveData());
         }
-        itemSaveData.itemModifiers = myModifiers;
-
+        itemSaveData.itemId = id;
+        itemSaveData.itemCount = itemCount;
         return itemSaveData;
     }
 }
