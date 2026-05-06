@@ -2,6 +2,7 @@ using UnityEngine;
 using System;
 using System.Collections.Generic;
 using static Defines;
+
 public class PlayerEntity : LivingEntity
 {
     InventoryData inventory = new InventoryData();
@@ -11,6 +12,8 @@ public class PlayerEntity : LivingEntity
     List<Vector2Int> previousView = new List<Vector2Int>();
     [SerializeField] List<string> items = new List<string>();
 
+    int stairNumber = 0;
+    TileType stairType = TileType.DownStair;
     public bool actable { get; private set; } = true;
     #region Initiate
     private void Awake()
@@ -35,6 +38,7 @@ public class PlayerEntity : LivingEntity
         base.Init();
         modifierController.SetMyEntity(this);
     }
+
 
     protected override void InitStat()
     {
@@ -115,7 +119,7 @@ public class PlayerEntity : LivingEntity
                 bool isCrit = false;
                 if (CombatManager.instance.TryHit(this, monster, out isCrit))
                 {
-                    int damage = (int)CombatManager.instance.CalculateMeleeAttackDamage(this, monster, isCrit);
+                    int damage = (int)CombatManager.instance.Combat(this, monster,out isCrit);
                     Debug.Log(damage);
 
                     actPoint = GetActPoint(ModifierTriggerType.OnAttack);
@@ -262,5 +266,20 @@ public class PlayerEntity : LivingEntity
         StairEntity stair = MapManager.instance.Try_GetStairEntity(Get_PosKey());
 
         return stair;
+    }
+
+    public void IneractStair(TileType type, int stairNumber)
+    {
+        this.stairNumber = stairNumber;
+        stairType = type;
+    }
+
+    public int Get_StiarNumber()
+    {
+        return stairNumber;
+    }
+    public TileType StairType()
+    {
+        return stairType;
     }
 }

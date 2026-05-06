@@ -46,8 +46,13 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::WallEntity
   myType: 0
-  spriteRenderer: []
+  spriteRenderer: {fileID: 0}
+  equipRenders: []
   myPos: {x: 0, y: 0}
+  posKey: {x: 0, y: 0}
+  myUIs: {fileID: 0}
+  myUIController: {fileID: 0}
+  spriteIndex: 0
 --- !u!1 &3052906057543846156
 GameObject:
   m_ObjectHideFlags: 0
@@ -127,7 +132,7 @@ SpriteRenderer:
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: 0
-  m_Sprite: {fileID: -9197995281396512200, guid: 9c5975548d34ad94cb9c570d0f2f08da, type: 3}
+  m_Sprite: {fileID: 1962133535289539259, guid: 37ef540218c65e343b3d21f70eba11b8, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
   m_FlipY: 0

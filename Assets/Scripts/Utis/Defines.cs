@@ -295,6 +295,20 @@ public static class Defines
     }
     #endregion
     #region items
+    public enum EquipCategory
+    {
+        Weapon,
+        Armor,
+        Accessory,
+        None
+    }
+    public enum ItemRarity
+    {
+        Normal,
+        Magic,
+        Rare,
+        Unique
+    }
     public enum ItemType
     {
         Weapon,
@@ -303,7 +317,15 @@ public static class Defines
         Glove,
         Shoose,
         Ring,
-        Consumable
+        Consumable,
+        None
+    }
+    public enum ItemSubType
+    {
+        OneHand,
+        TwoHand,
+        None
+
     }
     public enum WeaponType
     {

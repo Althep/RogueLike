@@ -77,8 +77,8 @@ public class ModifierManager : MonoBehaviour
         return modifierPooler;
     }
 
-    public Modifier Get_Modifier(ModifierType type,string id)
+    public Modifier Get_Modifier(string id)
     {
-        return modifierPooler.GetModifier(type,id);
+        return modifierPooler.GetModifier(id);
     }
 }

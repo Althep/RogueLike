@@ -261,7 +261,7 @@ public class StartDataManager : AsyncDataManager<StartDataManager>
         {
             Jobs job = Utils.ConvertToEnum<Jobs>( originData[i]["Job"].ToString());
             string id = originData[i]["ID"].ToString(); 
-            StatModifier stat = (StatModifier)modifierPooler.GetModifier(ModifierType.StatModifier, id);
+            StatModifier stat = (StatModifier)modifierPooler.GetModifier(id);
             if (!jobTrait_Stat.ContainsKey(job))
             {
                 jobTrait_Stat.Add(job, new List<StatModifier>());

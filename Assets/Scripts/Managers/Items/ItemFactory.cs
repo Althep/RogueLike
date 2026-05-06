@@ -114,6 +114,7 @@ public class ItemFactory
     {
         ItemBase origin = itemDataManager.Get_ItemDatas()[name];
         ItemBase item;
+        
         switch (origin.category)
         {
             case Defines.ItemCategory.Equipment:
@@ -123,6 +124,7 @@ public class ItemFactory
                     item.id = origin.id;
                     item.name = origin.name;
                     item.maxStack = 1;
+                    
                     item.category = ItemCategory.Equipment;
                 }
                 break;
@@ -156,7 +158,7 @@ public class ItemFactory
 
             // Pool에서 해당 타입 객체 가져오기
             PoolScriptType poolType = (PoolScriptType)Enum.Parse(typeof(PoolScriptType), modType.ToString());
-            IPoolScript pooled = pooler.GetModifier(modType, modi.id);
+            IPoolScript pooled = pooler.GetModifier(modi.id);
 
             if (pooled is Modifier newOne)
             {
@@ -169,7 +171,7 @@ public class ItemFactory
                 Debug.LogError($"Pool returned wrong type for {modType}");
             }*/
         }
-        
+        item.tier = origin.tier;
         return item;
     }
     public void MakeFieldItem()

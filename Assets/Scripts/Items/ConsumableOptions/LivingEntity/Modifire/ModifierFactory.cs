@@ -1,84 +1,84 @@
 using UnityEngine;
-using System;
-using System.Collections.Generic;
-using System.Collections;
 using Cysharp.Threading.Tasks;
 using static Defines;
+
 public class ModifierFactory
 {
-    
-    ModifierDataManager modifierDataManager;
+    private ModifierDataManager modifierDataManager;
     public static ModifierFactory _instance;
-    ModifierPooler modifierPooler;
-    ModifierFactory()
-    {
-    }
-    
-    public async UniTask Init()
-    {
-        if (modifierDataManager == null)
-        {
-            modifierDataManager = await ModifierDataManager.CreateAsync();
-            modifierPooler = ModifierManager.instance.GetModifierPooler();
-        }
-    }
+
+    // 생성자
+    private ModifierFactory() { }
+
+    // 비동기 팩토리 생성 (게임 시작 시 ModifierManager에서 await로 호출하여 초기화를 완벽히 끝냅니다)
     public static async UniTask<ModifierFactory> CreateAsync()
     {
         if (_instance == null)
         {
-            _instance = new ModifierFactory(); // 즉시 할당
+            _instance = new ModifierFactory();
+            // 팩토리가 생성될 때 데이터 매니저도 확실하게 세팅하고 대기합니다.
             _instance.modifierDataManager = await ModifierDataManager.CreateAsync();
         }
         return _instance;
     }
-    public Modifier CreateModifier(string id)
-    {
-        Init().Forget();
-        Modifier target = modifierDataManager.GetModifier(id);
-        return GetCopyModifier(target);
-    }
 
-    Modifier GetCopyModifier(Modifier modifier)
+    // 풀러(Pooler)가 호출할 단일 진입점 (이전 대화에서 풀러가 호출하던 이름과 통일)
+    public Modifier CreateNewInstance(string id)
     {
-        modifierPooler = ModifierManager.instance.GetModifierPooler();
-        if (modifier == null)
+        // Init().Forget() 제거: 팩토리는 이미 생성 시점에 초기화가 끝났어야 정상입니다.
+
+        Modifier targetTemplate = modifierDataManager.GetModifier(id);
+        if (targetTemplate == null)
         {
-            Debug.Log("Modifier Null! ModifierFactory_GetCopyModifier");
+            Debug.LogError($"[ModifierFactory] {id}에 해당하는 원본 데이터를 찾을 수 없습니다!");
             return null;
         }
-        ModifierType type = modifier.modifierType;
-        switch (type)
+
+        return GetCopyModifier(targetTemplate);
+    }
+
+    // 내부적으로 객체를 찍어내고 복사하는 로직
+    private Modifier GetCopyModifier(Modifier template)
+    {
+        // 풀러 참조(modifierPooler = ModifierManager...) 삭제 
+
+        switch (template.modifierType)
         {
             case ModifierType.StatModifier:
                 StatModifier newStat = new StatModifier();
-                if (modifier is StatModifier)
+                // 패턴 매칭으로 바로 캐스팅하여 Copy 진행
+                if (template is StatModifier statTemplate)
                 {
-                    modifier.Copy(newStat);
+                    statTemplate.Copy(newStat);
                 }
                 return newStat;
+
             case ModifierType.BuffModifier:
                 BuffModifier newBuff = new BuffModifier();
-                if (modifier is BuffModifier)
+                if (template is BuffModifier buffTemplate)
                 {
-                    modifier.Copy(newBuff);
+                    buffTemplate.Copy(newBuff);
                 }
                 return newBuff;
+
             case ModifierType.DamageModifier:
                 DamageModifier newDamage = new DamageModifier();
-                if (modifier is DamageModifier)
+                if (template is DamageModifier dmgTemplate)
                 {
-                    modifier.Copy(newDamage);
+                    dmgTemplate.Copy(newDamage);
                 }
                 return newDamage;
+
             case ModifierType.ActionModifier:
                 ActionModifier newAction = new ActionModifier();
-                if (modifier is ActionModifier)
+                if (template is ActionModifier actionTemplate)
                 {
-                    modifier.Copy(newAction);
+                    actionTemplate.Copy(newAction);
                 }
                 return newAction;
+
             default:
-                Debug.Log("StatType Error in GetEmptyModifier_ModifierFactory");
+                Debug.LogError($"[ModifierFactory] 정의되지 않은 ModifierType입니다: {template.modifierType}");
                 return null;
         }
     }

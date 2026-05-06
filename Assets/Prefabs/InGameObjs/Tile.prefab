@@ -79,7 +79,7 @@ SpriteRenderer:
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: 0
-  m_Sprite: {fileID: 5951348595876243351, guid: 4d063ffa5b60d514eac79077805a0087, type: 3}
+  m_Sprite: {fileID: 7940694260894536507, guid: d73839b2a4209774cbe175762560a119, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
   m_FlipY: 0
@@ -136,6 +136,11 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::TileEntity
   myType: 0
-  spriteRenderer: []
+  spriteRenderer: {fileID: 0}
+  equipRenders: []
   myPos: {x: 0, y: 0}
+  posKey: {x: 0, y: 0}
+  myUIs: {fileID: 0}
+  myUIController: {fileID: 0}
   upperObj: {fileID: 0}
+  spriteIndex: 0

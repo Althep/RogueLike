@@ -3,6 +3,8 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using Cysharp.Threading.Tasks;
+using static Defines;
+
 public class DungeonManager : MonoBehaviour
 {
     public static DungeonManager instance;
@@ -57,10 +59,21 @@ public class DungeonManager : MonoBehaviour
     public async UniTask ChangeFloor(int changes)
     {
         floor+=changes;
+        await ReturnAllObjects();
         Debug.Log("floor Changed");
         await OnFloorChange();
+        FogOfWarManager.Instance.OnFloorChange();
+        PlayerEntity player = GameManager.instance.Get_PlayerEntity();
+        int vision = (int)player.GetEntityStat(ModifierTriggerType.OnMove)[StatType.Vision];
+        player.UpdateFoV(player.Get_PosKey(), vision);
     }
     
+    public async UniTask ReturnAllObjects()
+    {
+        await mapManager.ReturnAllObjects();
+        itemManager.ReturnAllObjects();
+        monsterManager.ReturnAllObjects();
+    }
     public async UniTask OnFloorChange()
     {
         if(floor <= 0)
@@ -96,6 +109,7 @@ public class DungeonManager : MonoBehaviour
     }
     public bool Get_Visitied()
     {
+        Debug.Log($"방문 상태 {isVisited}!");
         return isVisited;
     }
     public async UniTask VisitNewFloor()
@@ -107,18 +121,23 @@ public class DungeonManager : MonoBehaviour
         }
         await GenerateDungeon();
         visitiedFloor.Add(floor);
-        monsterManager.OnFloorChange();
-        await itemManager.OnFloorChange();
         mapManager.CalculateInitialCost();
+        
     }
     async UniTask VisitedFloor()
     {
+        await GenerateDungeon();
+        mapManager.CalculateInitialCost();
+        FogOfWarManager.Instance.OnFloorChange();
+        if (!visitiedFloor.Contains(floor))
+        {
+            visitiedFloor.Add(floor);
+        }
         
     }
 
     public async UniTask GenerateDungeon()
     {
-        //OnFloorChange();
         float startTime = Time.realtimeSinceStartup;
         await poolManager.PreWarmObjects();
         Debug.Log($"[Profile] 데이터 생성 시간: {Time.realtimeSinceStartup - startTime}s");
@@ -127,14 +146,28 @@ public class DungeonManager : MonoBehaviour
         await mapManager.MapMake();
         Debug.Log($"[Profile] 오브젝트 배치 시간: {Time.realtimeSinceStartup - spawnStart}s");
 
-        //await itemManager.OnFloorChange();
-        //await itemManager.OnVisitNewFloor();
+        await itemManager.OnFloorChange();
+        await monsterManager.OnFloorChange();
 
-        await monsterManager.MonsterSpawn();
-
-        if(floor == 1)
+        //await monsterManager.MonsterSpawn();
+        
+        PlayerEntity player = GameManager.instance.Get_PlayerEntity();
+        Defines.TileType type = player.StairType();
+        int stiarNumber = player.Get_StiarNumber();
+        int _width = MapManager.instance.Get_Width();
+        int _height = MapManager.instance.Get_Height();
+        
+        switch (type)
         {
-            PlayerController.instance.Set_Player_UpStair(0);
+
+            case Defines.TileType.Upstair:
+                PlayerController.instance.Set_Player_DownStair(stiarNumber);
+                break;
+            case Defines.TileType.DownStair:
+                PlayerController.instance.Set_Player_UpStair(stiarNumber);
+                break;
+            default:
+                break;
         }
         Debug.Log($"[Profile] 총 소요 시간: {Time.realtimeSinceStartup - startTime}s");
     }

@@ -472,6 +472,11 @@ public class LivingEntity : MapEntity
         // 출발하기 직전에 최종적으로 길이 막혔는지 확인!
         if (myPos != destination && !MapManager.instance.CanMove(destination))
         {
+            Debug.Log($"이동 가능 여부 {MapManager.instance.CanMove(destination)}");
+            if(myPos == destination)
+            {
+                Debug.Log("MyPos == Destination");
+            }
             // 길막 당했으면 이동 상태를 풀고 이번 행동은 취소
             moveState = Defines.MoveState.Idle;
             return;
@@ -542,6 +547,7 @@ public class LivingEntity : MapEntity
         int maxHp = Mathf.RoundToInt(myStat.GetBase()[StatType.MaxHP]);
         myUIController.UpdateUIs(currentHp, maxHp);
 
+        modifierController.ApplyModifiers(ModifierTriggerType.OnHited);
     }
     public Dictionary<StatType, float> GetAttackBonus()
     {
@@ -581,6 +587,7 @@ public class LivingEntity : MapEntity
     public virtual void Set_Visibility(bool isVisible)
     {
         bool isChange = false;
+        
         foreach (SpriteRenderer sr in equipRenders)
         {
             if (sr.sprite == null)
@@ -612,7 +619,7 @@ public class LivingEntity : MapEntity
     {
         base.Return();
         Vector2 myPos = transform.position;
-        Vector2Int posKey = new Vector2Int(Mathf.RoundToInt(myPos.x), Mathf.RoundToInt(myPos.y));
+        Vector2Int posKey = Get_PosKey();
         MapManager.instance.dynamicMapData.Remove(posKey);
         
     }

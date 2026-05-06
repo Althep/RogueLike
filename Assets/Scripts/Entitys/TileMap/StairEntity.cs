@@ -2,6 +2,7 @@ using UnityEngine;
 
 public class StairEntity : MapEntity
 {
+    public int stairNumber;
     public override MapEntity CopyToEmpty()
     {
         throw new System.NotImplementedException();

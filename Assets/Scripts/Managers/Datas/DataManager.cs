@@ -21,6 +21,7 @@ public class DataManager
     public EffectDataManager effectDataManager;
     public UIDataManager uiDataManager;
     public StringKeyManager stringkeyManager;
+    public RandomOptionManager randomOptionManager;
     #region 어드레서블 데이터 이름
     #region 아이템
     string ConsumItem;
@@ -80,6 +81,10 @@ public class DataManager
         {
             stringkeyManager = StringKeyManager.Instance;
         }
+        if(randomOptionManager == null)
+        {
+            randomOptionManager = await RandomOptionManager.CreateAsync();
+        }
         await itemDataManager.Init();
         await startDataManager.Init();
         await DataRead();
@@ -103,6 +108,7 @@ public class DataManager
         await monsterManager .SetUp(allAssets.Where(a => a.name.StartsWith("Monster_")).ToList());
         await uiDataManager.SetUp(allAssets.Where(a => a.name.StartsWith("UI_")).ToList());
         stringkeyManager.SetUp(allAssets.FirstOrDefault(a=> a.name.StartsWith("String_")));
+        //await randomOptionManager.SetUp(allAssets.FirstOrDefault(a => a.name.StartsWith("Add_")));
         Debug.Log("모든 하위 매니저에게 데이터 배분 완료");
     }
 

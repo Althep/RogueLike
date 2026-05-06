@@ -1,155 +1,97 @@
 using UnityEngine;
-using System;
 using System.Collections.Generic;
-using static Defines;
+
 public class ModifierPooler
 {
-    public Dictionary<ModifierType, Dictionary<string, Queue<IPoolScript>>> inactiveModifiers = new Dictionary<ModifierType, Dictionary<string, Queue<IPoolScript>>>();
+    // ModifierType을 제거하고 id(문자열)만 키값으로 사용하는 단일 딕셔너리로 최적화
+    public Dictionary<string, Queue<IPoolScript>> inactiveModifiers = new Dictionary<string, Queue<IPoolScript>>();
+    public Dictionary<string, List<IPoolScript>> activeModifiers = new Dictionary<string, List<IPoolScript>>();
 
-    public Dictionary<ModifierType, Dictionary<string, List<IPoolScript>>> activeModifiers = new Dictionary<ModifierType, Dictionary<string, List<IPoolScript>>>();
+    private ModifierManager modifierManager;
+    private ModifierFactory modifierFactory;
 
-    ModifierManager modifierManager;
-    ModifierFactory modifierFactory;
-
-    public void Set_ModifierManager(ModifierManager MM,ModifierFactory MF)
+    public void Set_ModifierManager(ModifierManager MM, ModifierFactory MF)
     {
         modifierManager = MM;
         modifierFactory = MF;
-        modifierFactory = modifierManager.GetModifierFactory();
     }
 
-    public Modifier GetModifier(ModifierType type, string id)
+    public Modifier GetModifier(string id)
     {
-        IPoolScript value;
-        if(id == null)
+        if (string.IsNullOrEmpty(id))
         {
-            Debug.Log("id Null!");
+            Debug.LogWarning("[ModifierPooler] 유효하지 않은 ID입니다!");
             return null;
         }
-        if (!inactiveModifiers.ContainsKey(type))
+
+        // 1. 비활성 큐와 활성 리스트가 없으면 초기화
+        if (!inactiveModifiers.ContainsKey(id))
         {
-            inactiveModifiers.Add(type, new Dictionary<string, Queue<IPoolScript>>());
-            if (!inactiveModifiers[type].ContainsKey(id))
-            {
-                inactiveModifiers[type].Add(id, new Queue<IPoolScript>());
-            }
+            inactiveModifiers[id] = new Queue<IPoolScript>();
         }
-        if (!activeModifiers.ContainsKey(type))
+        if (!activeModifiers.ContainsKey(id))
         {
-            activeModifiers.Add(type, new Dictionary<string, List<IPoolScript>>());
-            if (!activeModifiers[type].ContainsKey(id))
-            {
-                activeModifiers[type].Add(id, new List<IPoolScript>());
-            }
+            activeModifiers[id] = new List<IPoolScript>();
         }
-        if (!inactiveModifiers.ContainsKey(type))
+
+        // 2. 큐에 남은 객체가 없으면 새로 생성해서 큐에 보충
+        if (inactiveModifiers[id].Count == 0)
         {
-            inactiveModifiers.Add(type, new Dictionary<string, Queue<IPoolScript>>());
+            CreateNew(id);
         }
-        if (!inactiveModifiers[type].ContainsKey(id))
-        {
-            inactiveModifiers[type].Add(id, new Queue<IPoolScript>());
-        }
-        if (inactiveModifiers[type][id].Count < 1)
-        {
-            CreateNew(type, id);
-        }
-        value = inactiveModifiers[type][id].Dequeue();
-        if (activeModifiers[type] == null)
-        {
-            activeModifiers[type] = new Dictionary<string, List<IPoolScript>>();   
-        }
-        if (!activeModifiers[type].ContainsKey(id))
-        {
-            activeModifiers[type].Add(id, new List<IPoolScript>());
-        }
-        activeModifiers[type][id].Add(value);
+
+        // 3. 큐에서 하나 꺼내서 활성 리스트로 이동
+        IPoolScript value = inactiveModifiers[id].Dequeue();
+        activeModifiers[id].Add(value);
+
         return value as Modifier;
     }
 
-    public IPoolScript CreateNew(ModifierType type, string id)
+    public IPoolScript CreateNew(string id)
     {
-        IPoolScript modifier = null;
-        //Debug.Log($"Create New Modifier Script {id}");
-        if(modifierFactory == null)
+        if (modifierFactory == null)
         {
-            Debug.Log("모디파이어 팩토리 널!");
             modifierFactory = modifierManager.GetModifierFactory();
         }
-        switch (type)
-        {
-            case ModifierType.StatModifier:
-                modifier = new StatModifier();
-                if (modifier is StatModifier)
-                {
-                    modifierFactory.CreateModifier(id).Copy((StatModifier)modifier);
-                }
 
-                break;
-            case ModifierType.ItemModifier:
-                modifier = new ItemModifier();
-                if (modifier is ItemModifier)
-                {
-                    modifierFactory.CreateModifier(id).Copy((ItemModifier)modifier);
-                }
-                break;
-            case ModifierType.BuffModifier:
-                modifier = new BuffModifier();
-                if (modifier is BuffModifier)
-                {
-                    modifierFactory.CreateModifier(id).Copy((BuffModifier)modifier);
-                }
-                break;
-            case ModifierType.DamageModifier:
-                modifier = new DamageModifier();
-                if (modifier is DamageModifier)
-                {
-                    modifierFactory.CreateModifier(id).Copy((DamageModifier)modifier);
-                }
-                break;
-            case ModifierType.ActionModifier:
-                modifier = new ActionModifier();
-                if(modifier is ActionModifier)
-                {
-                    modifierFactory.CreateModifier(id).Copy((ActionModifier)modifier);
-                }
-                break;
-            default:
-                break;
+        // 핵심: 풀러는 switch문으로 타입을 구분하지 않습니다. 
+        // 팩토리에게 "이 ID에 맞는 완성된 모디파이어 객체를 하나 만들어줘"라고 지시만 합니다.
+        Modifier newModifier = modifierFactory.CreateNewInstance(id);
+
+        if (newModifier == null)
+        {
+            Debug.LogError($"[ModifierPooler] 팩토리에서 {id} 생성에 실패했습니다.");
+            return null;
         }
 
-        //modifier.SetScriptType(type);
-        if (!inactiveModifiers.ContainsKey(type))
+        // 비활성 큐가 없으면 초기화 후 삽입
+        if (!inactiveModifiers.ContainsKey(id))
         {
-            inactiveModifiers.Add(type, new Dictionary<string, Queue<IPoolScript>>());
-            if (!inactiveModifiers[type].ContainsKey(id))
-            {
-                inactiveModifiers[type].Add(id, new Queue<IPoolScript>());
-            }
+            inactiveModifiers[id] = new Queue<IPoolScript>();
         }
-        inactiveModifiers[type][id].Enqueue(modifier);
-        return modifier;
+        inactiveModifiers[id].Enqueue(newModifier);
+
+        return newModifier;
     }
 
     public void ReturnModifier(IPoolScript script)
     {
+        Modifier modifier = script as Modifier;
+        if (modifier == null) return;
 
-        Modifier modifier = (Modifier)script;
-        ModifierType type = modifier.modifierType;
         string id = modifier.id;
-        activeModifiers[type][id].Remove(modifier);
 
-        if (!inactiveModifiers.ContainsKey(type))
+        // 1. 활성 리스트에서 제거
+        if (activeModifiers.ContainsKey(id))
         {
-            inactiveModifiers.Add(type, new Dictionary<string, Queue<IPoolScript>>());
-            if (!inactiveModifiers[type].ContainsKey(id))
-            {
-                inactiveModifiers[type].Add(id, new Queue<IPoolScript>());
-            }
-
+            activeModifiers[id].Remove(script);
         }
-        inactiveModifiers[type][id].Enqueue(script);
 
+        // 2. 비활성 큐로 반환 (큐가 없으면 방어적으로 생성)
+        if (!inactiveModifiers.ContainsKey(id))
+        {
+            inactiveModifiers[id] = new Queue<IPoolScript>();
+        }
+        inactiveModifiers[id].Enqueue(script);
     }
-
 }

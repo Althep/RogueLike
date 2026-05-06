@@ -52,7 +52,7 @@ MonoBehaviour:
   posKey: {x: 0, y: 0}
   myUIs: {fileID: 0}
   myUIController: {fileID: 0}
-  stairNumer: 0
+  stairNumber: 0
 --- !u!1 &6390127280269353258
 GameObject:
   m_ObjectHideFlags: 0
@@ -132,8 +132,8 @@ SpriteRenderer:
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: 0
-  m_Sprite: {fileID: 21300000, guid: b325a13e94f3bac4199e75b91fa98449, type: 3}
-  m_Color: {r: 0.0990566, g: 0.39956796, b: 1, a: 1}
+  m_Sprite: {fileID: 3635942527718191125, guid: 6a7ab6e0f7c46fa4c851b1237bca3762, type: 3}
+  m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
   m_FlipY: 0
   m_DrawMode: 0

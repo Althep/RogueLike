@@ -31,7 +31,7 @@ public class MapManager : MonoBehaviour
     public List<StairEntity> stairs = new List<StairEntity>();
     //public List<DownStairEntity> downStairs = new List<DownStairEntity>();
     public List<DoorEntity> doors = new List<DoorEntity>();
-    [SerializeField] List<MapEntity> tileObjects = new List<MapEntity>();
+    [SerializeField] List<MapEntity> enviromentObjs = new List<MapEntity>();
 
     public List<Vector2Int> tilePosList = new List<Vector2Int>();
     public List<Vector2Int> wallPosList = new List<Vector2Int>();
@@ -88,6 +88,22 @@ public class MapManager : MonoBehaviour
     }
 
     #region Gets
+    public bool IsInMap(Vector2Int pos)
+    {
+        if (pos.x>_width-1||pos.y>_height-1||pos.x<0||pos.y<0)
+        {
+            return false;
+        }
+        return true;
+    }
+    public int Get_Width()
+    {
+        return _width;
+    }
+    public int Get_Height()
+    {
+        return _height;
+    }
     void Get_RandomMapMaker()
     {
         List<MapMakeType> mapMakerType = Utils.Get_Enums<MapMakeType>(MapMakeType.Divide).ToList();
@@ -161,9 +177,10 @@ public class MapManager : MonoBehaviour
         _height = mapSize.y;
         _width = mapSize.x;
         await MapObjSpawn();
-        
+        LeftDataUpdate();
         
         mapLayer.Prepare(mapSize.x, mapSize.y);
+        //CalculateInitialCost();
         Debug.Log("던전 생성 완료");
     }
     public MapMaker Get_MapMaker()
@@ -222,6 +239,8 @@ public class MapManager : MonoBehaviour
     }
     public async UniTask MapObjSpawn()
     {
+        int upStairNunber = 0;
+        int downStairNunber = 0;
         if (poolManager == null)
             poolManager = GameManager.instance.Get_PoolManager();
 
@@ -232,20 +251,45 @@ public class MapManager : MonoBehaviour
         {
             TileType type = enviromentData[pos];
             GameObject go = poolManager.ObjectPool(type);
-            go.transform.position = new Vector3(pos.x, pos.y);
+            
 
             if (go.TryGetComponent<MapEntity>(out MapEntity tile))
             {
 
                 switch (tile)
                 {
-                    case DoorEntity door: AddMapData(pos, door); break;
-                    case TileEntity tileTile: AddMapData(tileTile); break;
-                    case WallEntity wallTile: AddMapData(wallTile); break;
-                    case StairEntity stair : AddMapData(stair); break;
+                    case DoorEntity door: 
+                        AddMapData(pos, door);
+                        go.transform.position = new Vector3(pos.x, pos.y, -1); 
+                        break;
+                    case TileEntity tileTile: 
+                        AddMapData(tileTile);
+                        go.transform.position = new Vector3(pos.x, pos.y);
+                        break;
+                    case WallEntity wallTile: 
+                        AddMapData(wallTile); 
+                        go.transform.position = new Vector3(pos.x, pos.y, -1);
+                        break;
+                    case StairEntity stair : 
+                        AddMapData(stair); 
+                        go.transform.position = new Vector3(pos.x, pos.y, -1);
+                        switch (stair.GetMyType())
+                        {
+                            case TileType.Upstair:
+                                stair.stairNumber = upStairNunber;
+                                upStairNunber++;
+                                break;
+                            case TileType.DownStair:
+                                stair.stairNumber = downStairNunber;
+                                downStairNunber++;
+                                break;
+                            default:
+                                break;
+                        }
+                        break;
                 }
 
-                tileObjects.Add(tile);
+                enviromentObjs.Add(tile);
                 tile.SetMyPos(pos);
                 if (pos.x >= 0 && pos.x < _width && pos.y >= 0 && pos.y < _height)
                 {
@@ -264,7 +308,7 @@ public class MapManager : MonoBehaviour
                 await UniTask.Yield();
             }
         }
-        FogOfWarManager.Instance.InitMapFog(_width, _height);
+        //FogOfWarManager.Instance.InitMapFog(_width, _height);
     }
     public bool IsSaved()
     {
@@ -274,23 +318,42 @@ public class MapManager : MonoBehaviour
     {
         return new Dictionary<Vector2Int, TileType>();
     }
-    #endregion 
-    public async UniTask ReturnAll()
+
+
+
+    public async UniTask ReturnAllObjects()
     {
-        if (poolManager == null)
+        for(int i = 0;i<enviromentObjs.Count; i++)
         {
-            poolManager = GameManager.instance.Get_PoolManager();
+            enviromentObjs[i].Return();
         }
-        foreach (MapEntity tile in tileObjects)
-        {
-            poolManager.Return(tile.myType, tile.gameObject);
-        }
-        tileObjects.Clear();
-        enviromentData.Clear();
-        TileListClear();
         await UniTask.Yield();
-        Debug.Log("제거완료");
+        /*
+        for(int i = 0; i<wallEntitys.Count; i++)
+        {
+            wallEntitys[i].Return();
+        }
+        for(int i =0; i<stairs.Count; i++)
+        {
+            stairs[i].Return();
+        }
+        for(int i = 0; i<doors.Count; i++)
+        {
+            doors[i].Return();
+        }
+        */
+        enviromentObjs.Clear();
+        dynamicMapData.Clear();
+        wallEntitys.Clear();
+        stairs.Clear();
+        doors.Clear();
+        enviromentData.Clear();
+        interactiveMapData.Clear();
     }
+
+
+    #endregion 
+    
 
     public List<Vector2Int> GetAroundTile(Vector2 target)
     {
@@ -478,7 +541,7 @@ public class MapManager : MonoBehaviour
     public Vector2Int Get_DownStairPos(int index)
     {
         Mathf.Clamp(index, 0, downStairList.Count);
-        return upStairList[index];
+        return downStairList[index];
     }
     public bool CanAcctack(Vector2Int dest)
     {
@@ -501,15 +564,18 @@ public class MapManager : MonoBehaviour
     {
         if (enviromentData.TryGetValue(dest, out var tileType))
         {
+
             Debug.Log(tileType);
             if (tileType == TileType.Wall || tileType == TileType.DeepWater)
             {
+                Debug.Log("타일타입 벽");
                 return false;
             }
         }
 
         if (dynamicMapData.ContainsKey(dest))
         {
+            Debug.Log("다이나믹 엔티티 포함!");
             return false;
         }
 
@@ -518,6 +584,7 @@ public class MapManager : MonoBehaviour
             var door = entities.OfType<DoorEntity>().FirstOrDefault();
             if (door != null && !door.IsOpen())
             {
+                Debug.Log("문 잠김!");
                 return false; // 문이 있는데 닫혀있으면 못 감
             }
         }
@@ -772,8 +839,8 @@ public class MapManager : MonoBehaviour
 
             if (pos.x<0||pos.x>=_width||pos.y<0||pos.y<_height) continue;
 
-            byte cost = 255;
-            if (type == TileType.Tile) cost = 1;
+            byte cost = 1;
+            if (type == TileType.Wall) cost = 255;
             else if (type == TileType.ShallowWater) cost =2;
             mapLayer[pos.x, pos.y] = cost;
         }
@@ -900,32 +967,22 @@ public class MapManager : MonoBehaviour
 
     #region MapSave&Load
 
-    public MapSaveData TileSave()
+    public List<TileEntityData> TileSave()
     {
-        int w = _width;
-        int h = _height;
-        int[] idx = new int[w*h];
-        int[] wallidx = new int[w*h];
-        Debug.Log($"[세이브 직전 상태] 벽 : {wallEntitys.Count}개, 문: {doors.Count}개, 계단: {stairs.Count}개 ");
-        Debug.Log($"[추적 1] 맵 데이터(enviromentData)에 기록된 '문' 타일 개수: {doorPosList.Count}개");
-        Debug.Log($"[추적 2] 씬에 스폰되어 리스트(doors)에 들어간 '문' 개수: {doors.Count}개");
-        for (int i = 0; i<_width*_height; i++)
-        {
-            idx[i]=-1;
-            wallidx[i]=-1;
-        }
+        List<TileEntityData> entityDatas = new List<TileEntityData>();
 
+        for(int i =0; i<enviromentObjs.Count; i++)
+        {
+            Vector2Int posKey = enviromentObjs[i].Get_PosKey();
+            entityDatas.Add(enviromentObjs[i].Get_SaveData());
+        }
+        /*
         for (int i = 0; i<tileEntitys.Count; i++)
         {
             Vector2Int posKey = tileEntitys[i].Get_PosKey();
             int x = posKey.x;
             int y = posKey.y;
-            if(x < 0 || y < 0 || x >= w || y >= h)
-            {
-                Debug.Log("PosKey Wrong");
-                continue;
-            }
-            idx[y*w+x] = tileEntitys[i].spriteIndex;
+            entityDatas.Add(tileEntitys[i].Get_SaveData());
         }
 
         
@@ -934,112 +991,58 @@ public class MapManager : MonoBehaviour
             Vector2Int posKey = wallEntitys[i].Get_PosKey();
             int x = posKey.x;
             int y = posKey.y;
-            if (x < 0 || y < 0 || x >= w || y >= h)
-            {
-                Debug.Log("PosKey Wrong");
-                continue;
-            }
-            wallidx[y*w+x] = wallEntitys[i].spriteIndex;
+            entityDatas.Add(wallEntitys[i].Get_SaveData());
         }
 
-        List<SpecialObjectData> specials = new List<SpecialObjectData>();
-
-        for(int i = 0; i< doors.Count; i++)
+        for (int i = 0; i<doors.Count; i++)
         {
-            SpecialObjectData save = doors[i].Get_SaveData();
-            specials.Add(save);
+            Vector2Int posKey = doors[i].Get_PosKey();
+            int x = posKey.x;
+            int y = posKey.y;
+            entityDatas.Add(doors[i].Get_SaveData());
         }
-
-        for(int i = 0; i<stairs.Count; i++)
+        for (int i = 0; i<stairs.Count; i++)
         {
-            SpecialObjectData save = stairs[i].Get_SaveData();
-            specials.Add(save);
+            Vector2Int posKey = stairs[i].Get_PosKey();
+            int x = posKey.x;
+            int y = posKey.y;
+            entityDatas.Add(stairs[i].Get_SaveData());
         }
-        MapSaveData data = new MapSaveData { width = w, height = h, tileIds=idx ,wallIds = wallidx,specialObjs = specials };
-        
-        return data;
+        */
+        return entityDatas;
     }
 
-    public void TileLoad(MapSaveData saveData)
+    public void LeftDataUpdate()
     {
-        // 1. 기존 데이터 정리 (안전장치)
-        // 씬에 이미 맵이 존재할 경우를 대비해 기존 리스트를 비우고 게임 오브젝트를 파괴하는 로직이 선행되어야 합니다.
-        // ClearMapObjects(); // (직접 구현하신 초기화 함수 호출)
-
-        // 2. 맵 크기 정보 복구
-        _width = saveData.width;
-        _height = saveData.height;
-
-        int w = _width;
-
-        // 3. 바닥 타일 복구 (1차원 배열 -> 2차원 좌표 변환)
-        for (int i = 0; i < saveData.tileIds.Length; i++)
+        if(selectedMaker is MapMaker_Saved mapMaker)
         {
-            int spriteIdx = saveData.tileIds[i];
+            Dictionary<Vector2Int, TileEntityData> left = mapMaker.leftData;
 
-            // 저장할 때 빈 공간을 -1로 처리했으므로, -1이 아닌 경우만 스폰합니다.
-            if (spriteIdx != -1)
+            for(int i = 0; i<doors.Count; i++)
             {
-                // 핵심: 1차원 인덱스 i를 너비(w)로 나눈 나머지가 x, 몫이 y가 됩니다.
-                int x = i % w;
-                int y = i / w;
+                DoorEntity door = doors[i];
+                Vector2Int key = door.Get_PosKey();
 
-                // TODO: 실제 타일 프리팹 생성 로직 연결
-                // TileEntity newTile = Instantiate(tilePrefab, new Vector3(x, y, 0), Quaternion.identity).GetComponent<TileEntity>();
-                // newTile.Init(x, y, spriteIdx); 
-                // tileEntitys.Add(newTile);
-            }
-        }
-
-        // 4. 벽 복구 (바닥 타일과 동일한 로직)
-        for (int i = 0; i < saveData.wallIds.Length; i++)
-        {
-            int spriteIdx = saveData.wallIds[i];
-
-            if (spriteIdx != -1)
-            {
-                int x = i % w;
-                int y = i / w;
-
-                // TODO: 실제 벽 프리팹 생성 로직 연결
-                // WallEntity newWall = Instantiate(wallPrefab, new Vector3(x, y, 0), Quaternion.identity).GetComponent<WallEntity>();
-                // newWall.Init(x, y, spriteIdx);
-                // wallEntitys.Add(newWall);
-            }
-        }
-
-        // 5. 특수 오브젝트 복구 (문, 계단 등)
-        if (saveData.specialObjs != null)
-        {
-            foreach (SpecialObjectData special in saveData.specialObjs)
-            {
-                // 열거형(Enum) 값에 따라 알맞은 객체를 스폰합니다.
-                switch (special.tileType)
+                if (left.ContainsKey(key))
                 {
-                    case TileType.Door: // (Enum 이름은 프로젝트 선언에 맞춰 수정하세요)
-                                        // TODO: 문 프리팹 생성 로직 연결
-                                        // DoorEntity newDoor = Instantiate(doorPrefab, new Vector3(special.x, special.y, 0), Quaternion.identity).GetComponent<DoorEntity>();
-                                        // newDoor.Set_LoadData(special.state); // 열림/닫힘 등 내부 상태 적용
-                                        // doors.Add(newDoor);
-                        break;
+                    TileEntityData data = left[key];
+                    door.Set_OpenState(data.state);
+                }
+            }
 
-                    case TileType.DownStair: // (계단을 나타내는 Enum 값)
-                                         // TODO: 계단 프리팹 생성 로직 연결
-                                         // StairEntity newStair = Instantiate(stairPrefab, new Vector3(special.x, special.y, 0), Quaternion.identity).GetComponent<StairEntity>();
-                                         // stairs.Add(newStair);
-                        break;
-                    case TileType.Upstair:
-                        break;
-                    default:
-                        Debug.LogWarning($"[TileLoad] 처리되지 않은 특수 타일 타입입니다: {special.tileType}");
-                        break;
+            for(int i = 0; i<stairs.Count; i++)
+            {
+                StairEntity stair = stairs[i];
+
+                Vector2Int key = stair.Get_PosKey();
+                if (left.ContainsKey(key))
+                {
+                    TileEntityData data = left[key];
+                    stair.stairNumber = data.stairNumber;
                 }
             }
         }
-
-        Debug.Log($"[TileLoad] 맵 로드 완료. 너비:{_width}, 높이:{_height}");
-        Debug.Log($"[TileLoad 결과] 타일: {tileEntitys.Count}개, 벽: {wallEntitys.Count}개, 문: {doors.Count}개, 계단: {stairs.Count}개 복구됨.");
+        Debug.Log("TileData NotContained");
     }
-
     #endregion
 }

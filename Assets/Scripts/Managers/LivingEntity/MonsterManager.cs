@@ -4,6 +4,8 @@ using System.Collections.Generic;
 using System.Collections;
 using System.Linq;
 using Cysharp.Threading.Tasks;
+using UnityEditor.EditorTools;
+
 [System.Serializable]
 public class MonsterManager : MonoBehaviour
 {
@@ -119,12 +121,21 @@ public class MonsterManager : MonoBehaviour
         await UniTask.Yield();
     }
 
-    public void OnFloorChange()
+    public async UniTask OnFloorChange()
     {
         int floor = dungeonManager.Get_Floor();
         tierRates = TierCalculator.GetTierProbabilities(floor, 3, 5, false);
-        SpawnPointCalc(floor);
-        monsterSpawner.OnFloorChange();
+        if (SaveDataManager.instance.IsSaved())
+        {
+            LoadMonster();
+        }
+        else
+        {
+            SpawnPointCalc(floor);
+            monsterSpawner.OnFloorChange();
+            await MonsterSpawn();
+        }
+        
     }
 
     void SpawnPointCalc(int floor)
@@ -265,7 +276,7 @@ public class MonsterManager : MonoBehaviour
             Debug.Log("Entity is not Monster Entity");
         }
     }
-
+    #region Save&Load
     public List<LivingEntitySaveData> SaveAllMonster()
     {
         List<LivingEntitySaveData> saveDatas = new List<LivingEntitySaveData>();
@@ -276,4 +287,100 @@ public class MonsterManager : MonoBehaviour
 
         return saveDatas;
     }
+
+    public void LoadMonster()
+    {
+        List<LivingEntitySaveData> savedData = SaveDataManager.instance.Get_FloorSaveData(DungeonManager.instance.Get_Floor()).monsterDatas;
+
+        if(savedData == null)
+        {
+            Debug.Log("");
+            return;
+        }
+
+        for(int i = 0; i<savedData.Count; i++)
+        {
+            MonsterStat originData = monsterDataManager.GetMonsterStat(savedData[i].id);
+            GameObject monster = PoolManager.instance.ObjectPool(Defines.TileType.Monster);
+            MonsterEntity monsterEntity = monster.transform.GetComponent<MonsterEntity>();
+            Vector2Int pos = new Vector2Int(savedData[i].x, savedData[i].y);
+            monster.transform.position = new Vector3(pos.x, pos.y, -1);
+            if (monsterEntity != null)
+            {
+                EntityStat monsterStat = originData.CopyStat();
+                monsterEntity.id = savedData[i].id;
+                monsterEntity.SetMyStat(monsterStat);
+                monsterEntity.GetMyStat().SetBaseStat(Defines.StatType.HP, savedData[i].currentHp);
+
+                if (savedData[i].itemdata!=null)
+                {
+                    for (int j = 0; j<savedData[i].itemdata.Count; j++)
+                    {
+                        ItemSaveData itemData = savedData[i].itemdata[j];
+                        ItemBase item = ItemManager.instance.LoadItem(itemData);
+                        AddItemToMonster(monsterEntity, item);
+                    }
+                }
+                if (savedData[i].equipMentsData!=null)
+                {
+
+                    for(int j = 0; j<savedData[i].equipMentsData.Count; j++)
+                    {
+                        ItemSaveData itemData = savedData[i].equipMentsData[j];
+                        ItemBase item = ItemManager.instance.LoadItem(itemData);
+                        EquipItemToMonster(monsterEntity, item);
+                    }
+                }
+                if (savedData[i].modifiers!=null)
+                {
+                    for(int j = 0; j<savedData[i].modifiers.Count; j++)
+                    {
+                        ModifierSaveData modifierData = savedData[i].modifiers[j];
+                        Modifier modi = ModifierManager.instance.Get_Modifier(modifierData.modifierId);
+                        monsterEntity.Add_Mutation(modi);
+                    }
+                }
+
+                if (savedData[i].buffs!=null)
+                {
+                    for(int j = 0; j<savedData[i].buffs.Count; j++)
+                    {
+                        BuffSaveData buffData = savedData[i].buffs[j];
+                        Modifier modi = ModifierManager.instance.Get_Modifier(buffData.modifierId);
+                        int duration = buffData.leftDuration;
+                        modi.value = buffData.value;
+
+                        EventManager.instance.AddBuff(monsterEntity, modi, duration);
+                    }
+                }
+            }
+            else
+            {
+                Debug.Log("MonsterEntity null");
+            }
+            monsterEntity.Set_Visibility(false);
+            monsters.Add(monsterEntity);
+            mapManager.AddMapData(pos,monsterEntity);
+        }
+    }
+
+    public void AddItemToMonster(MonsterEntity target , ItemBase item)
+    {
+        target.Add_Item(item);
+    }
+
+    public void EquipItemToMonster(MonsterEntity target, ItemBase equip)
+    {
+
+    }
+    
+    public void ReturnAllObjects()
+    {
+        for(int i = 0; i<monsters.Count; i++)
+        {
+            monsters[i].Return();
+        }
+        monsters.Clear();
+    }
+    #endregion
 }

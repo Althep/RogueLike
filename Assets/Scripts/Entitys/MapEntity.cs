@@ -84,8 +84,9 @@ public abstract class MapEntity : MonoBehaviour, ITargetable
         return posKey;
     }
 
-    public virtual SpecialObjectData Get_SaveData()
+    public virtual TileEntityData Get_SaveData()
     {
-        return new SpecialObjectData();
+
+        return new TileEntityData();
     }
 }

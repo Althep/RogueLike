@@ -2,7 +2,7 @@ using UnityEngine;
 
 public class DownStairEntity : StairEntity
 {
-    public int stairNumber;
+    
 
     protected override void Init()
     {
@@ -20,16 +20,25 @@ public class DownStairEntity : StairEntity
         stairNumber = 0;
     }
 
-    public override SpecialObjectData Get_SaveData()
+    public override TileEntityData Get_SaveData()
     {
-        SpecialObjectData saveData = new SpecialObjectData {x = posKey.x,y=posKey.y,tileType = this.GetMyType() };
-        saveData.x = posKey.x;
-        saveData.y = posKey.y;
-        return saveData;
+        Vector2Int posKey = Get_PosKey();
+        TileEntityData data = new TileEntityData() { x = posKey.x, y = posKey.y, stairNumber = this.stairNumber, type = GetMyType() };
+
+
+        return data;
     }
 
-    public override void Interact()
+    public override async void Interact()
     {
+        PlayerEntity player = GameManager.instance.Get_PlayerEntity();
+        player.IneractStair(GetMyType(), stairNumber);
         SaveDataManager.instance.SaveAllFloorDatas();
+        await DungeonManager.instance.ChangeFloor(1);
+    }
+
+    public override void Return()
+    {
+        PoolManager.instance.Return(GetMyType(), this.gameObject);
     }
 }

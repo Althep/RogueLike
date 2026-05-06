@@ -70,7 +70,7 @@ public abstract class ItemBase
         foreach (var option in this.options)
         {
             // option.Clone()을 호출하여 Modifier도 새롭게 생성해서 넣습니다.
-            Modifier copied = ModifierManager.instance.Get_Modifier(option.modifierType,option.id);
+            Modifier copied = ModifierManager.instance.Get_Modifier(option.id);
             Debug.Log($"아이템 데이터 클로닝 아이디{id}, 모디파이어 아이디{copied.id}");
             cloneObj.options.Add(copied);
         }

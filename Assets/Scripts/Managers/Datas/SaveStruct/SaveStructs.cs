@@ -5,24 +5,24 @@ using static Defines;
 
 public class FloorSaveData
 {
-    public MapSaveData mapData;
-    public List<ItemEntitySaveData> droppedItems;
-    public List<LivingEntitySaveData> monsterDatas;
-}
-public struct MapSaveData
-{
     public int width;
     public int height;
-    public int[] tileIds;
-    public int[] wallIds;
-    public List<SpecialObjectData> specialObjs;
+    public List<TileEntityData> tileDatas;
+    public List<ItemEntitySaveData> droppedItems;
+    public List<LivingEntitySaveData> monsterDatas;
+    public List<Vector2Int> visited;
 }
-public struct SpecialObjectData
+
+public struct TileEntityData
 {
-    public int x, y;
-    public TileType tileType;
+    public int x;
+    public int y;
+    public int spriteNumber;
+    public int stairNumber;
     public bool state;
+    public TileType type;
 }
+
 
 public struct ModifierSaveData
 {
@@ -33,7 +33,7 @@ public struct BuffSaveData
 {
     public float value;
     public string modifierId;
-    public int endTurn;
+    public int leftDuration;
 }
 public class ItemSaveData
 {
@@ -54,10 +54,13 @@ public class LivingEntitySaveData
 {
     public string id;
     public float currentHp;
-    public List<ItemSaveData> itemdata;//인벤토리, 장착중인 아이템 등
+    public int x;
+    public int y;
+    public List<ItemSaveData> itemdata;//인벤토리
+    public List<ItemSaveData> equipMentsData;//장착중인 아이템 등
     public List<ModifierSaveData> modifiers;//종족특성,돌연변이등
     public List<BuffSaveData> buffs;//버프 데이터
-    public List<ItemSaveData> equipMentsData;
+    
     
 }
 public class PlayerSaveData

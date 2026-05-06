@@ -63,19 +63,24 @@ public class SaveDataManager : MonoBehaviour
     public void SaveAllFloorDatas()
     {
         FloorSaveData saveData = new FloorSaveData();
-        saveData.mapData = FloorSave();
+        saveData.tileDatas = FloorSave();
         saveData.monsterDatas = MonsterSave();
         saveData.droppedItems = ItemSave();
+        saveData.width = MapManager.instance.Get_Width();
+        saveData.height = MapManager.instance.Get_Height();
+        saveData.visited = new List<Vector2Int>(FogOfWarManager.Instance.Get_Visited());
         int floor = DungeonManager.instance.Get_Floor();
         string name = $"floorSaveData_{floor}.json";
         string jsonData = JsonConvert.SerializeObject(saveData,Formatting.Indented);
         floorSaveDatas[floor]= saveData;
+        
         MakeSaveData(name, jsonData);
+        
     }
 
-    public MapSaveData FloorSave()
+    public List<TileEntityData> FloorSave()
     {
-        MapSaveData tileSave = MapManager.instance.TileSave();
+        List<TileEntityData> tileSave = MapManager.instance.TileSave();
         return tileSave;
     }
 

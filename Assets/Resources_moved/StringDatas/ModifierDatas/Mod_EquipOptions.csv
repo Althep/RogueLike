@@ -1,4 +1,4 @@
-ID,ModifierType,StringValue,IsMuti,ModifierTrigger,Priority,ActionName
+ID,ModifierType,StringValue,IsMulti,ModifierTrigger,Priority,ActionName
 Weapon_Damage,StatModifier,Damage,FALSE,Passive,50,null
 Weapon_DamageMuti,StatModifier,Damage,TRUE,Passive,100,null
 Weapon_Accurancy,StatModifier,Accurancy,FALSE,Passive,50,null
@@ -15,3 +15,20 @@ Armor_Def,StatModifier,Defense,FALSE,Passive,50,null
 Armor_Ev,StatModifier,Evasion,FALSE,Passive,50,null
 Armor_DamageReduce,StatModifier,DamageReduce,FALSE,Passive,50,null
 Armor_Disruption,StatModifier,Disruption,FALSE,Passive,50,null
+Add_W_Damage_OH,StatModifier,Damage,FALSE,Passive,50,null
+Add_W_Acc_OH,StatModifier,Accurancy,FALSE,Passive,50,null
+Add_W_Damage_TH,StatModifier,Damage,FALSE,Passive,50,null
+Add_W_Acc_TH,StatModifier,Accurancy,FALSE,Passive,50,null
+Add_W_AttackSpeed,StatModifier,AttackSpeed,TRUE,Passive,50,null
+Add_W_Vamp,ActionModifier,LifeSteel,TRUE,AfterAttack,50,LifeSteel
+Add_A_StatBonus_Str,StatModifier,Str,FALSE,Passive,50,null
+Add_A_StatBonus_Dex,StatModifier,Dex,FALSE,Passive,50,null
+Add_A_StatBonus_Int,StatModifier,Int,FALSE,Passive,50,null
+Add_D_Defense,StatModifier,Defense,FALSE,Passive,50,null
+Add_D_Evasion,StatModifier,Evasion,FALSE,Passive,50,null
+Add_D_DamageReduce,StatModifier,DamageReduce,FALSE,Passive,50,null
+Add_D_FireResist,StatModifier,FireResist,FALSE,Passive,50,null
+Add_D_IceResist,StatModifier,IceResist,FALSE,Passive,50,null
+Add_D_ThunderResist,StatModifier,ThunderResist,FALSE,Passive,50,null
+Add_D_MagicResist,StatModifier,MagicResist,FALSE,Passive,50,null
+Add_W_ElementalDamage,ActionModifier,Physical,FALSE,AfterAttack,50,ElementalDamage

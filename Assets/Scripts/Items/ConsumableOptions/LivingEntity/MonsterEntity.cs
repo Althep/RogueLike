@@ -17,7 +17,7 @@ public class MonsterEntity : LivingEntity
 
     MapEntity targetEntity;
 
-    
+    bool isInSight = false;
     private void Awake()
     {
         OnAwake();
@@ -47,8 +47,16 @@ public class MonsterEntity : LivingEntity
 
         myUIController.InitUIs(Mathf.RoundToInt(myStat.GetBaseStat(StatType.HP)), MaxHP, id);
     }
-
-
+    public override void Set_Visibility(bool isVisible)
+    {
+        base.Set_Visibility(isVisible);
+        ChangeInSight(isInSight);
+    }
+    bool ChangeInSight(bool isInSight)
+    {
+        this.isInSight = isInSight;
+        return this.isInSight;
+    }
     public override EntityStat GetMyStat()
     {
         return myStat;
@@ -127,7 +135,7 @@ public class MonsterEntity : LivingEntity
                 // 5. [매우 중요] 행동 직후 약간의 대기 시간을 주어 플레이어가 
                 // 몬스터가 이동하거나 공격하는 애니메이션을 볼 수 있게 합니다.
                 // 애니메이션 길이에 맞춰 시간(0.2f 등)을 조절하시면 됩니다.
-                if (false)
+                if (isInSight)
                 {
                     await UniTask.Delay(TimeSpan.FromSeconds(0.2f));
                 }
@@ -179,7 +187,7 @@ public class MonsterEntity : LivingEntity
                 break;
         }
     }
-
+    #region Save&Load
     public LivingEntitySaveData SaveMonster()
     {
         LivingEntitySaveData saveData = new LivingEntitySaveData();
@@ -189,9 +197,11 @@ public class MonsterEntity : LivingEntity
         Dictionary<StatType, float> stat = GetMyStat().GetBase();
 
         int currentHp = Mathf.RoundToInt(stat[StatType.HP]);
-
+        Vector2Int posKey = Get_PosKey();
+        saveData.x = posKey.x;
+        saveData.y = posKey.y;
         saveData.currentHp = currentHp;//hp셋
-
+        
         List<BuffSaveData> buffsave = modifierController.BuffSave();
         List<ModifierSaveData> modifierSaves = modifierController.MutetionSave();
         saveData.buffs = buffsave;
@@ -201,7 +211,7 @@ public class MonsterEntity : LivingEntity
             ItemSaveData data = equipments[key].SaveData();
             saveData.equipMentsData.Add(data);//장비 추가
         }
-
+        
         List<ItemSaveData> itemSaves = new List<ItemSaveData>();
         if(inventoryData == null)
         {
@@ -219,4 +229,13 @@ public class MonsterEntity : LivingEntity
         }
         return saveData;
     }
+
+    public override void Return()
+    {
+
+
+        PoolManager.instance.Return(GetMyType(), this.gameObject);
+    }
+
+    #endregion
 }

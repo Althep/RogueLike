@@ -238,6 +238,10 @@ public class GameManager : MonoBehaviour
     }
     public bool CanMove(Vector2Int dir)
     {
+        if (!mapManager.CanMove(dir))
+        {
+            Debug.Log("Can't");
+        }
         return mapManager.CanMove(dir);
     }
     #endregion

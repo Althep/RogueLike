@@ -294,7 +294,7 @@ public class ModifierController
         for(int i = 0; i<buffInstances.Count; i++)
         {
             BuffInstance buffInstance = buffInstances[i];
-            BuffSaveData buffData = new BuffSaveData{modifierId = buffInstance.modifier.id, value = buffInstance.modifier.value, endTurn = buffInstance.endTurn};
+            BuffSaveData buffData = new BuffSaveData{modifierId = buffInstance.modifier.id, value = buffInstance.modifier.value, leftDuration = buffInstance.endTurn-TurnManager.instance.GlovalTurn};
             buffSaveDatas.Add(buffData);
         }
         return buffSaveDatas;

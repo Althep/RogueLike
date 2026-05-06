@@ -12,6 +12,10 @@ public class DoorEntity : MapEntity
         myType = Defines.TileType.Door;
     }
 
+    public void Set_OpenState(bool isOpen)
+    {
+        this.isOpen = isOpen;
+    }
     public bool IsOpen()
     {
         return isOpen;
@@ -53,11 +57,18 @@ public class DoorEntity : MapEntity
         isOpen = false;
     }
 
-    public override SpecialObjectData Get_SaveData()
+    public override TileEntityData Get_SaveData()
     {
-        SpecialObjectData saveData = new SpecialObjectData { x = posKey.x, y=posKey.y, tileType = this.GetMyType(),state = isOpen };
-        saveData.x = posKey.x;
-        saveData.y = posKey.y;
-        return saveData;
+        Vector2Int posKey = Get_PosKey();
+        TileEntityData data = new TileEntityData() { x = posKey.x, y = posKey.y, state = isOpen, type = GetMyType()};
+
+
+        return data;
+    }
+
+    public override void Return()
+    {
+        PoolManager.instance.Return(GetMyType(), this.gameObject);
+        isOpen = false;
     }
 }

@@ -97,7 +97,7 @@ public class StatBuff : BuffAction
 
     public override Modifier GetMyModifier()
     {
-        modifier = (BuffModifier)ModifierManager.instance.GetModifierPooler().GetModifier(ModifierType.BuffModifier, effectID);
+        modifier = (BuffModifier)ModifierManager.instance.GetModifierPooler().GetModifier(effectID);
         return modifier;
     }
     public override void Excute(LivingEntity target)

@@ -2,15 +2,42 @@ using UnityEngine;
 using System;
 using System.Collections.Generic;
 using static Defines;
+
+public class CombatInfo
+{
+    public LivingEntity attacker;
+    public LivingEntity target;
+    public bool isHit;
+    public bool isMissile;
+    public bool isCrit;
+    public int damage;
+
+
+    public void Clear()
+    {
+        attacker = null;
+        target = null;
+        isHit = false;
+        isMissile = false;
+        isCrit = false;
+        damage = 0;
+    }
+}
 public class CombatManager : MonoBehaviour
 {
     public static CombatManager instance;
+
+    public CombatInfo info;
 
     private void Awake()
     {
         if(CombatManager.instance == null)
         {
             CombatManager.instance = this;
+        }
+        if(info == null)
+        {
+            info = new CombatInfo();
         }
     }
     int Random2Avg(int max)
@@ -38,12 +65,46 @@ public class CombatManager : MonoBehaviour
 
         return (roll + accurancy) >= ac;
     }*/
+
+    public int Combat(LivingEntity attaker, LivingEntity target, out bool isCrit)
+    {
+        int roll = UnityEngine.Random.Range(1, 21);
+        isCrit = roll == 20;
+        bool isHit = false;
+        if (isCrit)
+        {
+            isHit = true;
+        }
+        else
+        {
+            isHit = TryHit(attaker, target, out isCrit);
+        }
+        bool isMissile = false;
+        int damage = 0;
+        if (isHit)
+        {
+            info.target = target;
+            info.attacker = attaker;
+            info.isCrit = isCrit;
+            info.isMissile = isMissile;
+
+            if (isMissile)
+            {
+                damage = Mathf.RoundToInt(CalcuateRangeAttackDamage(attaker, target, isCrit));
+            }
+            else
+            {
+                damage = Mathf.RoundToInt(CalculateMeleeAttackDamage(attaker,target,isCrit));
+            }
+        }
+        return damage;
+    }
     public bool TryHit(LivingEntity attacker, LivingEntity target, out bool isCritical)
     {
         int roll = UnityEngine.Random.Range(1, 21);
         var atk = attacker.GetEntityStat(ModifierTriggerType.OnAttack);
         var def = target.GetEntityStat(ModifierTriggerType.OnHited);
-
+        
         float levelFactor = 1f + attacker.Get_MyData().GetLevel() * 0.06f;
 
         // 공격자의 명중력
@@ -74,7 +135,7 @@ public class CombatManager : MonoBehaviour
         // 최소 명중률 적용 (후반부도 너무 낮지 않게)
         //float minHitChance = 0.55f;
         //chance = Mathf.Max(chance, minHitChance);
-
+        
         return isHit;
     }
 
@@ -153,10 +214,20 @@ public class CombatManager : MonoBehaviour
         return resist * damageReduce;
     }
 
+    public int CalcuateRangeAttackDamage(LivingEntity attacker, LivingEntity target, bool isCritical)
+    {
+        //Todo!
+        return 0;
+    }
+
     public void GetDamage(LivingEntity attacker,LivingEntity targetEntity,int damage)
     {
         targetEntity.GetDamage(attacker,damage);
         Debug.Log($"Excute GetDamage{targetEntity.id}");
     }
 
+    public void CombatInfoClear()
+    {
+        info.Clear();
+    }
 }

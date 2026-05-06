@@ -6,6 +6,8 @@ public class ItemEntity : MapEntity
     ItemBase item;
     public string id;
     [SerializeField] List<string> myModifiers= new List<string>();
+    [SerializeField] List<string> myAddOptions = new List<string>();
+    [SerializeField] Defines.ItemRarity rarity;
     void Start()
     {
         SetSpriteRender();
@@ -43,7 +45,7 @@ public class ItemEntity : MapEntity
     {
         this.item = item;
         spriteRenderer.sprite = SpriteManager.instance.Get_Sprite(item.name);
-        ViewingOptions();
+        //ViewingOptions();
     }
     public void ViewingOptions()
     {
@@ -51,10 +53,21 @@ public class ItemEntity : MapEntity
         {
             myModifiers.Add(item.options[i].id);
         }
+
+        if(item is EquipItem equip)
+        {
+            for(int i = 0; i<equip.addOptions.Count; i++)
+            {
+                myAddOptions.Add(equip.addOptions[i].id);
+            }
+            rarity = equip.rarity;
+        }
+        
     }
     public override void Return()
     {
         base.Return();
+        item = null;
         Vector2 currentPos = transform.position;
         Vector2Int mykey = new Vector2Int(Mathf.RoundToInt(currentPos.x), Mathf.RoundToInt(currentPos.y));
         MapManager.instance.RemoveMapEntity(mykey,this);

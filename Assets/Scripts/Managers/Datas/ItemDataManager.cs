@@ -17,6 +17,7 @@ public class ItemDataManager : AsyncDataManager<ItemDataManager>
     ModifierFactory modifierFactory;
     ModifierPooler modifierPooler;
     EffectDataManager effectDataManager;
+    RandomOptionManager randomOptionManager;
     string equipMentsDataName = "EquipMents";
     #region DataInit
 
@@ -35,6 +36,10 @@ public class ItemDataManager : AsyncDataManager<ItemDataManager>
         {
 
         }
+        if(randomOptionManager == null)
+        {
+            randomOptionManager = await RandomOptionManager.CreateAsync();
+        }
         foreach(var asset in myAssets)
         {
             List<Dictionary<string, object>> originData = Utils.TextAssetParse(asset);
@@ -49,6 +54,10 @@ public class ItemDataManager : AsyncDataManager<ItemDataManager>
             else if (asset.name.Contains("Misc"))
             {
                 await ReadMiscData(originData);
+            }
+            else if (asset.name.Contains("AddOption"))
+            {
+                await randomOptionManager.SetUp(asset);
             }
             
         }
@@ -145,6 +154,7 @@ public class ItemDataManager : AsyncDataManager<ItemDataManager>
             float weight = 0f;
             Utils.TrySetValue<int>(originData[i], "Tier", ref tier);
             Utils.TrySetValue(originData[i], "Weight", ref weight);
+            
             if (!itemDatas.ContainsKey(Name))
             {
                 Debug.Log($"{Name} , {ID}");
@@ -155,6 +165,8 @@ public class ItemDataManager : AsyncDataManager<ItemDataManager>
                 Utils.TrySetValue<string>(originData[i], "Name", ref equip.name);
                 Utils.TryConvertEnum<EquipmentType>(originData[i], "ItemCategory", ref equip.equipmentType);
                 Utils.TryConvertEnum<SlotType>(originData[i], "SlotType", ref equip.slot);
+                Utils.TryConvertEnum(originData[i], "EquipmentCategory", ref equip.equipmentType);
+                Utils.TryConvertEnum(originData[i], "ItemSubType", ref equip.itemSubType);
                 itemDatas.Add(Name, equip);
                 equip.weight = weight;
                 equip.options = new List<Modifier>();
@@ -172,7 +184,7 @@ public class ItemDataManager : AsyncDataManager<ItemDataManager>
             bool exist = itemDatas[Name].options.Any(d => d.id == ID);
             if (!exist)
             {
-                Modifier modi = modifierFactory.CreateModifier(modifierId);
+                Modifier modi = modifierFactory.CreateNewInstance(modifierId);
                 Utils.TrySetValue(originData[i], "Value", ref modi.value);
                 Debug.Log($"{Name} 모디파이어 ID : {modifierId} 등록 값 : {modi.value} 타입 {modi.modifierType} 스탯 타입{modi.stat} 모디파이어 ID {modi.id}");
                 itemDatas[Name].options.Add(modi);
@@ -255,7 +267,7 @@ public class ItemDataManager : AsyncDataManager<ItemDataManager>
 
                 if (modifierPooler != null)
                 {
-                    Modifier mod = modifierPooler.GetModifier(type, id);
+                    Modifier mod = modifierPooler.GetModifier(id);
                     if (mod != null)
                     {
                         itemDatas[name].options.Add(mod);

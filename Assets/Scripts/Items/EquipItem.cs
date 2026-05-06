@@ -4,8 +4,11 @@ using System.Collections.Generic;
 public class EquipItem : ItemBase
 {
     public Defines.EquipmentType equipmentType;
+    public Defines.EquipCategory equipCategory;
+    public Defines.ItemSubType itemSubType;
     public Defines.SlotType slot;
-    public List<Modifier> addOptions;
+    public Defines.ItemRarity rarity;
+    public List<Modifier> addOptions = new List<Modifier>();
     public override ItemBase Clone()
     {
         EquipItem newEquip = ItemManager.instance.ItemMake(id) as EquipItem;
