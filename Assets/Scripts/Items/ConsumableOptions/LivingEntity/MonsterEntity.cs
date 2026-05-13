@@ -159,11 +159,11 @@ public class MonsterEntity : LivingEntity
             case MonsterState.Sleep:
             case MonsterState.Chase:
             case MonsterState.Patrol:
-                Debug.Log($"MovePoint {GetEntityStat(ModifierTriggerType.OnMove)[StatType.MoveSpeed]}");
-                return GetEntityStat(ModifierTriggerType.OnMove)[StatType.MoveSpeed];
+                Debug.Log($"MovePoint {Get_FinalStat(ModifierTriggerType.OnMove)[StatType.MoveSpeed]}");
+                return Get_FinalStat(ModifierTriggerType.OnMove)[StatType.MoveSpeed];
 
             case MonsterState.Attack:
-                return GetEntityStat(ModifierTriggerType.OnAttack)[StatType.AttackSpeed]; // OnMove가 아닌 OnAttack 트리거 확인
+                return Get_FinalStat(ModifierTriggerType.OnAttack)[StatType.AttackSpeed]; // OnMove가 아닌 OnAttack 트리거 확인
 
             default:
                 return 0; // 예외 상황

@@ -8,7 +8,6 @@ public class PlayerInputController : UI_InputUIBase
     private void Awake()
     {
         myInputType = Defines.InputType.Player;
-        Set_PlayerEntity();
         Init();
     }
 
@@ -37,6 +36,10 @@ public class PlayerInputController : UI_InputUIBase
 
     public async void OnMoveKey(Vector2Int dest)
     {
+        if(playerEntity == null)
+        {
+            Set_PlayerEntity();
+        }
         // 1. 입력 무시: 이미 행동 중이거나 턴이 넘어간 상태라면 입력을 막습니다.
         if (!playerEntity.actable)
         {

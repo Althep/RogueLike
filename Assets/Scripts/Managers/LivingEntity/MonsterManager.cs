@@ -23,8 +23,6 @@ public class MonsterManager : MonoBehaviour
 
     float spawnPoint = 10;
 
-    PlayerEntity playerEntity;
-
     public static MonsterManager Instance;
     private async UniTask Awake()
     {
@@ -74,10 +72,6 @@ public class MonsterManager : MonoBehaviour
         if(dataManager == null)
         {
             dataManager = GameManager.instance.Get_DataManager();
-        }
-        if(playerEntity == null)
-        {
-            playerEntity = PlayerController.instance.Get_PlayerEntity();
         }
         monsterFactory.Init();
     }

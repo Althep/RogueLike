@@ -11,7 +11,6 @@ public class LivingEntity : MapEntity
     [SerializeReference] protected EntityStat myStat;
     public string Objname;
     public string id;
-    //private Dictionary<ModifierTriggerType, ModifierContext> modifierContext = new Dictionary<ModifierTriggerType, ModifierContext>();
     protected Dictionary<SlotType, EquipItem> equipments = new Dictionary<SlotType, EquipItem>();
     [SerializeField] protected SPUM_MatchingList spriteMatching;
     protected Astar pathFinder;
@@ -73,6 +72,7 @@ public class LivingEntity : MapEntity
         {
             myStat = new EntityStat();
         }
+        myStat.Set_ModifierController(modifierController);
     }
     #endregion
     public virtual EntityStat GetMyStat()
@@ -82,8 +82,7 @@ public class LivingEntity : MapEntity
     public virtual void SetMyStat(EntityStat stat)
     {
         myStat = stat;
-        //Dictionary<StatType, float> myBase = myStat.GetBase();
-        //myUIController.InitUIs(Mathf.RoundToInt(myBase[StatType.HP]), Mathf.RoundToInt(myBase[StatType.MaxHP]), id);
+        myStat.Set_ModifierController(modifierController);
     }
     #region SetData
     public void Set_RaceData(RaceData race)
@@ -98,11 +97,11 @@ public class LivingEntity : MapEntity
     }
     #endregion
     #region modifiers
-    public void Add_Equip(Modifier modifier)
+    public virtual void Add_Equip(Modifier modifier)
     {
         modifierController.AddEquipment(modifier);
     }
-    public void Add_Buff(Modifier modifier)
+    public virtual void Add_Buff(Modifier modifier)
     {
         if(modifier is BuffModifier buff)
         {
@@ -114,7 +113,7 @@ public class LivingEntity : MapEntity
         modifierController.AddBuff(modifier);
         
     }
-    public void Add_Mutation(Modifier modifier)
+    public virtual void Add_Mutation(Modifier modifier)
     {
         modifierController.AddMutation(modifier);
     }
@@ -146,12 +145,6 @@ public class LivingEntity : MapEntity
     {
         return myStat;
     }
-    /*
-    public void Set_MyStat(EntityStat stat)
-    {
-        myStat = stat;
-    }
-    */
     public virtual void AddingStat(StatType type, float value)
     {
         myStat.AddBaseStat(type, value);
@@ -159,7 +152,6 @@ public class LivingEntity : MapEntity
         {
             isDead = myStat.IsDead();
         }
-
         Dictionary<StatType, float> baseStat = myStat.GetBase();
         switch (type)
         {
@@ -172,7 +164,6 @@ public class LivingEntity : MapEntity
                 {
                     isDead = true;
                 }
-                
                 break;
             case StatType.MaxHP:
                 break;
@@ -255,6 +246,7 @@ public class LivingEntity : MapEntity
             default:
                 break;
         }
+        
     }
     public virtual void LevelUp()
     {
@@ -286,82 +278,22 @@ public class LivingEntity : MapEntity
 
         if(lastAttacker is PlayerEntity player)
         {
-            float exp = GetEntityStat(ModifierTriggerType.Passive)[StatType.Exp];
+            float exp = Get_FinalStat(ModifierTriggerType.Passive)[StatType.Exp];
             
             lastAttacker.AddingStat(StatType.Exp, exp);
 
-            Debug.Log($"Get exp : {exp}, attackerExp {lastAttacker.GetEntityStat(ModifierTriggerType.Passive)[StatType.Exp]}");
+            Debug.Log($"Get exp : {exp}, attackerExp {lastAttacker.Get_FinalStat(ModifierTriggerType.Passive)[StatType.Exp]}");
         }
         MapManager.instance.RemoveMapEntity(posKey, this);
     }
 
-    
-    public Dictionary<StatType, float> GetEntityStat(ModifierTriggerType trigger)
+    public Dictionary<StatType,float> Get_FinalStat(ModifierTriggerType trigger)
     {
-        Dictionary<StatType, float> baseStat = myStat.GetBase();
-        Dictionary<StatType, float> finalStat = myStat.GetFinal();
-        finalStat.Clear();
-        ModifierContext context = modifierController.ApplyModifiers(trigger);
-        ModifierContext passive = modifierController.ApplyModifiers(ModifierTriggerType.Passive);
-
-        if (trigger == ModifierTriggerType.Passive)
-        {
-            foreach (var key in baseStat.Keys)
-            {
-                finalStat.Add(key, 0);
-                float finalValue = (baseStat[key] + passive.stats[key])
-                * (1 + passive.multifle[key]);
-
-                if (!finalStat.ContainsKey(key))
-                {
-                    finalStat.Add(key, 0);
-                }
-                finalStat[key] = finalValue;
-            }
-            return finalStat;
-        }
-        foreach (var key in baseStat.Keys)
-        {
-            finalStat.Add(key, 0);
-            if (!baseStat.ContainsKey(key))
-            {
-                Debug.Log($"Base Stat Din't Contain Key {key}");
-                return null;
-            }
-            if (!context.stats.ContainsKey(key))
-            {
-                Debug.Log($"context Multi Din't Contain Key {key}");
-                return null;
-            }
-            if (!passive.stats.ContainsKey(key))
-            {
-                Debug.Log($"passive Stat Din't Contain Key {key}");
-                return null;
-            }
-            if (!passive.multifle.ContainsKey(key))
-            {
-                Debug.Log($"passive multifle Din't Contain Key {key}");
-                return null;
-            }
-
-            if (!context.stats.ContainsKey(key))
-            {
-                Debug.Log($"context Stat Din't Contain Key {key}");
-                return null;
-            }
-            float finalValue = (baseStat[key] + context.stats[key] + passive.stats[key])
-                * (1 + context.multifle[key] + passive.multifle[key]);
-
-            if (!finalStat.ContainsKey(key))
-            {
-                finalStat.Add(key, 0);
-            }
-            finalStat[key] = finalValue;
-
-        }
-        return finalStat;
+        return myStat.Get_FinalStat(trigger);
     }
-
+    /*
+    
+    */
 
     #endregion
 
@@ -551,7 +483,7 @@ public class LivingEntity : MapEntity
     }
     public Dictionary<StatType, float> GetAttackBonus()
     {
-        return GetEntityStat(ModifierTriggerType.OnAttack);
+        return Get_FinalStat(ModifierTriggerType.OnAttack);
     }
     public ModifierContext GetDefenseBonus()
     {
@@ -580,9 +512,6 @@ public class LivingEntity : MapEntity
         id = null;
         equipments.Clear();
     }
-
-
-    
 
     public virtual void Set_Visibility(bool isVisible)
     {
@@ -632,5 +561,10 @@ public class LivingEntity : MapEntity
         }
     }
 
-    
+    public void OnStatOrModifierChange()
+    {
+        if (myStat == null)
+            return;
+        myStat.MarksAsDirty();
+    }
 }

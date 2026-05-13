@@ -15,7 +15,7 @@ public class PlayerSight : MonoBehaviour
         {
             playerEntity = GameManager.instance.Get_PlayerObj().transform.GetComponent<PlayerEntity>();
         }
-        Dictionary<Defines.StatType, float> stat = playerEntity.GetEntityStat(Defines.ModifierTriggerType.Passive);
+        Dictionary<Defines.StatType, float> stat = playerEntity.Get_FinalStat(Defines.ModifierTriggerType.Passive);
         Collider2D[] hits = Physics2D.OverlapCircleAll(this.gameObject.transform.position, stat[Defines.StatType.Vision]);
         
         foreach(Collider2D col in hits)

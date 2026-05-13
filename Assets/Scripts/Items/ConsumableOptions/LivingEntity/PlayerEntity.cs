@@ -15,6 +15,9 @@ public class PlayerEntity : LivingEntity
     int stairNumber = 0;
     TileType stairType = TileType.DownStair;
     public bool actable { get; private set; } = true;
+
+    public event Action OnStatChanged;
+
     #region Initiate
     private void Awake()
     {
@@ -39,6 +42,50 @@ public class PlayerEntity : LivingEntity
         modifierController.SetMyEntity(this);
     }
 
+    public override void Add_Equip(Modifier modifier)
+    {
+        base.Add_Equip(modifier);
+        if (modifier.triggerType == ModifierTriggerType.Passive)
+        {
+            StatType type = modifier.stat;
+
+            Dictionary<StatType, float> final = Get_FinalStat(ModifierTriggerType.Passive);
+
+            UIManager.instance.PlayerInfoUpdate(type, final[type]);
+
+            OnStatChanged?.Invoke();
+        }
+    }
+
+    public override void Add_Buff(Modifier modifier)
+    {
+        base.Add_Buff(modifier);
+        if (modifier.triggerType == ModifierTriggerType.Passive)
+        {
+            StatType type = modifier.stat;
+
+            Dictionary<StatType, float> final = Get_FinalStat(ModifierTriggerType.Passive);
+
+            UIManager.instance.PlayerInfoUpdate(type, final[type]);
+
+            OnStatChanged?.Invoke();
+        }
+    }
+
+    public override void Add_Mutation(Modifier modifier)
+    {
+        base.Add_Mutation(modifier);
+        if(modifier.triggerType == ModifierTriggerType.Passive)
+        {
+            StatType type = modifier.stat;
+            
+            Dictionary<StatType,float> final = Get_FinalStat(ModifierTriggerType.Passive);
+
+            UIManager.instance.PlayerInfoUpdate(type, final[type]);
+
+            OnStatChanged?.Invoke();
+        }
+    }
 
     protected override void InitStat()
     {
@@ -63,7 +110,7 @@ public class PlayerEntity : LivingEntity
         myStat.AddBaseStat(StatType.HP, stats[StatType.MaxHP]);
         myStat.AddBaseStat(StatType.MP, stats[StatType.MaxMP]);
 
-
+        OnStatChanged?.Invoke();
     }
     #endregion
     public InventoryData GetInventory()
@@ -188,7 +235,7 @@ public class PlayerEntity : LivingEntity
     {
         base.Move_To(dir);
         Vector2Int playerPos = new Vector2Int((int)transform.position.x+dir.x, (int)transform.position.y+dir.y);
-        int vision = (int)GetEntityStat(ModifierTriggerType.OnMove)[StatType.Vision];
+        int vision = (int)Get_FinalStat(ModifierTriggerType.OnMove)[StatType.Vision];
         UpdateFoV(playerPos, vision);
         ItemCheck(destination);
     }
@@ -243,13 +290,13 @@ public class PlayerEntity : LivingEntity
                 actPoint = normalAction;
                 break;
             case ModifierTriggerType.OnAttack:
-                actPoint = GetEntityStat(trigger)[StatType.AttackSpeed];
+                actPoint = Get_FinalStat(trigger)[StatType.AttackSpeed];
                 break;
             case ModifierTriggerType.OnSpellCast:
-                actPoint = GetEntityStat(trigger)[StatType.SpellSpeed];
+                actPoint = Get_FinalStat(trigger)[StatType.SpellSpeed];
                 break;
             case ModifierTriggerType.OnMove:
-                actPoint = GetEntityStat(trigger)[StatType.MoveSpeed];
+                actPoint = Get_FinalStat(trigger)[StatType.MoveSpeed];
                 break;
             default:
                 break;
@@ -281,5 +328,21 @@ public class PlayerEntity : LivingEntity
     public TileType StairType()
     {
         return stairType;
+    }
+
+
+    public void UIUpdate()
+    {
+
+    }
+
+    public void GetStat(StatType type, ModifierTriggerType trigger)
+    {
+        
+    }
+    public override void AddingStat(StatType type, float value)
+    {
+        base.AddingStat(type, value);
+        OnStatChanged.Invoke();
     }
 }

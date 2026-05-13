@@ -9,7 +9,7 @@ public class ItemManager :MonoBehaviour
     ItemRarityManager rarityManager;
     RandomOptionManager randomOptionManager;
     [SerializeField]ItemFactory itemFactory;
-    [SerializeField]PlayerEntity playerEntity;
+
     MapManager mapManager;
     PoolManager poolManager;
     int itemGenPerTile = 70;
@@ -28,10 +28,7 @@ public class ItemManager :MonoBehaviour
         {
             itemFactory =  new ItemFactory();
         }
-        if(playerEntity == null)
-        {
-            playerEntity = GameManager.instance.Get_PlayerEntity();
-        }
+
         if(poolManager == null)
         {
             poolManager = GameManager.instance.Get_PoolManager();

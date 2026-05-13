@@ -242,7 +242,7 @@ public static class Defines
         Regeneration,
         Tir,
         ExtraLife,
-        AwakeRate
+        AwakeRate,
     }
     public enum DamageType
     {

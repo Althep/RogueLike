@@ -14,7 +14,6 @@ public class ModifierContext
     public ModifierType ModifierType;
     public DamageType damageType = DamageType.Physical;
     private static readonly StatType[] allStatTypes = Utils.Get_Enums<StatType>();
-    public bool isDirty;
 
     public ModifierContext()
     {
@@ -46,10 +45,13 @@ public class ModifierContext
         for (int i = 0; i < allStatTypes.Length; i++)
         {
             StatType key = allStatTypes[i];
-
             stats[key] = 0;
             multifle[key] = 0;
         }
         damageType = DamageType.Physical;
+
+        // 이 두 줄이 반드시 추가되어야 합니다!
+        modifierActions.Clear();
+        statusEffect.Clear();
     }
 }

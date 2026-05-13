@@ -6,120 +6,117 @@ using static Defines;
 
 public class ModifierController
 {
-    
-
-    //private Dictionary<ModifierTriggerType, List<Modifier>> modifiers = new Dictionary<ModifierTriggerType, List<Modifier>>();
     private Dictionary<ModifierTriggerType, List<Modifier>> buffs = new Dictionary<ModifierTriggerType, List<Modifier>>();
     private Dictionary<ModifierTriggerType, List<Modifier>> mutation = new Dictionary<ModifierTriggerType, List<Modifier>>();
     private Dictionary<ModifierTriggerType, List<Modifier>> equips = new Dictionary<ModifierTriggerType, List<Modifier>>();
     private Dictionary<ModifierTriggerType, ModifierContext> contexts = new Dictionary<ModifierTriggerType, ModifierContext>();
 
+    
+    private Dictionary<ModifierTriggerType, bool> dirtyFlags = new Dictionary<ModifierTriggerType, bool>();
+    // 지연 갱신(Lazy Evaluation)을 위한 더티 플래그
+
     LivingEntity myEntity;
 
-    bool isDirty;
     public void InitAllContext(LivingEntity entity)
     {
-        Debug.Log("Init Context");
         ModifierTriggerType[] triggers = Utils.Get_Enums<ModifierTriggerType>();
-        Debug.Log($"Trigger Count ! :    {triggers.Length}");
+
         foreach (ModifierTriggerType type in triggers)
         {
-            Debug.Log($"Init context Trigger : {type}");
-            if (contexts.ContainsKey(type))
-            {
-                Debug.Log("Trigger Contained");
-                continue;
-            }
-            else
+            if (!contexts.ContainsKey(type))
             {
                 contexts.Add(type, new ModifierContext());
                 contexts[type].InitContext(type);
+                dirtyFlags.Add(type, false);
             }
         }
         SetMyEntity(entity);
     }
-    public ModifierContext Get_Context(ModifierTriggerType trigger)
-    {
-        //딕셔너리 초기화 오래걸리니 지연 초기화 사용
-        if (contexts.TryGetValue(trigger, out ModifierContext existingContext))
-        {
-            existingContext.Clear();
-            return existingContext;
-        }
 
-        ModifierContext newContext = new ModifierContext();
-        newContext.InitContext(trigger);
-        contexts.Add(trigger, newContext);
-        return newContext;
-    }
     public void SetMyEntity(LivingEntity entity)
     {
         myEntity = entity;
     }
 
+    // ==========================================
+    // 1. 모디파이어 추가/제거 (플래그만 변경)
+    // ==========================================
     private void AddModifierInternal(Dictionary<ModifierTriggerType, List<Modifier>> targetDict, Modifier modifier)
     {
         ModifierTriggerType trigger = modifier.triggerType;
 
-        // 1. 리스트 존재 여부 확인 및 생성
         if (!targetDict.ContainsKey(trigger))
         {
             targetDict.Add(trigger, new List<Modifier>());
         }
 
-        // 2. 데이터 삽입 및 정렬
         targetDict[trigger].Add(modifier);
         targetDict[trigger].Sort((a, b) => a.priority.CompareTo(b.priority));
 
-        // 3. 패시브 즉시 갱신 (공통 로직)
-        if (trigger == ModifierTriggerType.Passive)
-        {
-            Get_Context(trigger);
-            RefreshPassiveModifiers(); // 공통화된 갱신 메서드
-        }
+        // 재계산 없이 플래그만 오염
+        dirtyFlags[trigger] = true;
+        myEntity.OnStatOrModifierChange();
     }
 
-    // 외부 노출용 래퍼 함수
-    public void AddBuff(Modifier modifier) => AddModifierInternal(buffs, modifier);
-    public void AddEquipment(Modifier modifier) => AddModifierInternal(equips, modifier);
-    public void AddMutation(Modifier modifier) => AddModifierInternal(mutation, modifier);
-
-    private void RemoveModifierInternal(Dictionary<ModifierTriggerType,List<Modifier>> targetDict, Modifier modifier)
+    private void RemoveModifierInternal(Dictionary<ModifierTriggerType, List<Modifier>> targetDict, Modifier modifier)
     {
         if (modifier == null || !targetDict.ContainsKey(modifier.triggerType)) return;
 
-        var trigger = modifier.triggerType;
-        var list = targetDict[trigger];
+        ModifierTriggerType trigger = modifier.triggerType;
 
-        // 참조 비교로 딱 하나만 삭제
-        if (list.Remove(modifier))
+        if (targetDict[trigger].Remove(modifier))
         {
-            if (trigger == ModifierTriggerType.Passive)
-            {
-                Get_Context(trigger);
-                RefreshPassiveModifiers();
-            }
+            dirtyFlags[trigger] = true;
         }
+        myEntity.OnStatOrModifierChange();
     }
+
+    public void AddBuff(Modifier modifier) => AddModifierInternal(buffs, modifier);
+    public void AddEquipment(Modifier modifier) => AddModifierInternal(equips, modifier);
+    public void AddMutation(Modifier modifier) => AddModifierInternal(mutation, modifier);
 
     public void RemoveBuff(Modifier modifier) => RemoveModifierInternal(buffs, modifier);
     public void RemoveEquipment(Modifier modifier) => RemoveModifierInternal(equips, modifier);
     public void RemoveMutate(Modifier modifier) => RemoveModifierInternal(mutation, modifier);
 
-    public void RefreshPassiveModifiers()
+    // ==========================================
+    // 2. 컨텍스트 획득 (패시브 지연 갱신 처리)
+    // ==========================================
+    public ModifierContext Get_Context(ModifierTriggerType trigger)
     {
-        ApplyPassivesFrom(mutation); // 돌연변이 먼저 적용
-        ApplyPassivesFrom(equips);  // 그 다음 장비
-        ApplyPassivesFrom(buffs);   // 마지막으로 버프
+        if (!contexts.TryGetValue(trigger, out ModifierContext context))
+        {
+            context = new ModifierContext();
+            context.InitContext(trigger);
+            contexts.Add(trigger, context);
+            dirtyFlags[trigger] = true;
+        }
+
+        // [패시브 전용] 캐싱 로직: 스탯 요구 시점에 더티 플래그가 true면 단 한 번만 계산
+        if (trigger == ModifierTriggerType.Passive)
+        {
+            if (dirtyFlags.TryGetValue(trigger, out bool isDirty) && isDirty)
+            {
+                context.Clear();
+                RefreshPassiveModifiers();
+                dirtyFlags[trigger] = false; // 캐싱 완료
+            }
+        }
+
+        return context;
+    }
+
+    private void RefreshPassiveModifiers()
+    {
+        ApplyPassivesFrom(mutation);
+        ApplyPassivesFrom(equips);
+        ApplyPassivesFrom(buffs);
     }
 
     private void ApplyPassivesFrom(Dictionary<ModifierTriggerType, List<Modifier>> targetDict)
     {
-        // 패시브 키가 존재하고, 리스트에 요소가 있을 때만 실행
         if (targetDict.TryGetValue(ModifierTriggerType.Passive, out var list) && list.Count > 0)
         {
-            // for문이 foreach보다 유니티 환경에서 미세한 성능(가비지 컬렉션 등) 이점이 있을 수 있으나, 
-            // 최신 C#에서는 List<T>의 foreach 최적화가 잘 되어 있어 그대로 유지하셔도 무방합니다.
             foreach (var modifier in list)
             {
                 modifier.Apply(myEntity);
@@ -127,135 +124,81 @@ public class ModifierController
         }
     }
 
+    // ==========================================
+    // 3. 액티브 발동 (매 이벤트마다 초기화 후 장전)
+    // ==========================================
     public ModifierContext ApplyModifiers(ModifierTriggerType type)
     {
+        
         ModifierContext context = Get_Context(type);
 
-        // 1. 패시브는 별도의 갱신(Refresh) 로직을 타므로 여기서 적용하지 않음
+        // 1. 패시브는 Get_Context에서 이미 지연 갱신이 완료됨
         if (type == ModifierTriggerType.Passive)
         {
             return context;
         }
 
-        // 2. 도우미 함수를 통해 각 딕셔너리를 안전하게 순회하며 적용
-        ApplyActiveModifiersFrom(mutation, type);
-        ApplyActiveModifiersFrom(equips, type);
-        ApplyActiveModifiersFrom(buffs, type);
+        // 2. 액티브 타입 지연 갱신 적용
+        if (dirtyFlags.TryGetValue(type, out bool isDirty) && isDirty)
+        {
+            // 플래그가 오염되었을 때만 그릇을 비우고 재계산
+            context.Clear();
 
-        return context;
+            bool hasActionConsumed = false;
+
+            // RemoveAll의 결과(소모 여부)를 받아옵니다.
+            hasActionConsumed |= ApplyActiveModifiersFrom(mutation, type);
+            hasActionConsumed |= ApplyActiveModifiersFrom(equips, type);
+            hasActionConsumed |= ApplyActiveModifiersFrom(buffs, type);
+
+            // 핵심 로직: 
+            // 1회성 아이템이 소모되었다면 다음 번엔 그 액션을 빼고 계산해야 하므로 true 유지.
+            // 소모된 게 없다면 일반 장비/버프만 있는 것이므로 false로 캐싱 완료.
+            dirtyFlags[type] = hasActionConsumed;
+        }
+
+        return context; // 밖에서 일괄 Invoke()
     }
 
-    // 중복 로직 및 에러 방지를 위한 헬퍼 함수
-    private void ApplyActiveModifiersFrom(Dictionary<ModifierTriggerType, List<Modifier>> targetDict, ModifierTriggerType type)
+    // 헬퍼 함수가 '소모된 액션이 있는지'를 bool로 반환하도록 수정
+    private bool ApplyActiveModifiersFrom(Dictionary<ModifierTriggerType, List<Modifier>> targetDict, ModifierTriggerType type)
     {
-        // TryGetValue로 해당 타입의 리스트가 있는지 '안전하게' 확인
+        bool removedAny = false;
+
         if (targetDict.TryGetValue(type, out var list) && list.Count > 0)
         {
-            // 1. 등록된 모디파이어들 발동
             foreach (var modifier in list)
             {
-                modifier.Apply(myEntity);
+                modifier.Apply(myEntity); // context.modifierActions에 액션 Add
             }
 
-            // 2. 1회성/액션 모디파이어(ActionModifier) 사용 후 즉시 제거
-            // 기존의 임시 리스트 생성 + for 루프 + Remove 방식을 
-            // RemoveAll 한 줄로 바꾸면 메모리 할당 없이 엄청나게 빠르게 처리됩니다.
-            list.RemoveAll(m => m is ActionModifier);
+            // RemoveAll은 지워진 요소의 개수를 int로 반환합니다. 
+            // 0보다 크면 무언가 삭제(소모)되었다는 뜻입니다.
+            int removedCount = list.RemoveAll(m => m is ActionModifier);
+            removedAny = removedCount > 0;
         }
+
+        return removedAny;
     }
 
-    public void Reset_Mutations()
-    {
-        ResetModifiers(mutation);
-    }
-    public void Reset_Buffs()
-    {
-        ResetModifiers(buffs);
-    }
-    void ResetModifiers(Dictionary<ModifierTriggerType, List<Modifier>> target)
-    {
-        target.Clear();
-    }
-    public Dictionary<ModifierTriggerType,List<Modifier>> Get_Mutations()
-    {
-        return GetModifiers(mutation);
-    }
-    public Dictionary<ModifierTriggerType, List<Modifier>> Get_Buffs()
-    {
-        return GetModifiers(buffs);
-    }
-    public Dictionary<ModifierTriggerType,List<Modifier>> Get_Equips()
-    {
-        return GetModifiers(equips);
-    }
-    Dictionary<ModifierTriggerType, List<Modifier>> GetModifiers(Dictionary<ModifierTriggerType,List<Modifier>> target)
-    {
-        return target;
-    }
-
+    // ==========================================
+    // 4. 아이템 장착 제한 (안전한 단락 평가 적용)
+    // ==========================================
     public bool IsRestricted(ItemBase item, ModifierTriggerType trigger)
     {
-        if (!mutation.TryGetValue(trigger, out var mutateList))
-            return false;
-        if (!equips.TryGetValue(trigger, out var equipList))
-            return false;
-        var context = Get_Context(trigger);
-        context.Clear();
+        bool hasMutation = mutation.TryGetValue(trigger, out var mutateList);
+        bool hasEquip = equips.TryGetValue(trigger, out var equipList);
 
-        foreach (var modifier in mutateList)
-        {
-            if (modifier is ItemModifier itemModi)
-            {
-                switch (itemModi.itemTargetType)
-                {
-                    case ItemTargetType.Category:
-                        if(itemModi.itemCategory == item.category)
-                        {
-                            modifier.Apply(myEntity);
-                        }
-                        break;
-                    case ItemTargetType.Specific:
-                        // 카테고리 및 세부 타입 일치 확인
-                        if (itemModi.itemCategory == item.category &&
-                            itemModi.specificType.Equals(item.GetSpecificType()))
-                        {
-                            modifier.Apply(myEntity);
-                        }
-                        break;
-                    default:
-                        break;
-                }
-                
-            }
-        }
-        foreach (var modifier in equipList)
-        {
-            if (modifier is ItemModifier itemModi)
-            {
-                switch (itemModi.itemTargetType)
-                {
-                    case ItemTargetType.Category:
-                        if (itemModi.itemCategory == item.category)
-                        {
-                            modifier.Apply(myEntity);
-                        }
-                        break;
-                    case ItemTargetType.Specific:
-                        // 카테고리 및 세부 타입 일치 확인
-                        if (itemModi.itemCategory == item.category &&
-                            itemModi.specificType.Equals(item.GetSpecificType()))
-                        {
-                            modifier.Apply(myEntity);
-                        }
-                        break;
-                    default:
-                        break;
-                }
+        if (!hasMutation && !hasEquip)
+            return false;
 
-            }
-        }
-        // 제한 조건 확인
-        foreach (var kvp in context.multifle)
+        ModifierContext tempContext = new ModifierContext();
+        tempContext.InitContext(trigger);
+
+        if (hasMutation) CheckRestrictionModifiers(mutateList, item, tempContext);
+        if (hasEquip) CheckRestrictionModifiers(equipList, item, tempContext);
+
+        foreach (var kvp in tempContext.multifle)
         {
             if (kvp.Value <= -1f)
                 return true;
@@ -263,11 +206,50 @@ public class ModifierController
 
         return false;
     }
-   
-    List<ModifierSaveData> SaveModifierInternal(Dictionary<ModifierTriggerType, List<Modifier>> target)
+
+    private void CheckRestrictionModifiers(List<Modifier> modifierList, ItemBase item, ModifierContext tempContext)
+    {
+        if (modifierList == null) return;
+
+        foreach (var modifier in modifierList)
+        {
+            if (modifier is ItemModifier itemModi)
+            {
+                bool isMatch = false;
+                switch (itemModi.itemTargetType)
+                {
+                    case ItemTargetType.Category:
+                        isMatch = (itemModi.itemCategory == item.category);
+                        break;
+                    case ItemTargetType.Specific:
+                        isMatch = (itemModi.itemCategory == item.category && itemModi.specificType.Equals(item.GetSpecificType()));
+                        break;
+                }
+
+                if (isMatch)
+                {
+                    modifier.Apply(myEntity);
+                }
+            }
+        }
+    }
+
+    // ==========================================
+    // 기타 유틸리티 및 세이브/로드
+    // ==========================================
+    public void Reset_Mutations() => ResetModifiers(mutation);
+    public void Reset_Buffs() => ResetModifiers(buffs);
+    private void ResetModifiers(Dictionary<ModifierTriggerType, List<Modifier>> target) => target.Clear();
+
+    public Dictionary<ModifierTriggerType, List<Modifier>> Get_Mutations() => mutation;
+    public Dictionary<ModifierTriggerType, List<Modifier>> Get_Buffs() => buffs;
+    public Dictionary<ModifierTriggerType, List<Modifier>> Get_Equips() => equips;
+
+    public List<ModifierSaveData> MutetionSave() => SaveModifierInternal(mutation);
+
+    private List<ModifierSaveData> SaveModifierInternal(Dictionary<ModifierTriggerType, List<Modifier>> target)
     {
         List<ModifierSaveData> modifierSaves = new List<ModifierSaveData>();
-
         foreach (var triggerModifiers in target.Values)
         {
             for (int i = 0; i < triggerModifiers.Count; i++)
@@ -275,29 +257,26 @@ public class ModifierController
                 modifierSaves.Add(triggerModifiers[i].SaveData());
             }
         }
-
         return modifierSaves;
     }
-    public List<ModifierSaveData> MutetionSave()
-    {
-        return SaveModifierInternal(mutation);
-    }
+
     public List<BuffSaveData> BuffSave()
     {
         List<BuffInstance> buffInstances = EventManager.instance.Get_EntityBuffList(myEntity);
-        List<BuffSaveData> buffSaveDatas = new List<BuffSaveData>();
-        if(buffInstances ==null || buffInstances.Count == 0)
-        {
-            return null;
-        }
+        if (buffInstances == null || buffInstances.Count == 0) return null;
 
-        for(int i = 0; i<buffInstances.Count; i++)
+        List<BuffSaveData> buffSaveDatas = new List<BuffSaveData>();
+        for (int i = 0; i < buffInstances.Count; i++)
         {
             BuffInstance buffInstance = buffInstances[i];
-            BuffSaveData buffData = new BuffSaveData{modifierId = buffInstance.modifier.id, value = buffInstance.modifier.value, leftDuration = buffInstance.endTurn-TurnManager.instance.GlovalTurn};
+            BuffSaveData buffData = new BuffSaveData
+            {
+                modifierId = buffInstance.modifier.id,
+                value = buffInstance.modifier.value,
+                leftDuration = buffInstance.endTurn - TurnManager.instance.GlovalTurn
+            };
             buffSaveDatas.Add(buffData);
         }
         return buffSaveDatas;
     }
 }
-

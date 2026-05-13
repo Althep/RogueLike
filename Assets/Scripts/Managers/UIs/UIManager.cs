@@ -16,7 +16,7 @@ public class UIManager : MonoBehaviour
     UIDataManager uidataManager;
     StringKeyManager _SKManager;
     [SerializeField]UIPooler uiPooler;
-
+    [SerializeField]PlayerInfoPanel playerInfos;
     private void Awake()
     {
         Init();
@@ -53,6 +53,7 @@ public class UIManager : MonoBehaviour
         {
             uidataManager = GameManager.instance.Get_DataManager().uiDataManager;
         }
+        EventManager.instance.AddListnerToSceneChange(OnSceneChange);
     }
     public UIPooler Get_UIPooler()
     {
@@ -128,6 +129,101 @@ public class UIManager : MonoBehaviour
             // 여백 없이 부모의 크기와 100% 동일해집니다.
             selectObjRect.sizeDelta = Vector2.zero;
             selectObjRect.anchoredPosition = Vector2.zero;
+        }
+    }
+
+    public void OnSceneChange()
+    {
+        if(SceneController.Instance.currentScene == Scenes.DungeonScene)
+        {
+            playerInfos = GameObject.Find("PlayerInfo").transform.GetComponent<PlayerInfoPanel>();
+        }
+    }
+
+    public void PlayerInfoUpdate(StatType type, float value)
+    {
+        if(playerInfos == null)
+        {
+            return;
+        }
+        int casted = (int)value;
+        switch (type)
+        {
+            case StatType.HP:
+                playerInfos.UpdateCurrentHpText(casted);
+                break;
+            case StatType.MaxHP:
+                playerInfos.UpdateMaxHp(casted);
+                break;
+            case StatType.MP:
+                playerInfos.UpdateCurrentMpText(casted);
+                break;
+            case StatType.MaxMP:
+                playerInfos.UpdateMaxMp(casted);
+                break;
+            case StatType.Str:
+                playerInfos.UpdateStrText(casted);
+                break;
+            case StatType.Dex:
+                playerInfos.UpdateDexText(casted);
+                break;
+            case StatType.Int:
+                playerInfos.UpdateIntText(casted);
+                break;
+            case StatType.Evasion:
+                break;
+            case StatType.Defense:
+                break;
+            case StatType.DamageReduce:
+                break;
+            case StatType.ShieldDefense:
+                break;
+            case StatType.Damage:
+                break;
+            case StatType.Accurancy:
+                break;
+            case StatType.AttackRange:
+                break;
+            case StatType.SpellDamage:
+                break;
+            case StatType.SpellAccurancy:
+                break;
+            case StatType.SpellSpeed:
+                break;
+            case StatType.Disruption:
+                break;
+            case StatType.FireResist:
+                break;
+            case StatType.IceResist:
+                break;
+            case StatType.MagicResist:
+                break;
+            case StatType.ThunderResist:
+                break;
+            case StatType.Vision:
+                break;
+            case StatType.Sound:
+                break;
+            case StatType.MoveSpeed:
+                break;
+            case StatType.AttackSpeed:
+                break;
+            case StatType.MaxExp:
+                playerInfos.UpdateMaxExp(casted);
+                break;
+            case StatType.Exp:
+                playerInfos.UpdateCurrentExp(casted);
+                break;
+            case StatType.Regeneration:
+                break;
+            case StatType.Tir:
+                break;
+            case StatType.ExtraLife:
+                break;
+            case StatType.AwakeRate:
+                break;
+            default:
+                break;
         }
     }
 }
