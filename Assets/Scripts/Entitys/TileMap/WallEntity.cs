@@ -12,10 +12,6 @@ public class WallEntity : MapEntity
 
 
 
-    public override MapEntity CopyToEmpty()
-    {
-        return new WallEntity();
-    }
 
     public override void ResetData()
     {

@@ -58,7 +58,7 @@ public class PlayerInfoPanel : MonoBehaviour
 
     public void OnStatChange()
     {
-        Dictionary<StatType, float> finalStat = player.Get_FinalStat(ModifierTriggerType.Passive);
+        Dictionary<StatType, float> finalStat = player.CalculateContext(ModifierTriggerType.Passive);
         foreach(var key in uiStats)
         {
             HandlesStatChanged(key, (int)finalStat[key]);

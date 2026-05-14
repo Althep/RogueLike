@@ -81,4 +81,9 @@ public class ModifierManager : MonoBehaviour
     {
         return modifierPooler.GetModifier(id);
     }
+
+    public void Return_Modifier(Modifier modifier)
+    {
+        modifierPooler.ReturnModifier(modifier);
+    }
 }

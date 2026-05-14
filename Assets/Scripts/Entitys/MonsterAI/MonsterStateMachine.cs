@@ -119,13 +119,13 @@ public class MonsterStateMachine
 
     public bool CheckAttackSpeed()
     {
-        var stat = myEntity.Get_FinalStat(ModifierTriggerType.Passive);
+        var stat = myEntity.CalculateContext(ModifierTriggerType.Passive);
         return myEntity.Get_ActPoint() >= stat[StatType.AttackSpeed];
     }
 
     public bool CheckMoveSpeed()
     {
-        var stat = myEntity.Get_FinalStat(ModifierTriggerType.Passive);
+        var stat = myEntity.CalculateContext(ModifierTriggerType.Passive);
         return myEntity.Get_ActPoint() >= stat[StatType.MoveSpeed];
     }
 
@@ -137,7 +137,7 @@ public class MonsterStateMachine
         // 패턴 매칭: 타겟이 LocationTarget(단순 허공 좌표)라면 공격할 수 없음
         if (!(target is MapEntity)) return false;
 
-        float attackRange = myEntity.Get_FinalStat(ModifierTriggerType.Passive)[StatType.AttackRange];
+        float attackRange = myEntity.CalculateContext(ModifierTriggerType.Passive)[StatType.AttackRange];
 
         // GridPos 기반 거리 계산 (루트 연산 없이 빠름)
         float distSqr = ((Vector2)myEntity.GridPos - (Vector2)target.GridPos).sqrMagnitude;
@@ -149,7 +149,7 @@ public class MonsterStateMachine
     {
         if (target == null || !target.IsValid) return false;
 
-        float vision = myEntity.Get_FinalStat(ModifierTriggerType.Passive)[StatType.Vision];
+        float vision = myEntity.CalculateContext(ModifierTriggerType.Passive)[StatType.Vision];
 
         // GridPos 기반 거리 계산
         float distSqr = ((Vector2)myEntity.GridPos - (Vector2)target.GridPos).sqrMagnitude;
@@ -161,7 +161,7 @@ public class MonsterStateMachine
     {
         if (currentState != MonsterState.Sleep) return false;
 
-        int awakeRate = (int)myEntity.Get_FinalStat(ModifierTriggerType.Passive)[StatType.AwakeRate];
+        int awakeRate = (int)myEntity.CalculateContext(ModifierTriggerType.Passive)[StatType.AwakeRate];
         if (awakeRate <= 0) return true;
 
         return UnityEngine.Random.Range(0, 100) >= awakeRate;

@@ -6,4 +6,5 @@ public interface IPoolScript
     public void SetScriptType(Defines.PoolScriptType type);
     public Defines.PoolScriptType GetScriptType();
     public void Reset();
+    public void Return();
 }

@@ -159,11 +159,11 @@ public class MonsterEntity : LivingEntity
             case MonsterState.Sleep:
             case MonsterState.Chase:
             case MonsterState.Patrol:
-                Debug.Log($"MovePoint {Get_FinalStat(ModifierTriggerType.OnMove)[StatType.MoveSpeed]}");
-                return Get_FinalStat(ModifierTriggerType.OnMove)[StatType.MoveSpeed];
+                Debug.Log($"MovePoint {CalculateContext(ModifierTriggerType.OnMove)[StatType.MoveSpeed]}");
+                return CalculateContext(ModifierTriggerType.OnMove)[StatType.MoveSpeed];
 
             case MonsterState.Attack:
-                return Get_FinalStat(ModifierTriggerType.OnAttack)[StatType.AttackSpeed]; // OnMove가 아닌 OnAttack 트리거 확인
+                return CalculateContext(ModifierTriggerType.OnAttack)[StatType.AttackSpeed]; // OnMove가 아닌 OnAttack 트리거 확인
 
             default:
                 return 0; // 예외 상황
@@ -186,6 +186,11 @@ public class MonsterEntity : LivingEntity
                 Attack();
                 break;
         }
+    }
+
+    public override void OnDeadFunc()
+    {
+        base.OnDeadFunc();
     }
     #region Save&Load
     public LivingEntitySaveData SaveMonster()

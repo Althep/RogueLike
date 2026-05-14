@@ -12,10 +12,6 @@ public class UpStairEntity : StairEntity
     }
 
 
-    public override MapEntity CopyToEmpty()
-    {
-        return new UpStairEntity();
-    }
 
     public override void ResetData()
     {

@@ -64,7 +64,7 @@ public class DungeonManager : MonoBehaviour
         await OnFloorChange();
         FogOfWarManager.Instance.OnFloorChange();
         PlayerEntity player = GameManager.instance.Get_PlayerEntity();
-        int vision = (int)player.Get_FinalStat(ModifierTriggerType.OnMove)[StatType.Vision];
+        int vision = (int)player.CalculateContext(ModifierTriggerType.OnMove)[StatType.Vision];
         player.UpdateFoV(player.Get_PosKey(), vision);
     }
     

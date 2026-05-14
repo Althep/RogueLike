@@ -49,7 +49,7 @@ public class PlayerEntity : LivingEntity
         {
             StatType type = modifier.stat;
 
-            Dictionary<StatType, float> final = Get_FinalStat(ModifierTriggerType.Passive);
+            Dictionary<StatType, float> final = CalculateContext(ModifierTriggerType.Passive);
 
             UIManager.instance.PlayerInfoUpdate(type, final[type]);
 
@@ -64,7 +64,7 @@ public class PlayerEntity : LivingEntity
         {
             StatType type = modifier.stat;
 
-            Dictionary<StatType, float> final = Get_FinalStat(ModifierTriggerType.Passive);
+            Dictionary<StatType, float> final = CalculateContext(ModifierTriggerType.Passive);
 
             UIManager.instance.PlayerInfoUpdate(type, final[type]);
 
@@ -79,7 +79,7 @@ public class PlayerEntity : LivingEntity
         {
             StatType type = modifier.stat;
             
-            Dictionary<StatType,float> final = Get_FinalStat(ModifierTriggerType.Passive);
+            Dictionary<StatType,float> final = CalculateContext(ModifierTriggerType.Passive);
 
             UIManager.instance.PlayerInfoUpdate(type, final[type]);
 
@@ -235,7 +235,7 @@ public class PlayerEntity : LivingEntity
     {
         base.Move_To(dir);
         Vector2Int playerPos = new Vector2Int((int)transform.position.x+dir.x, (int)transform.position.y+dir.y);
-        int vision = (int)Get_FinalStat(ModifierTriggerType.OnMove)[StatType.Vision];
+        int vision = (int)CalculateContext(ModifierTriggerType.OnMove)[StatType.Vision];
         UpdateFoV(playerPos, vision);
         ItemCheck(destination);
     }
@@ -290,13 +290,13 @@ public class PlayerEntity : LivingEntity
                 actPoint = normalAction;
                 break;
             case ModifierTriggerType.OnAttack:
-                actPoint = Get_FinalStat(trigger)[StatType.AttackSpeed];
+                actPoint = CalculateContext(trigger)[StatType.AttackSpeed];
                 break;
             case ModifierTriggerType.OnSpellCast:
-                actPoint = Get_FinalStat(trigger)[StatType.SpellSpeed];
+                actPoint = CalculateContext(trigger)[StatType.SpellSpeed];
                 break;
             case ModifierTriggerType.OnMove:
-                actPoint = Get_FinalStat(trigger)[StatType.MoveSpeed];
+                actPoint = CalculateContext(trigger)[StatType.MoveSpeed];
                 break;
             default:
                 break;

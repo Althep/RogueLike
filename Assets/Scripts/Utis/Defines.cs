@@ -43,6 +43,11 @@ public class BuffInstance : IPoolScript
     {
         poolType = type;
     }
+
+    public void Return()
+    {
+        Reset();
+    }
 }
 
 

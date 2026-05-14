@@ -42,15 +42,7 @@ public class DoorEntity : MapEntity
         isOpen = false;
     }
 
-    public override MapEntity CopyToEmpty()
-    {
-        DoorEntity newDoor = new DoorEntity();
-        if (newDoor.IsOpen())
-        {
-            newDoor.Interaction();
-        }
-        return newDoor;
-    }
+
 
     public override void ResetData()
     {

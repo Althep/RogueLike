@@ -69,7 +69,7 @@ public abstract class MapEntity : MonoBehaviour, ITargetable
         //MapManager.instance.RemoveMapData(posKey,this);
     }
 
-    public abstract MapEntity CopyToEmpty();
+    //public abstract MapEntity CopyToEmpty();
     public abstract void ResetData();
     public Defines.TileType GetMyType()
     {

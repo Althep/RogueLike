@@ -17,6 +17,8 @@ public class ModifierController
 
     LivingEntity myEntity;
 
+    public Action<Modifier> OnModifierChanged;
+
     public void InitAllContext(LivingEntity entity)
     {
         ModifierTriggerType[] triggers = Utils.Get_Enums<ModifierTriggerType>();
@@ -55,7 +57,8 @@ public class ModifierController
 
         // 재계산 없이 플래그만 오염
         dirtyFlags[trigger] = true;
-        myEntity.OnStatOrModifierChange();
+        //myEntity.OnStatOrModifierChange();
+        OnModifierChanged?.Invoke(modifier);
     }
 
     private void RemoveModifierInternal(Dictionary<ModifierTriggerType, List<Modifier>> targetDict, Modifier modifier)
@@ -68,7 +71,9 @@ public class ModifierController
         {
             dirtyFlags[trigger] = true;
         }
-        myEntity.OnStatOrModifierChange();
+        //myEntity.OnStatOrModifierChange();
+        OnModifierChanged?.Invoke(modifier);
+        ModifierManager.instance.Return_Modifier(modifier);
     }
 
     public void AddBuff(Modifier modifier) => AddModifierInternal(buffs, modifier);
@@ -278,5 +283,28 @@ public class ModifierController
             buffSaveDatas.Add(buffData);
         }
         return buffSaveDatas;
+    }
+
+
+    public void OnDead()
+    {
+        foreach(List<Modifier> modis in buffs.Values)
+        {
+            for(int i = 0; i<modis.Count; i++)
+            {
+                modis[i].Return();
+            }
+
+        }
+        buffs.Clear();
+        foreach (List<Modifier> modis in mutation.Values)
+        {
+            for (int i = 0; i<modis.Count; i++)
+            {
+                modis[i].Return();
+            }
+        }
+        mutation.Clear();
+        //모디파이어 리셋 , 장비는 UnEquip작성 후 모두 UnEquip하기
     }
 }

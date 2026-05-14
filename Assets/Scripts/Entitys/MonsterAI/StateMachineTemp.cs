@@ -108,13 +108,13 @@ public class MonsterStateMachineTemp
 
     public bool CheckAttackSpeed()
     {
-        Dictionary<StatType, float> stat = myEntity.Get_FinalStat(ModifierTriggerType.Passive);
+        Dictionary<StatType, float> stat = myEntity.CalculateContext(ModifierTriggerType.Passive);
         return myEntity.Get_ActPoint() >= stat[StatType.AttackSpeed];
     }
 
     public bool CheckMoveSpeed()
     {
-        Dictionary<StatType, float> stat = myEntity.Get_FinalStat(ModifierTriggerType.Passive);
+        Dictionary<StatType, float> stat = myEntity.CalculateContext(ModifierTriggerType.Passive);
         return myEntity.Get_ActPoint() >= stat[StatType.MoveSpeed];
     }
 
@@ -124,7 +124,7 @@ public class MonsterStateMachineTemp
         bool isHear = false;
         if (target is PlayerEntity player)
         {
-            float soundRange = player.Get_FinalStat(ModifierTriggerType.Passive)[StatType.Sound];
+            float soundRange = player.CalculateContext(ModifierTriggerType.Passive)[StatType.Sound];
             float dist = Vector2.Distance(player.transform.position, myEntity.transform.position);
             if (dist < soundRange)
             {
@@ -138,7 +138,7 @@ public class MonsterStateMachineTemp
     {
         if (target == null) return false;
 
-        Dictionary<StatType, float> attackStat = myEntity.Get_FinalStat(ModifierTriggerType.Passive);
+        Dictionary<StatType, float> attackStat = myEntity.CalculateContext(ModifierTriggerType.Passive);
         float attackRange = attackStat[StatType.AttackRange];
 
         Vector2Int myPos = new Vector2Int((int)myEntity.transform.position.x, (int)myEntity.transform.position.y);
@@ -152,7 +152,7 @@ public class MonsterStateMachineTemp
     {
         if (target == null) return false;
 
-        Dictionary<StatType, float> passiveStat = myEntity.Get_FinalStat(ModifierTriggerType.Passive);
+        Dictionary<StatType, float> passiveStat = myEntity.CalculateContext(ModifierTriggerType.Passive);
         float vision = passiveStat[StatType.Vision];
 
         Vector2Int myPos = new Vector2Int((int)myEntity.transform.position.x, (int)myEntity.transform.position.y);
@@ -171,7 +171,7 @@ public class MonsterStateMachineTemp
         }
 
         // 2. 수면 상태라면 깨어날지 말지 확률 계산
-        Dictionary<StatType, float> stat = myEntity.Get_FinalStat(ModifierTriggerType.Passive);
+        Dictionary<StatType, float> stat = myEntity.CalculateContext(ModifierTriggerType.Passive);
         int awakeRate = (int)stat[StatType.AwakeRate];
 
         // 예외 처리: awakeRate가 0 이하일 경우 0 나누기 에러 방지 및 절대 못 깸 처리

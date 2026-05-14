@@ -14,10 +14,7 @@ public class TileEntity : MapEntity
     {
 
     }
-    public override MapEntity CopyToEmpty()
-    {
-        return new TileEntity();
-    }
+
 
     public override void ResetData()
     {

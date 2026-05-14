@@ -26,10 +26,6 @@ public class ItemEntity : MapEntity
             spriteRenderer = this.transform.GetComponentInChildren<SpriteRenderer>();
         }
     }
-    public override MapEntity CopyToEmpty()
-    {
-        return new ItemEntity();
-    }
 
     public override void ResetData()
     {

@@ -10,10 +10,7 @@ public class DownStairEntity : StairEntity
         myType = Defines.TileType.DownStair;
     }
 
-    public override MapEntity CopyToEmpty()
-    {
-        return new DownStairEntity();
-    }
+
 
     public override void ResetData()
     {

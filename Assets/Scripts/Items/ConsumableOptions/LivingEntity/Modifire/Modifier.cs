@@ -55,6 +55,12 @@ public class Modifier : IPoolScript
     {
 
     }
+
+    public virtual void Return()
+    {
+        Reset();
+        ModifierManager.instance.Return_Modifier(this);
+    }
 }
 
 public class StatModifier : Modifier
