@@ -1281,7 +1281,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4850d3d6f4743014889b6affc87c4216, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::ItemManager
-  playerEntity: {fileID: 0}
 --- !u!1 &596905755
 GameObject:
   m_ObjectHideFlags: 0
@@ -1509,7 +1508,11 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   poolManager: {fileID: 0}
-  tileObjects: []
+  wallEntitys: []
+  tileEntitys: []
+  stairs: []
+  doors: []
+  enviromentObjs: []
   tilePosList: []
   wallPosList: []
   doorPosList: []
@@ -1709,6 +1712,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 03b4a2c13ea52e44c994da5d8236e615, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::TurnManager
+  GlovalTurn: 0
+  LastTurn: 0
+  accuredAp: 0
 --- !u!1 &767412203
 GameObject:
   m_ObjectHideFlags: 0
@@ -1813,6 +1819,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   uiPooler: {fileID: 1583641832}
+  playerInfos: {fileID: 0}
 --- !u!114 &803215737
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -2059,7 +2066,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d80835281401d514db1bd64aac850d5b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::DungeonManager
-  floor: 0
 --- !u!1 &1007948410
 GameObject:
   m_ObjectHideFlags: 0
@@ -4880,6 +4886,7 @@ MonoBehaviour:
   fogTilemap: {fileID: 1024003463}
   fogTileAsset: {fileID: 11400000, guid: fca299fe8d55f6841942d8baa0129664, type: 2}
   visitedTileAsset: {fileID: 11400000, guid: 7b363db81e032b4459bbe2e66f3e46b0, type: 2}
+  visited: []
 --- !u!156049354 &1924598315
 Grid:
   m_ObjectHideFlags: 0

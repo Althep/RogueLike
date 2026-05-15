@@ -1,111 +1,207 @@
 using UnityEngine;
-using UnityEditor; // 유니티 에디터 창을 만들기 위한 필수 네임스페이스
+using UnityEditor;
 using System;
-using System.IO;   // 텍스트 파일 저장 및 폴더 탐색기 기능을 위한 네임스페이스
+using System.IO;
+using System.Linq; // 목록 정렬을 위해 추가
+using System.Text;
 
-// 일반적인 게임 오브젝트 스크립트(MonoBehaviour)가 아니라, 
-// 유니티 에디터의 독립적인 창을 띄우기 위해 EditorWindow를 상속받습니다.
 public class DevLogMini : EditorWindow
 {
-    // 입력받은 텍스트를 임시로 들고 있을 변수들입니다. (뇌의 작업 기억을 대신할 공간)
-    string tasksDone = "";
+    // 입력 데이터를 저장할 변수들
     string classesWorkedOn = "";
+    string tasksDone = "";
+    string nextTasks = "";
 
-    // 1. 창 띄우기 설정
-    // 상단 메뉴바에 [Tools] -> [개발 일지 작성기] 버튼을 만들어 줍니다.
-    [MenuItem("Tools/개발 일지 작성기")]
+    // 파일 목록 관리를 위한 변수들
+    string[] logFilePaths = new string[0]; // 실제 파일 경로들
+    string[] logFileNames = new string[0]; // 화면에 보여줄 날짜 이름들 (예: 2026-05-15)
+    int selectedFileIndex = 0;             // 드롭다운에서 선택된 항목의 번호
+
+    // 현재 편집 중인 기준 날짜 (오늘이 아닐 수도 있으므로 기록해둠)
+    string currentEditingDate = "";
+
+    [MenuItem("Tools/개발 일지 작성기 V3")]
     public static void ShowWindow()
     {
-        // 클릭하면 "개발 일지"라는 이름의 창이 열립니다.
-        GetWindow<DevLogMini>("개발 일지");
+        var window = GetWindow<DevLogMini>("개발 일지");
+        window.RefreshFileList(); // 창을 열 때 파일 목록을 한번 쫙 읽어옵니다.
     }
 
-    // 2. UI 그리기 (유니티 에디터 창에 보여질 버튼과 입력칸들)
+    // 유니티가 로딩되거나 스크립트가 리로드될 때 자동으로 실행되는 함수
+    void OnEnable()
+    {
+        RefreshFileList();
+        // 편집 중인 날짜가 비어있으면 무조건 '오늘'로 세팅
+        if (string.IsNullOrEmpty(currentEditingDate))
+        {
+            currentEditingDate = DateTime.Now.ToString("yyyy-MM-dd");
+        }
+    }
+
+    // DevLogs 폴더 안의 txt 파일들을 읽어서 최신순으로 정렬하는 핵심 로직
+    void RefreshFileList()
+    {
+        string path = Path.Combine(Application.dataPath, "../DevLogs");
+        if (!Directory.Exists(path)) Directory.CreateDirectory(path);
+
+        // "DevLog_"로 시작하는 모든 txt 파일을 찾아 내림차순(최신순)으로 정렬합니다.
+        var files = Directory.GetFiles(path, "DevLog_*.txt").OrderByDescending(f => f).ToArray();
+
+        logFilePaths = files;
+        logFileNames = new string[files.Length];
+
+        for (int i = 0; i < files.Length; i++)
+        {
+            // 화면에 깔끔하게 보이기 위해 파일명에서 "DevLog_"와 ".txt"를 떼어냅니다.
+            logFileNames[i] = Path.GetFileNameWithoutExtension(files[i]).Replace("DevLog_", "");
+        }
+
+        // 에러 방지용 인덱스 초기화
+        if (selectedFileIndex >= logFileNames.Length) selectedFileIndex = 0;
+    }
+
     void OnGUI()
     {
-        GUILayout.Label("오늘의 작업 기록", EditorStyles.boldLabel);
-        GUILayout.Space(10); // 여백 10픽셀
+        // 상단에 내가 지금 '며칠 자' 일지를 쓰고 있는지 명확하게 띄워줍니다.
+        GUILayout.Label($"[현재 편집 중: {currentEditingDate}]", EditorStyles.boldLabel);
+        GUILayout.Space(10);
 
-        // [입력칸 1] 작업한 클래스 이름 적는 곳 (한 줄 입력)
-        GUILayout.Label("작업한 클래스 (예: PlayerModifier, AStarPathfinding):");
-        classesWorkedOn = EditorGUILayout.TextField(classesWorkedOn);
+        classesWorkedOn = EditorGUILayout.TextField("작업한 클래스:", classesWorkedOn);
+
+        GUILayout.Space(5);
+        GUILayout.Label("오늘 한 일:");
+        tasksDone = EditorGUILayout.TextArea(tasksDone, GUILayout.Height(100));
+
+        GUILayout.Space(5);
+        GUILayout.Label("내일 할 일 (To-do):", EditorStyles.boldLabel);
+        nextTasks = EditorGUILayout.TextArea(nextTasks, GUILayout.Height(60));
 
         GUILayout.Space(10);
 
-        // [입력칸 2] 오늘 한 일 적는 곳 (엔터키 쳐서 여러 줄 입력 가능하도록 크기 100 할당)
-        GUILayout.Label("오늘 한 일 (기억나는 대로 짧게, 단어 위주로):");
-        tasksDone = EditorGUILayout.TextArea(tasksDone, GUILayout.Height(100));
+        // ---------------- [저장 버튼] ----------------
+        // 이 버튼을 누르면 무조건 'currentEditingDate' 날짜 파일에 덮어씌워집니다.
+        if (GUILayout.Button($"'{currentEditingDate}' 일지 저장 및 복사", GUILayout.Height(40)))
+        {
+            SaveReport();
+            RefreshFileList(); // 혹시 오늘 처음 저장한 거라면 파일 목록에 추가해야 하므로 새로고침
+        }
 
         GUILayout.Space(20);
 
-        // [버튼 1] 텍스트 파일로 저장하고 클립보드에 복사하는 버튼 (크게 보이도록 높이 40)
-        if (GUILayout.Button("보고서 저장 및 클립보드 복사", GUILayout.Height(40)))
+        // ---------------- [파일 목록 및 불러오기 구획] ----------------
+        GUILayout.Label("과거 일지 불러오기", EditorStyles.boldLabel);
+        EditorGUILayout.BeginHorizontal(); // 여기서부터 가로 배치 시작
+
+        if (GUILayout.Button("?? 갱신", GUILayout.Width(50)))
         {
-            GenerateAndSaveReport();
+            RefreshFileList();
         }
+
+        // 파일이 1개라도 있을 때만 드롭다운 메뉴를 띄웁니다.
+        if (logFileNames.Length > 0)
+        {
+            selectedFileIndex = EditorGUILayout.Popup(selectedFileIndex, logFileNames);
+
+            if (GUILayout.Button("불러오기", GUILayout.Width(80)))
+            {
+                LoadSpecificReport(selectedFileIndex);
+            }
+        }
+        else
+        {
+            GUILayout.Label("저장된 일지가 없습니다.");
+        }
+        EditorGUILayout.EndHorizontal(); // 가로 배치 끝
 
         GUILayout.Space(10);
 
-        // [버튼 2] 어제 기록을 슬쩍 보고 싶을 때 누르는 폴더 열기 버튼 (높이 30)
-        if (GUILayout.Button("저장된 일지 폴더 열기", GUILayout.Height(30)))
+        // ★ [안전장치] 만약 '어제' 기록을 불러와서 보는 중이라면, 
+        // 다시 '오늘' 기록으로 돌아가기 쉽게 노란색 버튼을 띄워줍니다.
+        if (currentEditingDate != DateTime.Now.ToString("yyyy-MM-dd"))
+        {
+            GUI.backgroundColor = Color.yellow;
+            if (GUILayout.Button("새 일지 작성 (오늘 날짜로 비우기)", GUILayout.Height(30)))
+            {
+                CreateNewTodayLog();
+            }
+            GUI.backgroundColor = Color.white;
+        }
+
+        GUILayout.Space(10);
+        if (GUILayout.Button("폴더에서 직접 열기", GUILayout.Height(30)))
         {
             OpenLogFolder();
         }
     }
 
-    // 3. 실제 저장 및 복사 기능이 돌아가는 로직
-    void GenerateAndSaveReport()
+    void SaveReport()
     {
-        // 오늘 날짜를 YYYY-MM-DD 형태로 가져옵니다.
-        string date = DateTime.Now.ToString("yyyy-MM-dd");
-
-        // 텍스트 파일에 적힐 보고서의 형태를 예쁘게 조립합니다. (\n은 줄바꿈)
-        string report = $"[개발 일지 - {date}]\n\n" +
-                        $"■ 수정한 클래스\n{classesWorkedOn}\n\n" +
-                        $"■ 작업 내용\n{tasksDone}\n\n" +
-                        $"----------------------";
-
-        // 저장될 경로 설정: Application.dataPath는 Assets 폴더를 의미합니다.
-        // 유니티가 리로딩되며 작업 흐름이 끊기는 걸 막기 위해, Assets 폴더 바깥(../)에 DevLogs 폴더를 만듭니다.
+        string report = BuildReportText(currentEditingDate);
         string path = Path.Combine(Application.dataPath, "../DevLogs");
+        if (!Directory.Exists(path)) Directory.CreateDirectory(path);
 
-        // 만약 DevLogs 폴더가 아직 없다면 새로 생성해 줍니다.
-        if (!Directory.Exists(path))
-        {
-            Directory.CreateDirectory(path);
-        }
+        string filePath = Path.Combine(path, $"DevLog_{currentEditingDate}.txt");
+        File.WriteAllText(filePath, report, Encoding.UTF8);
 
-        // 최종적으로 저장될 파일의 이름 (예: DevLog_2026-05-14.txt)
-        string filePath = Path.Combine(path, $"DevLog_{date}.txt");
-
-        // File.AppendAllText를 사용하면, 기존 파일 내용을 지우지 않고 맨 밑에 계속 이어붙입니다.
-        // 생각날 때마다 버튼을 눌러도 안전하게 누적됩니다.
-        File.AppendAllText(filePath, report + "\n");
-
-        // 유니티 밖의 메신저나 메모장에 바로 Ctrl+V 할 수 있도록 시스템 클립보드에 복사합니다.
         GUIUtility.systemCopyBuffer = report;
-
-        // 에러가 났는지 저장이 잘 되었는지 알기 쉽게 유니티 콘솔창에 메시지를 띄워줍니다.
-        Debug.Log($"[개발일지 저장 완료] 클립보드에 복사되었습니다! (저장 위치: {filePath})");
-
-        // 저장을 완료했으니, 창에 쓰여있던 글씨들을 깔끔하게 지워줍니다. (다음 입력을 위해)
-        tasksDone = "";
-        classesWorkedOn = "";
+        Debug.Log($"[{currentEditingDate} 일지 갱신 완료] 클립보드에 복사되었습니다!");
     }
 
-    // 4. 저장된 폴더를 윈도우 탐색기(맥은 파인더)로 열어주는 기능
+    void LoadSpecificReport(int index)
+    {
+        if (index < 0 || index >= logFilePaths.Length) return;
+
+        string filePath = logFilePaths[index];
+        string dateTag = logFileNames[index];
+        string fullText = File.ReadAllText(filePath, Encoding.UTF8);
+
+        // 구분선을 기준으로 텍스트를 정확하게 잘라옵니다.
+        classesWorkedOn = ExtractText(fullText, "■ 수정한 클래스", "■ 작업 내용");
+        tasksDone = ExtractText(fullText, "■ 작업 내용", "■ 내일 할 일");
+        nextTasks = ExtractText(fullText, "■ 내일 할 일", "----------------------");
+
+        // 편집 기준일을 방금 불러온 파일의 날짜로 바꿉니다.
+        currentEditingDate = dateTag;
+
+        GUI.FocusControl(null); // 텍스트 커서 잔상을 지워줍니다.
+        Debug.Log($"{dateTag} 일지를 성공적으로 불러왔습니다.");
+    }
+
+    // 다시 '오늘' 날짜로 리셋하는 함수
+    void CreateNewTodayLog()
+    {
+        currentEditingDate = DateTime.Now.ToString("yyyy-MM-dd");
+        classesWorkedOn = "";
+        tasksDone = "";
+        nextTasks = "";
+        GUI.FocusControl(null);
+    }
+
+    string BuildReportText(string date)
+    {
+        return $"[개발 일지 - {date}]\n\n" +
+               $"■ 수정한 클래스\n{classesWorkedOn}\n\n" +
+               $"■ 작업 내용\n{tasksDone}\n\n" +
+               $"■ 내일 할 일\n{nextTasks}\n\n" +
+               $"----------------------";
+    }
+
+    string ExtractText(string source, string startTag, string endTag)
+    {
+        int start = source.IndexOf(startTag);
+        if (start < 0) return "";
+        start += startTag.Length;
+
+        int end = source.IndexOf(endTag, start);
+        if (end < 0) end = source.Length;
+
+        return source.Substring(start, end - start).Trim();
+    }
+
     void OpenLogFolder()
     {
-        // 위에서 설정한 경로와 동일한 DevLogs 폴더 경로를 잡습니다.
         string path = Path.Combine(Application.dataPath, "../DevLogs");
-
-        // 버튼을 먼저 눌러버려서 폴더가 없을 경우를 대비해, 없으면 빈 폴더를 만들어줍니다.
-        if (!Directory.Exists(path))
-        {
-            Directory.CreateDirectory(path);
-        }
-
-        // 지정된 경로의 폴더를 운영체제의 기본 파일 탐색기로 바로 열어줍니다.
+        if (!Directory.Exists(path)) Directory.CreateDirectory(path);
         EditorUtility.RevealInFinder(path);
     }
 }

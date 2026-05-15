@@ -139,8 +139,11 @@ public class BuffModifier : Modifier
     }
     public override void Apply(LivingEntity entity)
     {
-        int duration = UnityEngine.Random.Range(minTime, maxTime+1);
-        EventManager.instance.AddBuff(entity, this, duration);
+        int applyDuration = (this.duration > 0) ? this.duration : UnityEngine.Random.Range(minTime, maxTime + 1);
+
+        EventManager.instance.AddBuff(entity, this, applyDuration);
+
+        this.duration = 0;
     }
     
     void GetStats()
@@ -219,12 +222,11 @@ public class DamageModifier : Modifier
 
     public bool CanEvoke()
     {
-        canEvoke = false;
-        if (evokeRate >= UnityEngine.Random.Range(0, 101))
+        if (evokeRate >= UnityEngine.Random.Range(0f, 100f))
         {
             return canEvoke = true;
         }
-        return canEvoke;
+        return canEvoke = false;
     }
     public override void Copy(Modifier newOne)
     {
@@ -244,45 +246,78 @@ public class DamageModifier : Modifier
 }
 public class ActionModifier: Modifier
 {
-    ModifierAction action;
+    public ModifierAction action;
     public string effectName;
     public string stringValue;
     public int minValue;
-    public int maxValue;    
+    public int maxValue;
     public override void Apply(LivingEntity entity)
     {
         ModifierContext context = entity.GetContext(triggerType);
         List<ModifierAction> effects = context.modifierActions;
-        int duration = 0;
-        for(int i = 0; i<effects.Count; i++)
+
+        bool isAlreadyExist = false;
+
+        // 1. 리스트를 딱 한 번만 돌면서 확인합니다.
+        for (int i = 0; i < effects.Count; i++)
         {
-            if(effects[i] is BuffAction buff && buff.effectName == effectName) //중복 검사&검사 후 중복되어있다면 버프시간 갱신
+            // 내 effectName과 똑같은 버프를 찾았다면?
+            if (effects[i] is BuffAction buff && buff.effectName == this.effectName)
             {
-                duration = UnityEngine.Random.Range(buff.minTime,buff.maxTime+1);
-                break;
-            }
-        }
-        
-        for(int i = 0; i<effects.Count; i++)
-        {
-            if (effects[i] is BuffAction buff && buff.effectName == effectName)
-            {
-                buff.SetDuration(duration);
+                // [수정] 기존 버프의 시간이 아닌, '새로 들어온 이 모디파이어'의 시간으로 갱신!
+                int newDuration = UnityEngine.Random.Range(this.minValue, this.maxValue + 1);
+                buff.SetDuration(newDuration);
+
+                isAlreadyExist = true; // 찾았다고 깃발(플래그)을 듦
+                break; // 이미 갱신했으니 남은 리스트는 더 볼 필요 없이 탈출!
             }
         }
 
-        if(!effects.Any(item => item.effectName == action.effectName))
+        // 2. 만약 리스트를 다 뒤졌는데도 못 찾았다면(새로운 효과라면) 추가합니다.
+        if (!isAlreadyExist)
         {
-            context.modifierActions.Add(action);
+            if (action != null)
+            {
+                context.modifierActions.Add(action);
+            }
         }
-
     }
 
-    
+    public void SetConsumableFlag()
+    {
+        if (action != null)
+        {
+            action.isConsumable = true;
+        }
+    }
+
     public void SetAction(ModifierAction action)
     {
         this.action = action;
         action.stringValue = stringValue;
+    }
+
+    public override void Copy(Modifier newOne)
+    {
+        base.Copy(newOne);
+        if (newOne is ActionModifier act)
+        {
+            act.action = this.action;
+            act.effectName = this.effectName;
+            act.stringValue = this.stringValue;
+            act.minValue = this.minValue;
+            act.maxValue = this.maxValue;
+        }
+    }
+
+    public override void Reset()
+    {
+        base.Reset();
+        action = null;
+        effectName = null;
+        stringValue = null;
+        minValue = 0;
+        maxValue = 0;
     }
 }
 

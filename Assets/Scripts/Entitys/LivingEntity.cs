@@ -70,7 +70,7 @@ public class LivingEntity : MapEntity
     {
         return myStat.CalculateContext(trigger);
     }
-    public void OnStatChange(StatType stat,float value)
+    public void OnStatChange(StatType stat, float value)
     {
         if (myStat == null)
             return;
@@ -146,7 +146,7 @@ public class LivingEntity : MapEntity
     #endregion
 
     #region [4] 장비 및 인벤토리 (Inventory & Items)
-    protected Dictionary<SlotType, EquipItem> equipments = new Dictionary<SlotType, EquipItem>();
+    protected EquipSystem equipSystem = new EquipSystem();
     protected InventoryData inventoryData;
     protected List<ItemEntity> groundItems;
 
@@ -155,74 +155,26 @@ public class LivingEntity : MapEntity
 
     }
 
-    public Dictionary<SlotType, EquipItem> GetEquips()
-    {
-        return equipments;
-    }
-
     public StatType Get_WeaponAttribueType()
     {
-        if (!equipments.ContainsKey(SlotType.MainHand))
-        {
-            return StatType.Str;
-        }
-        if (equipments[SlotType.MainHand] != null)
-        {
-            if (equipments[SlotType.MainHand] is Weapon weapon)
-            {
-                return weapon.attributeStat;
-            }
-            return StatType.Str;
-        }
-        else
-        {
-            return StatType.Str;
-        }
+        return equipSystem.Get_WeaponAttribute();
     }
 
     public void UseItem(ItemBase item)
     {
         if (item is EquipItem equip)
         {
-            ItemEquip(equip);
+            equipSystem.ItemEquip(equip);
+        }
+        else if (item is ConsumableItem consum)
+        {
+            consum.OnUse(this);
         }
     }
 
     public bool IsRistricted(ItemBase item, ModifierTriggerType trigger)
     {
         return modifierController.IsRestricted(item, trigger);
-    }
-
-    public void ItemEquip(EquipItem target)
-    {
-        SlotType slot = target.slot;
-
-        if (equipments[slot] != null)
-        {
-            EquipItem origin = equipments[slot];
-
-            List<Modifier> modis = origin.options;
-            List<Modifier> addOptions = origin.addOptions;
-            foreach (Modifier modi in modis)
-            {
-                modifierController.RemoveEquipment(modi);
-            }
-            foreach (Modifier modi in addOptions)
-            {
-                modifierController.RemoveEquipment(modi);
-            }
-        }
-
-        equipments[slot] = target;
-
-        foreach (Modifier option in target.options)
-        {
-            modifierController.AddEquipment(option);
-        }
-        foreach (Modifier option in target.addOptions)
-        {
-            modifierController.AddEquipment(option);
-        }
     }
 
     public void ItemCheck(Vector2Int pos)
@@ -293,11 +245,7 @@ public class LivingEntity : MapEntity
     public void End_Move()
     {
         moveState = Defines.MoveState.Idle;
-        // MoveTowards가 정확히 도달시켜 주므로, 여기서 강제로 position을 다시 맞출 필요가 사라졌습니다.
     }
-
-    // 기존의 복잡했던 float SetMoveDistance(Vector2 moveDirection) 함수는 
-    // MoveTowards의 도입으로 아예 필요가 없어져 삭제했습니다!
     #endregion
 
     #region [6] 전투 및 판정 (Combat & Battle)
@@ -373,6 +321,20 @@ public class LivingEntity : MapEntity
         myStat.OnDeadActions-=OnDeadFunc;
         Return();
     }
+
+    public virtual void ExecuteAction(LivingEntity target, ModifierTriggerType trigger)
+    {
+        ModifierContext context = modifierController.ApplyModifiers(trigger);
+
+        // 2. 액션 실행 (기본적인 상태이상 부여 등)
+        foreach (var action in context.modifierActions)
+        {
+            // 공통 액션 처리 로직
+        }
+
+        // 3. 일회용 청소! (아까 만든 함수)
+        modifierController.ConsumeOneTimeActions(trigger);
+    }
     #endregion
 
     #region [7] 시각 요소 및 렌더링 (Visuals & Rendering)
@@ -424,6 +386,7 @@ public class LivingEntity : MapEntity
         {
             inventoryData = new InventoryData();
         }
+        OnAwake();
     }
 
     protected virtual void OnAwake()
@@ -445,11 +408,16 @@ public class LivingEntity : MapEntity
         {
             pathFinder = new Astar(this.gameObject);
         }
-        if(modifierController == null)
+        if (modifierController == null)
         {
             modifierController = new ModifierController();
         }
+        if (equipSystem == null)
+        {
+            equipSystem = new EquipSystem();
+        }
         modifierController.OnModifierChanged += OnModifierChange;
+        equipSystem.InitSystem(modifierController);
     }
 
     public void Set_RaceData(RaceData race)
@@ -475,7 +443,7 @@ public class LivingEntity : MapEntity
         myStat = null;
         Objname = null;
         id = null;
-        equipments.Clear();
+        if (equipSystem!= null) equipSystem.ClearEquips();
     }
 
     public override void Return()
@@ -486,7 +454,5 @@ public class LivingEntity : MapEntity
         MapManager.instance.dynamicMapData.Remove(posKey);
 
     }
-
-
     #endregion
 }

@@ -11,7 +11,7 @@ public class ModifierController
     private Dictionary<ModifierTriggerType, List<Modifier>> equips = new Dictionary<ModifierTriggerType, List<Modifier>>();
     private Dictionary<ModifierTriggerType, ModifierContext> contexts = new Dictionary<ModifierTriggerType, ModifierContext>();
 
-    
+
     private Dictionary<ModifierTriggerType, bool> dirtyFlags = new Dictionary<ModifierTriggerType, bool>();
     // 지연 갱신(Lazy Evaluation)을 위한 더티 플래그
 
@@ -43,6 +43,22 @@ public class ModifierController
     // ==========================================
     // 1. 모디파이어 추가/제거 (플래그만 변경)
     // ==========================================
+    public void EquipItem(EquipItem equip)
+    {
+        List<Modifier> equipModifiers = equip.options;
+        List<Modifier> equipAddOptions = equip.addOptions;
+
+
+        if (equipModifiers != null)
+        {
+            for (int i = 0; i < equipModifiers.Count; i++) AddEquipment(equipModifiers[i]);
+        }
+
+        if (equipAddOptions != null) // 안전장치!
+        {
+            for (int i = 0; i < equipAddOptions.Count; i++) AddEquipment(equipAddOptions[i]);
+        }
+    }
     private void AddModifierInternal(Dictionary<ModifierTriggerType, List<Modifier>> targetDict, Modifier modifier)
     {
         ModifierTriggerType trigger = modifier.triggerType;
@@ -74,6 +90,23 @@ public class ModifierController
         //myEntity.OnStatOrModifierChange();
         OnModifierChanged?.Invoke(modifier);
         ModifierManager.instance.Return_Modifier(modifier);
+    }
+
+    public void ConsumeOneTimeActions(ModifierTriggerType trigger)
+    {
+        // 해당 트리거(예: Attack)의 컨텍스트를 가져옵니다.
+        if (contexts.TryGetValue(trigger, out ModifierContext context))
+        {
+            // 1회성 액션(isConsumable == true)만 핀셋으로 골라서 제거합니다.
+            int removedCount = context.modifierActions.RemoveAll(a => a.isConsumable);
+
+            // [핵심] 만약 뭔가 지워졌다면, 그릇의 상태가 변한 것이므로 
+            // 다음번 호출 시 재계산되도록 더티 플래그를 다시 오염(true)시킵니다!
+            if (removedCount > 0)
+            {
+                dirtyFlags[trigger] = true;
+            }
+        }
     }
 
     public void AddBuff(Modifier modifier) => AddModifierInternal(buffs, modifier);
@@ -134,35 +167,24 @@ public class ModifierController
     // ==========================================
     public ModifierContext ApplyModifiers(ModifierTriggerType type)
     {
-        
         ModifierContext context = Get_Context(type);
 
-        // 1. 패시브는 Get_Context에서 이미 지연 갱신이 완료됨
-        if (type == ModifierTriggerType.Passive)
-        {
-            return context;
-        }
+        if (type == ModifierTriggerType.Passive) return context;
 
-        // 2. 액티브 타입 지연 갱신 적용
         if (dirtyFlags.TryGetValue(type, out bool isDirty) && isDirty)
         {
-            // 플래그가 오염되었을 때만 그릇을 비우고 재계산
             context.Clear();
 
-            bool hasActionConsumed = false;
+            // 1. 장비, 변이, 버프에서 액티브 스킬들을 안전하게 장전만 합니다.
+            ApplyActiveModifiersFrom(mutation, type);
+            ApplyActiveModifiersFrom(equips, type);
+            ApplyActiveModifiersFrom(buffs, type);
 
-            // RemoveAll의 결과(소모 여부)를 받아옵니다.
-            hasActionConsumed |= ApplyActiveModifiersFrom(mutation, type);
-            hasActionConsumed |= ApplyActiveModifiersFrom(equips, type);
-            hasActionConsumed |= ApplyActiveModifiersFrom(buffs, type);
-
-            // 핵심 로직: 
-            // 1회성 아이템이 소모되었다면 다음 번엔 그 액션을 빼고 계산해야 하므로 true 유지.
-            // 소모된 게 없다면 일반 장비/버프만 있는 것이므로 false로 캐싱 완료.
-            dirtyFlags[type] = hasActionConsumed;
+            // 2. 삭제되는게 없으므로 무조건 캐싱 완료(false) 처리합니다.
+            dirtyFlags[type] = false;
         }
 
-        return context; // 밖에서 일괄 Invoke()
+        return context;
     }
 
     // 헬퍼 함수가 '소모된 액션이 있는지'를 bool로 반환하도록 수정
@@ -176,11 +198,6 @@ public class ModifierController
             {
                 modifier.Apply(myEntity); // context.modifierActions에 액션 Add
             }
-
-            // RemoveAll은 지워진 요소의 개수를 int로 반환합니다. 
-            // 0보다 크면 무언가 삭제(소모)되었다는 뜻입니다.
-            int removedCount = list.RemoveAll(m => m is ActionModifier);
-            removedAny = removedCount > 0;
         }
 
         return removedAny;
@@ -233,7 +250,17 @@ public class ModifierController
 
                 if (isMatch)
                 {
-                    modifier.Apply(myEntity);
+                    // [수정된 부분] myEntity에 Apply하지 말고, tempContext의 제한 수치만 조작!
+                    if (itemModi.isMulti)
+                    {
+                        if (!tempContext.multifle.ContainsKey(itemModi.stat)) tempContext.multifle.Add(itemModi.stat, 0f);
+                        tempContext.multifle[itemModi.stat] += itemModi.value;
+                    }
+                    else
+                    {
+                        if (!tempContext.stats.ContainsKey(itemModi.stat)) tempContext.stats.Add(itemModi.stat, 0f);
+                        tempContext.stats[itemModi.stat] += itemModi.value;
+                    }
                 }
             }
         }
@@ -288,9 +315,9 @@ public class ModifierController
 
     public void OnDead()
     {
-        foreach(List<Modifier> modis in buffs.Values)
+        foreach (List<Modifier> modis in buffs.Values)
         {
-            for(int i = 0; i<modis.Count; i++)
+            for (int i = 0; i<modis.Count; i++)
             {
                 modis[i].Return();
             }

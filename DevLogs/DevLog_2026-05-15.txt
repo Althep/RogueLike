@@ -1,0 +1,14 @@
+﻿[개발 일지 - 2026-05-15]
+
+■ 수정한 클래스
+LivingEntity 스탯/모디파이어 구역 리팩토리
+
+■ 작업 내용
+LivingEntity 스탯/모디파이어 구역 리팩토리
+
+■ 내일 할 일
+장비 / 소모품 사용 작성하기
+Equip 구현 후 
+ModifierController의 OnDead 모든 장비 Unequip하기
+
+----------------------

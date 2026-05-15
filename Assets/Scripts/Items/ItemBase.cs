@@ -15,22 +15,16 @@ public abstract class ItemBase
     public float weight;
     public List<Modifier> options = new List<Modifier>();
 
-    public void OnUse(LivingEntity entity)
+    public virtual void OnUse(LivingEntity entity)
     {
-        List<BuffModifier> buffs = options.OfType<BuffModifier>().ToList();
-        
-        if(buffs.Count>1)
-        {
-            int duration = UnityEngine.Random.Range(buffs[0].minTime, buffs[0].maxTime+1);
-            foreach(var buff in buffs)
-            {
-                buff.duration = duration;
-            }
-        }
-        foreach(var option in options)
-        {
-            option.Apply(entity);
-        }
+        // 1. 장전: 모디파이어들을 엔티티의 주머니(컨텍스트)에 넣습니다.
+        EffectApplier.ApplySynchronized(entity, options);
+
+        // 2. 격발 및 청소: 방금 넣은 1회용 액션들을 즉시 실행하고 비워줍니다.
+        // (이전에 논의했던 엔티티의 실행 함수를 여기서 바로 호출해버립니다!)
+
+        // 예시: 소비 아이템 전용 트리거를 사용해 실행
+        entity.ExecuteAction(entity, Defines.ModifierTriggerType.OnUseItem);
     }
     public bool CanStack(int amount)
     {

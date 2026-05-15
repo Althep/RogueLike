@@ -211,12 +211,11 @@ public class MonsterEntity : LivingEntity
         List<ModifierSaveData> modifierSaves = modifierController.MutetionSave();
         saveData.buffs = buffsave;
         saveData.modifiers = modifierSaves;
-        foreach(var key in equipments.Keys)
+        if(equipSystem != null)
         {
-            ItemSaveData data = equipments[key].SaveData();
-            saveData.equipMentsData.Add(data);//장비 추가
+            List<ItemSaveData> saves = equipSystem.SaveEquips();
+            saveData.equipMentsData.AddRange(saves);
         }
-        
         List<ItemSaveData> itemSaves = new List<ItemSaveData>();
         if(inventoryData == null)
         {

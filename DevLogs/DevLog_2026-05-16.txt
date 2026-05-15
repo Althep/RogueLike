@@ -1,0 +1,18 @@
+﻿[개발 일지 - 2026-05-16]
+
+■ 수정한 클래스
+LivingEntity,Modifiers,ModifierContext,ModifierController,EquipSystem
+
+■ 작업 내용
+장비 시스템 독립: 복잡했던 장비 장착/해제 로직을 EquipSystem으로 완전히 분리하여 LivingEntity의 부담을 줄이고 단일 책임 원칙(SRP) 확보.
+
+아이템 사용 로직 수정: 장비 아이템과 1회성 소비 아이템의 사용 흐름을 분리하여 안전한 처리 구조 확립.
+
+캐싱 시스템 최적화 및 버그 픽스: ModifierContext의 지연 갱신(Lazy Evaluation) 유지 시 1회성 ModifierAction이 삭제되지 않거나 무한 중첩되는 치명적 논리 오류 해결 (1회성 꼬리표 isConsumable 도입).
+
+■ 내일 할 일
+부모/자식 상속 구조를 활용하여 각 LivingEntity의 ExecuteAction 구체화 및 연출 분리.
+
+StateMachine 기반 액션 리팩토링 진행.
+
+----------------------

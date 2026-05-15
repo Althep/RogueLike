@@ -24,6 +24,7 @@ public abstract class ModifierAction
     public ActionEffectType actionEffectType;
     public int minTime;
     public int maxTime;
+    public bool isConsumable = false;
     //protected ModifierManager mm = GameManager.instance.Get_ModifierManager();
     public virtual Modifier GetMyModifier()
     {

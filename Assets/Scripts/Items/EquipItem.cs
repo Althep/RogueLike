@@ -9,6 +9,8 @@ public class EquipItem : ItemBase
     public Defines.SlotType slot;
     public Defines.ItemRarity rarity;
     public List<Modifier> addOptions = new List<Modifier>();
+
+    
     public override ItemBase Clone()
     {
         EquipItem newEquip = ItemManager.instance.ItemMake(id) as EquipItem;
