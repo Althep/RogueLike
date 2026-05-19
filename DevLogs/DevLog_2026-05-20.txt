@@ -1,0 +1,16 @@
+﻿[개발 일지 - 2026-05-20]
+
+■ 수정한 클래스
+CombatManager / MiniMapManager / MapManager / FogOfWarManager
+
+■ 작업 내용
+CombatManager
+전투 스냅샷 / ModifierAction 능동적 실행부분 작성, 트리거 발동 세분화
+MiniMapManager
+전체함수 작성 / Texture2D기반 픽셀 랜더링
+이벤트 주도형으로 작성 (FogOfWar , MapManager부분)
+
+■ 내일 할 일
+MonsterEntity 정상 작동하지만 다시 살펴보기
+
+----------------------

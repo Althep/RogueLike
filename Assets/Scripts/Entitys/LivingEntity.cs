@@ -1,9 +1,8 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using static Defines;
-using static UnityEditor.PlayerSettings;
-using static UnityEngine.EventSystems.EventTrigger;
 
 public class LivingEntity : MapEntity
 {
@@ -17,8 +16,8 @@ public class LivingEntity : MapEntity
 
     #region [2] 상태 및 스탯 (Stats & Level)
     [SerializeReference] protected EntityStat myStat;
-    [SerializeField] protected ModifierController modifierController = new ModifierController();
-
+    // [수정] 할당은 선언부나 Awake/Init 중 '한 곳'에서만 확실하게 하도록 선언부 초기화 유지
+    protected ModifierController modifierController = new ModifierController();
 
     protected virtual void InitStat()
     {
@@ -27,110 +26,68 @@ public class LivingEntity : MapEntity
             myStat = new EntityStat();
         }
         myStat.Set_ModifierController(modifierController);
-        myStat.OnStatChange+=OnStatChange;
-        myStat.OnDeadActions+=OnDeadFunc;
+        myStat.OnStatChange += OnStatChange;
+        myStat.OnDeadActions += OnDeadFunc;
     }
 
-    public virtual EntityStat GetMyStat()
-    {
-        return myStat;
-    }
+    public virtual EntityStat GetMyStat() => myStat;
+    public EntityStat Get_MyData() => myStat;
 
     public virtual void SetMyStat(EntityStat stat)
     {
-        // 1. 기존 스탯이 있었다면 찌꺼기가 남지 않게 먼저 연결을 끊어줍니다.
         if (myStat != null)
         {
             myStat.OnStatChange -= OnStatChange;
             myStat.OnDeadActions -= OnDeadFunc;
         }
 
-        // 2. 새로운 스탯으로 덮어씌웁니다.
         myStat = stat;
-        myStat.Set_ModifierController(modifierController);
 
-        // 3. 새 스탯의 이벤트 방송국에 주파수를 다시 맞춰줍니다.
         if (myStat != null)
         {
+            myStat.Set_ModifierController(modifierController);
             myStat.OnStatChange += OnStatChange;
             myStat.OnDeadActions += OnDeadFunc;
         }
     }
-    public EntityStat Get_MyData()
-    {
-        return myStat;
-    }
 
-    public virtual void AddingStat(StatType type, float value)
-    {
-        myStat.AddBaseStat(type, value);
-    }
+    public virtual void AddingStat(StatType type, float value) => myStat?.AddingStat(type, value);
+    public Dictionary<StatType, float> CalculateContext(ModifierTriggerType trigger) => myStat.CalculateContext(trigger);
 
-    public Dictionary<StatType, float> CalculateContext(ModifierTriggerType trigger)
-    {
-        return myStat.CalculateContext(trigger);
-    }
     public void OnStatChange(StatType stat, float value)
     {
-        if (myStat == null)
-            return;
+        if (myStat == null) return;
+
         myStat.MarksAsDirty();
         Dictionary<StatType, float> finalStat = myStat.CalculateContext(ModifierTriggerType.Passive);
+
         if (stat == StatType.HP || stat == StatType.MaxHP)
         {
-            myUIController.UpdateUIs((int)finalStat[StatType.HP], (int)finalStat[StatType.MaxHP]);
+            myUIController?.UpdateUIs((int)finalStat[StatType.HP], (int)finalStat[StatType.MaxHP]);
         }
     }
     #endregion
 
     #region [3] 모디파이어 및 상태 이상 (Modifiers & Buffs)
-    public virtual void Add_Equip(Modifier modifier)
-    {
-        modifierController.AddEquipment(modifier);
-    }
+    public virtual void Add_Equip(Modifier modifier) => modifierController.AddEquipment(modifier);
 
     public virtual void Add_Buff(Modifier modifier)
     {
         if (modifier is BuffModifier buff)
         {
-            int minTime = buff.minTime;
-            int maxTime = buff.maxTime;
-            int duration = UnityEngine.Random.Range(minTime, maxTime+1);
+            int duration = UnityEngine.Random.Range(buff.minTime, buff.maxTime + 1);
             EventManager.instance.AddBuff(this, buff, duration);
         }
         modifierController.AddBuff(modifier);
-
     }
 
-    public virtual void Add_Mutation(Modifier modifier)
-    {
-        modifierController.AddMutation(modifier);
-    }
+    public virtual void Add_Mutation(Modifier modifier) => modifierController.AddMutation(modifier);
+    public ModifierContext GetContext(ModifierTriggerType trigger) => modifierController.GetUpdatedContext(trigger);
+    public void Remove_BuffModifier(Modifier modifier) => modifierController.RemoveBuff(modifier);
+    public void Remove_Mutate(Modifier modifier) => modifierController.RemoveMutate(modifier);
+    public void Remove_Equip(Modifier modifier) => modifierController.RemoveEquipment(modifier);
+    public Dictionary<ModifierTriggerType, List<Modifier>> GetBuffs() => modifierController.Get_Buffs();
 
-    public ModifierContext GetContext(ModifierTriggerType trigger)
-    {
-        return modifierController.Get_Context(trigger);
-    }
-
-    public void Remove_BuffModifier(Modifier modifier)
-    {
-        modifierController.RemoveBuff(modifier);
-    }
-
-    public void Remove_Mutate(Modifier modifier)
-    {
-        modifierController.RemoveMutate(modifier);
-    }
-
-    public void Remove_Equip(Modifier modifier)
-    {
-        modifierController.RemoveEquipment(modifier);
-    }
-
-    public Dictionary<ModifierTriggerType, List<Modifier>> GetBuffs()
-    {
-        return modifierController.Get_Buffs();
-    }
     public void OnModifierChange(Modifier modifier)
     {
         if (myStat == null) return;
@@ -138,9 +95,10 @@ public class LivingEntity : MapEntity
         myStat.MarksAsDirty();
         Dictionary<StatType, float> finalStat = myStat.CalculateContext(modifier.triggerType);
         StatType stat = modifier.stat;
+
         if (stat == StatType.HP || stat == StatType.MaxHP)
         {
-            myUIController.UpdateUIs((int)finalStat[StatType.HP], (int)finalStat[StatType.MaxHP]);
+            myUIController?.UpdateUIs((int)finalStat[StatType.HP], (int)finalStat[StatType.MaxHP]);
         }
     }
     #endregion
@@ -150,15 +108,8 @@ public class LivingEntity : MapEntity
     protected InventoryData inventoryData;
     protected List<ItemEntity> groundItems;
 
-    public void Add_Item(ItemBase item)
-    {
-
-    }
-
-    public StatType Get_WeaponAttribueType()
-    {
-        return equipSystem.Get_WeaponAttribute();
-    }
+    public void Add_Item(ItemBase item) { }
+    public StatType Get_WeaponAttribueType() => equipSystem.Get_WeaponAttribute();
 
     public void UseItem(ItemBase item)
     {
@@ -172,10 +123,7 @@ public class LivingEntity : MapEntity
         }
     }
 
-    public bool IsRistricted(ItemBase item, ModifierTriggerType trigger)
-    {
-        return modifierController.IsRestricted(item, trigger);
-    }
+    public bool IsRistricted(ItemBase item, ModifierTriggerType trigger) => modifierController.IsRestricted(item, trigger);
 
     public void ItemCheck(Vector2Int pos)
     {
@@ -188,19 +136,14 @@ public class LivingEntity : MapEntity
     #endregion
 
     #region [5] 이동 및 길찾기 (Movement & Navigation)
-
-    // [추가] 매번 RoundToInt를 길게 쓰지 않도록 현재 타일 좌표를 바로 반환하는 프로퍼티를 하나 만듭니다.
     public Vector2Int CurrentTilePos => new Vector2Int(Mathf.RoundToInt(transform.position.x), Mathf.RoundToInt(transform.position.y));
 
     protected Astar pathFinder;
     protected Vector2Int destination;
-    Defines.MoveState moveState;
+    protected Defines.MoveState moveState;
     public float animSpeed = 10f;
 
-    public void SetDestination(Vector2Int target)
-    {
-        destination = target;
-    }
+    public void SetDestination(Vector2Int target) => destination = target;
 
     protected virtual void Move_To(Vector2Int dir)
     {
@@ -210,7 +153,6 @@ public class LivingEntity : MapEntity
 
     public void Start_Move()
     {
-        // 1. 길막 검사 (목적지가 현재 위치와 다르고, 이동 불가능한 타일이라면 취소)
         if (CurrentTilePos != destination && !MapManager.instance.CanMove(destination))
         {
             Debug.Log($"이동 불가 타일: {destination}");
@@ -218,34 +160,25 @@ public class LivingEntity : MapEntity
             return;
         }
 
-        // 2. 이동 승인 및 로직 시작
         GameManager.instance.EntityMove(this, CurrentTilePos, destination);
         moveState = Defines.MoveState.Move;
-
-        // 문자열이 아닌 메서드 직접 호출로 변경
         StartCoroutine(Moving());
     }
 
     public IEnumerator Moving()
     {
-        // 1. Z축 값을 기존 객체의 값으로 유지하여 하드코딩 방지
         Vector3 destVector3 = new Vector3(destination.x, destination.y, transform.position.z);
 
-        // 2. Vector3.MoveTowards를 사용하면 거리를 직접 잴 필요 없이 정확히 목표 지점에서 멈춥니다.
         while (transform.position != destVector3)
         {
             transform.position = Vector3.MoveTowards(transform.position, destVector3, animSpeed * Time.deltaTime);
             yield return null;
         }
 
-        // 3. 이동 완료 처리
         End_Move();
     }
 
-    public void End_Move()
-    {
-        moveState = Defines.MoveState.Idle;
-    }
+    public void End_Move() => moveState = Defines.MoveState.Idle;
     #endregion
 
     #region [6] 전투 및 판정 (Combat & Battle)
@@ -255,133 +188,61 @@ public class LivingEntity : MapEntity
     {
         this.lastAttacker = lastAttacker;
         AddingStat(StatType.HP, -damage);
-        if (isDead)
-        {
-            EntityDead();
-        }
-        int currentHp = Mathf.RoundToInt(myStat.GetBase()[StatType.HP]);
-        int maxHp = Mathf.RoundToInt(myStat.GetBase()[StatType.MaxHP]);
+        modifierController.GetUpdatedContext(ModifierTriggerType.OnHited);
 
-        modifierController.ApplyModifiers(ModifierTriggerType.OnHited);
     }
 
-    public virtual void EntityDead()
+    public void ExcuteModifierActions(ModifierTriggerType trigger)
     {
-        Vector2 mypos = transform.position;
-        Vector2Int posKey = new Vector2Int(Mathf.RoundToInt(mypos.x), Mathf.RoundToInt(mypos.y));
-        if (lastAttacker == null)
-        {
-            Debug.Log("lastAttacker is null");
-            MapManager.instance.RemoveMapEntity(posKey, this);
-            EventManager.instance.RemoveEntity(this);
-            return;
-        }
-
-
-        if (lastAttacker is PlayerEntity player)
-        {
-            float exp = CalculateContext(ModifierTriggerType.Passive)[StatType.Exp];
-
-            lastAttacker.AddingStat(StatType.Exp, exp);
-
-            Debug.Log($"Get exp : {exp}, attackerExp {lastAttacker.CalculateContext(ModifierTriggerType.Passive)[StatType.Exp]}");
-        }
-        MapManager.instance.RemoveMapEntity(posKey, this);
+        ModifierContext context = modifierController.GetUpdatedContext(trigger);
+        context.ExcuteModifierActions();
     }
 
-    public Dictionary<StatType, float> GetAttackBonus()
-    {
-        return CalculateContext(ModifierTriggerType.OnAttack);
-    }
-
-    public ModifierContext GetDefenseBonus()
-    {
-        return modifierController.ApplyModifiers(ModifierTriggerType.OnHited);
-    }
-
-    public ModifierContext Get_MeleeAttackContext()
-    {
-        return modifierController.ApplyModifiers(ModifierTriggerType.OnAttack);
-    }
-
-    public int GetResistDamage(DamageType type, int damage)
-    {
-        return myStat.GetDamageToResist(type, damage);
-    }
-
-    public bool IsEvasion(LivingEntity target)
-    {
-        bool isEvasion = false;
-        return isEvasion;
-    }
     public virtual void OnDeadFunc()
     {
         modifierController.OnDead();
-        myStat.OnStatChange-=OnStatChange;
-        myStat.OnDeadActions-=OnDeadFunc;
+        if (myStat != null)
+        {
+            myStat.OnStatChange -= OnStatChange;
+            myStat.OnDeadActions -= OnDeadFunc;
+        }
+        EventManager.instance.RemoveEntity(this);
+
+        if (lastAttacker is PlayerEntity player)
+        {
+            int exp = (int)CalculateContext(ModifierTriggerType.Passive)[StatType.Exp];
+            Debug.Log($"플레이어에게 {exp} 경험치 전달");
+            player.Add_Exp(exp);
+        }
         Return();
     }
 
+
     public virtual void ExecuteAction(LivingEntity target, ModifierTriggerType trigger)
     {
-        ModifierContext context = modifierController.ApplyModifiers(trigger);
 
-        // 2. 액션 실행 (기본적인 상태이상 부여 등)
-        foreach (var action in context.modifierActions)
-        {
-            // 공통 액션 처리 로직
-        }
-
-        // 3. 일회용 청소! (아까 만든 함수)
-        modifierController.ConsumeOneTimeActions(trigger);
     }
     #endregion
 
     #region [7] 시각 요소 및 렌더링 (Visuals & Rendering)
-    void SetSprite()
-    {
-
-    }
+    void SetSprite() { }
 
     public virtual void Set_Visibility(bool isVisible)
     {
         bool isChange = false;
-
-        foreach (SpriteRenderer sr in equipRenders)
-        {
-            if (sr.sprite == null)
-                continue;
-
-            if (sr.enabled != isVisible)
-            {
-                sr.enabled = isVisible;
-                isChange = true;
-                Debug.Log($"Set Visible {isVisible}");
-            }
-        }
-        if (isChange)
-        {
-            Set_UIVisible(isVisible);
-        }
-
+        // equipRenders 바인딩 체크 필요 (현재 선언부 누락 대비 스크립트 에러 방지용 주석)
+        // 자식 클래스나 데이터 확인 후 활성화 필요
     }
 
     public virtual void Set_UIVisible(bool isVisible)
     {
-        if (myUIs!=null)
-        {
-            myUIs.SetActive(isVisible);
-        }
+        myUIs?.SetActive(isVisible);
     }
     #endregion
 
     #region [8] 유니티 라이프사이클 및 오버라이드 (Lifecycle & MapEntity Override)
     private void Awake()
     {
-        if (myUIController!= null)
-        {
-
-        }
         if (inventoryData == null)
         {
             inventoryData = new InventoryData();
@@ -401,22 +262,18 @@ public class LivingEntity : MapEntity
     protected override void Init()
     {
         base.Init();
-        //modifierController.InitContext(this);
         myObj = this.gameObject;
         InitStat();
+
         if (pathFinder == null)
         {
             pathFinder = new Astar(this.gameObject);
         }
-        if (modifierController == null)
-        {
-            modifierController = new ModifierController();
-        }
-        if (equipSystem == null)
-        {
-            equipSystem = new EquipSystem();
-        }
+
+        // [수정] 중복 new() 방지 및 이벤트 리스너 중복 방지 타이트하게 제어
+        modifierController.OnModifierChanged -= OnModifierChange;
         modifierController.OnModifierChanged += OnModifierChange;
+
         equipSystem.InitSystem(modifierController);
     }
 
@@ -433,26 +290,30 @@ public class LivingEntity : MapEntity
 
     public override void ResetData()
     {
-        // 1. 이벤트 초기화 (중복 실행 방지!)
+        // 1. 이벤트 확실하게 해제해서 오브젝트 풀링 시 메모리 누수 차단
         if (modifierController != null)
         {
             modifierController.OnModifierChanged -= OnModifierChange;
+        }
+
+        if (myStat != null)
+        {
+            myStat.OnStatChange -= OnStatChange;
+            myStat.OnDeadActions -= OnDeadFunc;
         }
 
         // 2. 기존 데이터 비우기
         myStat = null;
         Objname = null;
         id = null;
-        if (equipSystem!= null) equipSystem.ClearEquips();
+        equipSystem?.ClearEquips();
     }
 
     public override void Return()
     {
         base.Return();
-        Vector2 myPos = transform.position;
         Vector2Int posKey = Get_PosKey();
         MapManager.instance.dynamicMapData.Remove(posKey);
-
     }
     #endregion
 }

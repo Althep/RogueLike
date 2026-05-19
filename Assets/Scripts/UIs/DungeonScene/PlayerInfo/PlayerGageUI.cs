@@ -12,7 +12,13 @@ public class PlayerGageUI : PlayerInfoUI
     public Image fillImage;
     public override void UpdateValue()
     {
+        if(maxValue == 0)
+        {
+            Debug.Log($"{maxType} value zero");
+            return;
+        }
         myTmp.text = $"{currentType} : {currentValue} / {maxValue}";
+        fillImage.fillAmount = currentValue/maxValue;
     }
 
 
@@ -23,7 +29,7 @@ public class PlayerGageUI : PlayerInfoUI
         this.maxValue = maxValue;
         this.currentValue = currentValue;
         UpdateValue();
-        fillImage.fillAmount = currentValue/maxValue;
+        
     }
     
     public void Set_CurrentValue(StatType currentType, int currentValue)
@@ -39,4 +45,6 @@ public class PlayerGageUI : PlayerInfoUI
         this.maxValue = maxValue;
         UpdateValue();
     }
+
+
 }

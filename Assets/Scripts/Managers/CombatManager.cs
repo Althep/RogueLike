@@ -2,6 +2,7 @@ using UnityEngine;
 using System;
 using System.Collections.Generic;
 using static Defines;
+using UnityEditor.Experimental.GraphView;
 
 public class CombatInfo
 {
@@ -49,27 +50,16 @@ public class CombatManager : MonoBehaviour
         float spellDisruption = baseStat[StatType.Disruption] - (baseStat[StatType.Str] - 10) * strenthFactor;
         return spellDisruption;
     }
-    /*
-    public bool TryHit(LivingEntity attacker, LivingEntity target, out bool isCritical)
+
+    public int Combat(LivingEntity attacker, LivingEntity target, out bool isCrit)
     {
+        info.Clear();
+
+        ModifierContext attackerContext = attacker.GetContext(ModifierTriggerType.OnAttack);
+        ModifierContext targetContext = target.GetContext(ModifierTriggerType.OnHited);
+
         int roll = UnityEngine.Random.Range(1, 21);
-        Dictionary<StatType,float> attackBonus = attacker.GetAttackBonus(); // 종합스탯정보 공격자의 명중등을 참조
-        Dictionary<StatType,float> defense = target.GetDefenseBonus();           // 방어자의 종합 스탯정보
-
-        int accurancy = (int)(attackBonus[StatType.Accuracy]+(attackBonus[StatType.Dex]/3)+(attackBonus[StatType.Str]/5));
-        accurancy = Random2Avg(accurancy);
-        int ac = (int)(defense[StatType.Defense]);
-        ac = Random2Avg(ac);
-        isCritical = (roll == 20);
-        if (isCritical) return true; // 자동명중
-
-        return (roll + accurancy) >= ac;
-    }*/
-
-    public int Combat(LivingEntity attaker, LivingEntity target, out bool isCrit)
-    {
-        int roll = UnityEngine.Random.Range(1, 21);
-        isCrit = roll == 20;
+        isCrit = roll == 20;//크리티컬 계산 상시 명중
         bool isHit = false;
         if (isCrit)
         {
@@ -77,33 +67,43 @@ public class CombatManager : MonoBehaviour
         }
         else
         {
-            isHit = TryHit(attaker, target, out isCrit);
+            isHit = TryHit(attacker, target, out isCrit);
         }
         bool isMissile = false;
         int damage = 0;
         if (isHit)
         {
             info.target = target;
-            info.attacker = attaker;
+            info.attacker = attacker;
             info.isCrit = isCrit;
             info.isMissile = isMissile;
 
             if (isMissile)
             {
-                damage = Mathf.RoundToInt(CalcuateRangeAttackDamage(attaker, target, isCrit));
+                damage = Mathf.RoundToInt(CalcuateRangeAttackDamage(attacker, target, isCrit));
             }
             else
             {
-                damage = Mathf.RoundToInt(CalculateMeleeAttackDamage(attaker,target,isCrit));
+                damage = Mathf.RoundToInt(CalculateMeleeAttackDamage(attacker, target,isCrit));
             }
+
+            info.damage = damage;
+
+            attacker.ExcuteModifierActions(ModifierTriggerType.OnAttack);
+
+            GetDamage(attacker, target, damage);
+
+            target.ExcuteModifierActions(ModifierTriggerType.OnHited);
+
+            attacker.ExcuteModifierActions(ModifierTriggerType.AfterAttack);
         }
         return damage;
     }
     public bool TryHit(LivingEntity attacker, LivingEntity target, out bool isCritical)
     {
         int roll = UnityEngine.Random.Range(1, 21);
-        var atk = attacker.CalculateContext(ModifierTriggerType.OnAttack);
-        var def = target.CalculateContext(ModifierTriggerType.OnHited);
+        var atk = attacker.GetContext(ModifierTriggerType.OnAttack).stats;
+        var def = target.GetContext(ModifierTriggerType.OnAttack).stats;
         
         float levelFactor = 1f + attacker.Get_MyData().GetLevel() * 0.06f;
 
@@ -139,12 +139,11 @@ public class CombatManager : MonoBehaviour
         return isHit;
     }
 
-    public float CalculateMeleeAttackDamage(LivingEntity attacker, LivingEntity target, bool isCritical)
+    private float CalculateMeleeAttackDamage(LivingEntity attacker, LivingEntity target, bool isCritical)
     {
-
         Dictionary<StatType, float> attackerData = attacker.CalculateContext(ModifierTriggerType.OnAttack);
         Dictionary<StatType, float> targetData = target.CalculateContext(ModifierTriggerType.OnHited);
-        ModifierContext attackerContext = attacker.Get_MeleeAttackContext();
+        ModifierContext attackerContext = attacker.GetContext(ModifierTriggerType.OnAttack);
         
         DamageType damageType = attackerContext.damageType;
         
@@ -174,7 +173,7 @@ public class CombatManager : MonoBehaviour
         {
             totalDamage *= 1.5f;
         }
-        float resist = Mathf.Clamp(CalculateElementResist(target, damageType), -1f, 0.75f);
+        float resist = Mathf.Clamp(CalculateElementResist(target, damageType), -0.75f, 0.75f);
 
         // 양수 → 저항, 음수 → 약점
         totalDamage *= (1f - resist);
@@ -183,8 +182,8 @@ public class CombatManager : MonoBehaviour
         totalDamage -= targetData[StatType.DamageReduce];
         int randomDamage = Mathf.RoundToInt(UnityEngine.Random.Range(0, totalDamage));
         Debug.Log($"Random damage : {randomDamage}");
-        GetDamage(attacker,target,randomDamage);
-        return Mathf.Max(0, totalDamage);        
+
+        return randomDamage;        
     }
     public int CalculateElementResist(LivingEntity target, DamageType damageType)
     {

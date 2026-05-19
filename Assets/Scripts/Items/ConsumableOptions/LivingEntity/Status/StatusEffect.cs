@@ -51,7 +51,7 @@ public class GetDamage : StatusEffect
     {
         SetValueToString();
         base.Excute(target);
-        target.GetResistDamage(DamageType.Poison, (int)value);
+        //target.GetResistDamage(DamageType.Poison, (int)value);
     }
 
     public override void Reset()

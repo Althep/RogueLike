@@ -1,3 +1,4 @@
+using System;
 using UnityEngine;
 using UnityEngine.Tilemaps;
 using System.Collections.Generic;
@@ -11,6 +12,10 @@ public class FogOfWarManager : MonoBehaviour
 
     public List<Vector2Int> visited = new List<Vector2Int>();
 
+    private bool[,] exploredMap;
+
+    public Action OnFogUpdateComplete;
+    public Action<Vector2Int> OnFogTileChanged;
     private void Awake()
     {
         if (Instance == null)
@@ -21,6 +26,7 @@ public class FogOfWarManager : MonoBehaviour
 
     public void InitMapFog(int width, int height)
     {
+        exploredMap = new bool[width, height];
         fogTilemap.ClearAllTiles();
         for (int x = 0; x < width; x++)
         {
@@ -28,8 +34,10 @@ public class FogOfWarManager : MonoBehaviour
             {
                 Vector3Int pos = new Vector3Int(x, y, 0);
                 fogTilemap.SetTile(pos, fogTileAsset);
+                exploredMap[x, y] = false;
             }
         }
+        OnFogUpdateComplete?.Invoke();
     }
 
     public void SetVisible(Vector2Int gridPos)
@@ -37,6 +45,7 @@ public class FogOfWarManager : MonoBehaviour
         Vector3Int pos = new Vector3Int(gridPos.x, gridPos.y, 0);
         
         fogTilemap.SetTile(pos, null);
+        
     }
 
     public void SetExplored(Vector2Int gridPos)
@@ -54,6 +63,8 @@ public class FogOfWarManager : MonoBehaviour
         if (!visited.Contains(gridPos))
         {
             visited.Add(gridPos);
+            exploredMap[gridPos.x, gridPos.y] = true;
+            OnFogTileChanged?.Invoke(gridPos);
         }
         
     }
@@ -77,6 +88,7 @@ public class FogOfWarManager : MonoBehaviour
             SetExplored(visited[i]);
         }
     }
+
     public List<Vector2Int> Get_Visited()
     {
         return visited;
@@ -86,5 +98,24 @@ public class FogOfWarManager : MonoBehaviour
     {
         visited= new List<Vector2Int>();
     }
+    /// <summary>
+    /// 미니맵에서 해당 타일이 한 번이라도 탐험되었는지(회색 타일 이상인지) 확인합니다.
+    /// </summary>
+    public bool IsExplored(int x, int y)
+    {
+        if (exploredMap == null) return false;
+        if (x < 0 || x >= exploredMap.GetLength(0) || y < 0 || y >= exploredMap.GetLength(1)) return false;
 
+        return exploredMap[x, y];
+    }
+
+    /// <summary>
+    /// (선택) 미니맵에서 현재 내 시야에 몬스터가 들어와 있는지 판별할 때 사용합니다.
+    /// 타일이 null(완전히 밝혀짐)이면 현재 시야에 있는 것으로 간주합니다.
+    /// </summary>
+    public bool IsCurrentlyVisible(int x, int y)
+    {
+        TileBase tile = fogTilemap.GetTile(new Vector3Int(x, y, 0));
+        return tile == null; // 까만 타일도 아니고, 회색 타일도 아니면 현재 보고 있는 곳!
+    }
 }

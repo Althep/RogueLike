@@ -910,7 +910,7 @@ MonoBehaviour:
   strText: {fileID: 1415583231}
   dexText: {fileID: 45781065}
   intText: {fileID: 1833364187}
-  levelText: {fileID: 1136093939}
+  levelText: {fileID: 951443266}
 --- !u!114 &174652761
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -3538,7 +3538,7 @@ GameObject:
   - component: {fileID: 951443262}
   - component: {fileID: 951443265}
   - component: {fileID: 951443264}
-  - component: {fileID: 951443263}
+  - component: {fileID: 951443266}
   m_Layer: 5
   m_Name: LevelPanel
   m_TagString: Untagged
@@ -3566,21 +3566,6 @@ RectTransform:
   m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 0, y: 0}
   m_Pivot: {x: 0.5, y: 0.5}
---- !u!114 &951443263
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 951443261}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: a9c8a1a8a9550fa4d887f238f2573d3c, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::PlayerStatUI
-  statType: 0
-  value: 0
-  originalText: 
 --- !u!114 &951443264
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -3619,6 +3604,20 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 951443261}
   m_CullTransparentMesh: 1
+--- !u!114 &951443266
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 951443261}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1d676fc56e559434ba3fdd7c8fbcaefc, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::LevelUI
+  level: 0
+  levelText: {fileID: 0}
 --- !u!1001 &990914823
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -8350,7 +8349,7 @@ MonoBehaviour:
   m_PreserveAspect: 0
   m_FillCenter: 1
   m_FillMethod: 0
-  m_FillAmount: 0.543
+  m_FillAmount: 1
   m_FillClockwise: 1
   m_FillOrigin: 0
   m_UseSpriteMesh: 0

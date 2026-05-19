@@ -14,10 +14,10 @@ public class ModifierContext
     public ModifierType ModifierType;
     public DamageType damageType = DamageType.Physical;
     private static readonly StatType[] allStatTypes = Utils.Get_Enums<StatType>();
-
-    public ModifierContext()
+    private LivingEntity myEntity;
+    public ModifierContext(LivingEntity myEntity)
     {
-        
+        this.myEntity = myEntity;
     }
     public void InitContext(ModifierTriggerType trigger)
     {
@@ -38,6 +38,15 @@ public class ModifierContext
         foreach (StatType type in types)
         {
             multifle.Add(type, 0);
+        }
+    }
+    public void ExcuteModifierActions()
+    {
+        for(int i = 0; i<modifierActions.Count; i++)
+        {
+            if (myEntity == null)
+                return;
+            modifierActions[i].Excute(myEntity);
         }
     }
     public void Clear()

@@ -45,12 +45,16 @@ public class MapManager : MonoBehaviour
     int _width;
     int _height;
 
+    public Action OnMapGenerateComplete;
+    public Action<Vector2Int,Vector2Int> OnEntityPositionChanged;
+
     Vector2[] around = new Vector2[]
 {
     new Vector2(1, 1),  new Vector2(1, 0),  new Vector2(1, -1),
     new Vector2(0, 1),                      new Vector2(0, -1), // (0,0) 제외, (0,1) 추가
     new Vector2(-1, 1), new Vector2(-1, 0), new Vector2(-1, -1)
 };
+
 
 
     public void Awake()
@@ -163,6 +167,23 @@ public class MapManager : MonoBehaviour
 
         return stairEntity;
     }
+
+    public TileType GetTileType(Vector2Int posKey)
+    {
+        //미니맵 드로잉을 위한 타입 가져오기
+        if (dynamicMapData.ContainsKey(posKey))//플레이어와 몬스터 우선
+        {
+            return dynamicMapData[posKey].GetMyType();
+        }
+        else if (interactiveMapData.ContainsKey(posKey))//아이템,문 가장 처음에 있던 오브젝트 기준
+        {
+            return interactiveMapData[posKey][0].GetMyType();
+        }
+        else//환경정보 반환
+        {
+            return enviromentData[posKey];
+        }
+    }
     #endregion
 
     
@@ -181,6 +202,7 @@ public class MapManager : MonoBehaviour
         
         mapLayer.Prepare(mapSize.x, mapSize.y);
         //CalculateInitialCost();
+        OnMapGenerateComplete?.Invoke();
         Debug.Log("던전 생성 완료");
     }
     public MapMaker Get_MapMaker()
@@ -633,6 +655,8 @@ public class MapManager : MonoBehaviour
 
         mapLayer[origin.x, origin.y] = (byte)GetTypeCost(origin);
         mapLayer[dest.x, dest.y] = (byte)GetTypeCost(dest);
+
+        OnEntityPositionChanged?.Invoke(origin,dest);
     }
 
     #region AddMapData
@@ -976,39 +1000,7 @@ public class MapManager : MonoBehaviour
             Vector2Int posKey = enviromentObjs[i].Get_PosKey();
             entityDatas.Add(enviromentObjs[i].Get_SaveData());
         }
-        /*
-        for (int i = 0; i<tileEntitys.Count; i++)
-        {
-            Vector2Int posKey = tileEntitys[i].Get_PosKey();
-            int x = posKey.x;
-            int y = posKey.y;
-            entityDatas.Add(tileEntitys[i].Get_SaveData());
-        }
 
-        
-        for(int i = 0; i<wallEntitys.Count; i++)
-        {
-            Vector2Int posKey = wallEntitys[i].Get_PosKey();
-            int x = posKey.x;
-            int y = posKey.y;
-            entityDatas.Add(wallEntitys[i].Get_SaveData());
-        }
-
-        for (int i = 0; i<doors.Count; i++)
-        {
-            Vector2Int posKey = doors[i].Get_PosKey();
-            int x = posKey.x;
-            int y = posKey.y;
-            entityDatas.Add(doors[i].Get_SaveData());
-        }
-        for (int i = 0; i<stairs.Count; i++)
-        {
-            Vector2Int posKey = stairs[i].Get_PosKey();
-            int x = posKey.x;
-            int y = posKey.y;
-            entityDatas.Add(stairs[i].Get_SaveData());
-        }
-        */
         return entityDatas;
     }
 

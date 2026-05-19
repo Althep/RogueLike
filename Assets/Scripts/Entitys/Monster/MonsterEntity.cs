@@ -1,86 +1,54 @@
 using UnityEngine;
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using Cysharp.Threading.Tasks;
 using static Defines;
+
 public class MonsterEntity : LivingEntity
 {
-    //[SerializeField]protected MonsterStat monsterStat;
+    #region [1] 기본 정보 및 식별자 (Identity & Component)
+    [Header("Monster Identity")]
+    [SerializeField] private MonsterState myState;
+    private LivingEntity targetEntity; // MapEntity에서 LivingEntity로 구체화하여 전투 연동 최적화
+    private bool isInSight = false;
+    #endregion
 
-    [SerializeField] int MaxHP = 0;
-    [SerializeField] int actPoint = 0;
-    [SerializeField] MonsterState myState;
-    [SerializeField] float moveSpeed;
-    [SerializeField] float attackSpeed;
-    [SerializeField] float attackRange;
-    MonsterStateMachine myStateMachine;
+    #region [2] 상태 및 스탯 (Stats & Level)
+    [Header("Monster Stats (Runtime Cache)")]
+    [SerializeField] private int maxHP = 0;
+    [SerializeField] private int actPoint = 0;
+    [SerializeField] private float moveSpeed;
+    [SerializeField] private float attackSpeed;
+    [SerializeField] private float attackRange;
 
-    MapEntity targetEntity;
-
-    bool isInSight = false;
-    private void Awake()
-    {
-        OnAwake();
-        
-    }
-    protected override void OnAwake()
-    {
-        Init();
-    }
-    protected override void Init()
-    {
-        base.Init();
-        modifierController.SetMyEntity(this);
-        equipRenders = GetComponentsInChildren<SpriteRenderer>();
-        if(myStateMachine == null)
-        {
-            myStateMachine = new MonsterStateMachine(pathFinder, this);
-        }
-    }
     public void InitMonster()
     {
-        MaxHP = Mathf.RoundToInt(myStat.GetBaseStat(StatType.MaxHP));
+        if (myStat == null) return;
+
+        maxHP = Mathf.RoundToInt(myStat.GetBaseStat(StatType.MaxHP));
         moveSpeed = myStat.GetBaseStat(StatType.MoveSpeed);
         attackSpeed = myStat.GetBaseStat(StatType.AttackSpeed);
         attackRange = myStat.GetBaseStat(StatType.AttackRange);
-        myStat.SetBaseStat(StatType.HP,MaxHP);
 
-        myUIController.InitUIs(Mathf.RoundToInt(myStat.GetBaseStat(StatType.HP)), MaxHP, id);
+        myStat.SetBaseStat(StatType.HP, maxHP);
+        myUIController?.InitUIs(Mathf.RoundToInt(myStat.GetBaseStat(StatType.HP)), maxHP, id);
     }
-    public override void Set_Visibility(bool isVisible)
-    {
-        base.Set_Visibility(isVisible);
-        ChangeInSight(isInSight);
-    }
-    bool ChangeInSight(bool isInSight)
-    {
-        this.isInSight = isInSight;
-        return this.isInSight;
-    }
-    public override EntityStat GetMyStat()
-    {
-        return myStat;
-    }
+
+    public override EntityStat GetMyStat() => myStat;
 
     public override void SetMyStat(EntityStat stat)
     {
         base.SetMyStat(stat);
-        Debug.Log("Set My Stat!");
         InitMonster();
     }
 
-    public void Add_ActPoint(int point)
-    {
-        actPoint+=point;
-    }
-    public int Get_ActPoint()
-    {
-        return actPoint;
-    }
-    public void Set_MyState(MonsterState state)
-    {
-        myState = state;
-    }
+    public void Add_ActPoint(int point) => actPoint += point;
+    public int Get_ActPoint() => actPoint;
+    public void Set_MyState(MonsterState state) => myState = state;
+    #endregion
+
+    #region [4] 장비 및 인벤토리 (Inventory & Items)
     public MonsterEntity CopyData(MonsterEntity entity)
     {
         entity.SetMyTileType(this.GetMyType());
@@ -90,156 +58,220 @@ public class MonsterEntity : LivingEntity
         entity.myStat = this.myStat.CopyStat();
         return entity;
     }
+    #endregion
+
+    #region [5] 이동 및 길찾기 (Movement & Navigation)
+    // [핵심 보완] 부모의 Moving 코루틴이 끝날 때까지 동기화하기 위한 플래그 추가
+    private bool isMovingNow = false;
+
+    protected override void Move_To(Vector2Int dir)
+    {
+        destination = CurrentTilePos + dir;
+        Start_MonsterMove();
+    }
+
+    private void Start_MonsterMove()
+    {
+        // 부모인 LivingEntity의 Start_Move()를 바로 실행하여 
+        // 모든 몬스터가 '동시에' 걷기 시작하게 만듭니다.
+        base.Start_Move();
+    }
+
+    private IEnumerator MonsterMovingLoop()
+    {
+        isMovingNow = true;
+        yield return StartCoroutine(Moving()); // 부모의 Moving() 코루틴이 완전히 끝날 때까지 대기
+        isMovingNow = false;
+    }
+    #endregion
+
+    #region [6] 전투 및 판정 (Combat & Battle)
+    public void Set_LastAttacker(LivingEntity attacker) => lastAttacker = attacker;
 
     public void Attack()
     {
-        Debug.Log("Attack!");
+        if (targetEntity == null) return;
+
+        // [대통합!] 어제 고친 뼈대를 그대로 사용합니다. 
+        // 이제 장비의 추가타나 독 부여 액션이 이 한 줄로 전부 자동 실행됩니다.
+        //base.ExecuteAction(targetEntity, ModifierTriggerType.OnAttack);
+        bool isCrit = false;
+        CombatManager.instance.TryHit(this, targetEntity, out isCrit); //CombatManager 내부에 각 트리거 활성화한후 작동
+        Debug.Log($"{this.gameObject.name}이(가) {targetEntity.gameObject.name}을(를) 공격했습니다!");
     }
 
-    public void Set_LastAttacker(LivingEntity attacker)
-    {
-        lastAttacker = attacker;
-    }
-    // 1. UniTask를 활용하여 비동기(Async) 함수로 변경합니다.
-    public async UniTask ReadyAction()
-    {
-        if (myStateMachine == null)
-        {
-            Debug.Log($"State Machine Not Ready! {this.gameObject.name}");
-            return;
-        }
-
-        // 타겟 갱신 (이전 대화에서 조언드린 대로 LivingEntity나 MapEntity 형태로 
-        // StateMachine 내부에서 관리하고 갱신하는 것이 더 확장성에 좋습니다.)
-        targetEntity = PlayerController.instance.Get_PlayerEntity();
-
-        // 2. actPoint가 0보다 큰 동안만 반복하도록 단순화합니다.
-        while (actPoint > 0)
-        {
-            myStateMachine.UpdateMonsterState();
-
-            // 3. 행동을 덮어놓고 실행하기 전에, 무슨 행동을 할지 '비용(Cost)'만 먼저 계산합니다.
-            float requiredCost = CalculateActionCost();
-
-            // 4. 요구 비용이 유효하고(0보다 크고), 현재 AP로 감당할 수 있는지 검사합니다.
-            if (requiredCost > 0 && actPoint >= requiredCost)
-            {
-                destination = myStateMachine.Get_Destination();
-
-                // 실제 행동 실행
-                ExecuteAction();
-
-                // AP 차감
-                actPoint -= (int)requiredCost;
-
-                // 5. [매우 중요] 행동 직후 약간의 대기 시간을 주어 플레이어가 
-                // 몬스터가 이동하거나 공격하는 애니메이션을 볼 수 있게 합니다.
-                // 애니메이션 길이에 맞춰 시간(0.2f 등)을 조절하시면 됩니다.
-                if (isInSight)
-                {
-                    await UniTask.Delay(TimeSpan.FromSeconds(0.2f));
-                }
-
-            }
-            else
-            {
-                // AP가 부족하거나, 알 수 없는 상태라 비용이 0이라면 이번 턴을 강제로 종료(Break)합니다.
-                // 이렇게 하면 무한 루프를 완벽하게 차단할 수 있습니다.
-                break;
-            }
-        }
-    }
-
-    // 행동의 '비용'만 계산해서 반환하는 함수 (기존 TryAction에서 분리)
-    private float CalculateActionCost()
-    {
-        switch (myStateMachine.currentState)
-        {
-            case MonsterState.Idle:
-            case MonsterState.Sleep:
-            case MonsterState.Chase:
-            case MonsterState.Patrol:
-                Debug.Log($"MovePoint {CalculateContext(ModifierTriggerType.OnMove)[StatType.MoveSpeed]}");
-                return CalculateContext(ModifierTriggerType.OnMove)[StatType.MoveSpeed];
-
-            case MonsterState.Attack:
-                return CalculateContext(ModifierTriggerType.OnAttack)[StatType.AttackSpeed]; // OnMove가 아닌 OnAttack 트리거 확인
-
-            default:
-                return 0; // 예외 상황
-        }
-    }
-
-    // 실제 행동(로직)만 실행하는 함수 (기존 TryAction에서 분리)
-    private void ExecuteAction()
-    {
-        switch (myStateMachine.currentState)
-        {
-            case MonsterState.Idle:
-            case MonsterState.Sleep:
-            case MonsterState.Chase:
-            case MonsterState.Patrol:
-                Start_Move();
-                break;
-
-            case MonsterState.Attack:
-                Attack();
-                break;
-        }
-    }
+    // [핵심] 부모의 ExecuteAction을 오버라이드하여 몬스터 전용 연출(피격/공격 애니메이션 등) 확장 가능구간 확보
 
     public override void OnDeadFunc()
     {
         base.OnDeadFunc();
     }
-    #region Save&Load
-    public LivingEntitySaveData SaveMonster()
+    #endregion
+
+    #region [6-1] AI 턴 처리 및 AP 계산 루프 (AI Brain & UniTask Loop)
+    private MonsterStateMachine myStateMachine;
+
+    public ModifierTriggerType CalculateTrigger(MonsterState state)
     {
-        LivingEntitySaveData saveData = new LivingEntitySaveData();
-
-        saveData.id = id;//Id셋
-
-        Dictionary<StatType, float> stat = GetMyStat().GetBase();
-
-        int currentHp = Mathf.RoundToInt(stat[StatType.HP]);
-        Vector2Int posKey = Get_PosKey();
-        saveData.x = posKey.x;
-        saveData.y = posKey.y;
-        saveData.currentHp = currentHp;//hp셋
-        
-        List<BuffSaveData> buffsave = modifierController.BuffSave();
-        List<ModifierSaveData> modifierSaves = modifierController.MutetionSave();
-        saveData.buffs = buffsave;
-        saveData.modifiers = modifierSaves;
-        if(equipSystem != null)
+        ModifierTriggerType trigger = ModifierTriggerType.OnMove;
+        switch (state)
         {
-            List<ItemSaveData> saves = equipSystem.SaveEquips();
-            saveData.equipMentsData.AddRange(saves);
+            case MonsterState.Attack:
+                trigger = ModifierTriggerType.OnAttack;
+                break;
+            default:
+                trigger = ModifierTriggerType.Passive;
+                break;
         }
-        List<ItemSaveData> itemSaves = new List<ItemSaveData>();
-        if(inventoryData == null)
+        return trigger;
+    }
+
+    public override void ExecuteAction(LivingEntity target, ModifierTriggerType trigger)
+    {
+        switch (myStateMachine.currentState)
         {
-            return saveData;
+            case MonsterState.Idle:
+            case MonsterState.Sleep:
+            case MonsterState.Chase:
+            case MonsterState.Patrol:
+                Start_MonsterMove();
+                break;
+            case MonsterState.Attack:
+                Attack();
+                break;
         }
-        for(int i = 0; i<inventoryData.inventory.Length; i++)
+        base.ExecuteAction(target, trigger);
+    }
+
+    public async UniTask ReadyAction()
+    {
+        if (myStateMachine == null) return;
+
+        targetEntity = PlayerController.instance.Get_PlayerEntity() as LivingEntity;
+
+        while (actPoint > 0)
         {
-            if (inventoryData.inventory[i] ==null)
+            myStateMachine.UpdateMonsterState();
+            float requiredCost = CalculateActionCost();
+
+            if (requiredCost > 0 && actPoint >= requiredCost)
             {
-                continue;
-            }
+                destination = myStateMachine.Get_Destination();
 
-            ItemSaveData item = inventoryData.inventory[i].SaveData();
-            itemSaves.Add(item);//인벤토리 아이템 추가
+                ModifierTriggerType trigger = CalculateTrigger(myState);
+                ExecuteAction(targetEntity,trigger);
+
+                actPoint -= (int)requiredCost;
+
+                // [수정] 내부의 무거운 대기 코드를 전부 치워버립니다.
+                // 몬스터가 화면에 보일 때만 아주 미세한 연출용 갭(예: 0.01초~0.03초)만 주거나 아예 생략합니다.
+                if (isInSight)
+                {
+                    await UniTask.Yield(); // 단 1프레임만 양보해서 다음 몬스터와 '동시 실행'되도록 유도
+                }
+            }
+            else
+            {
+                break;
+            }
         }
-        return saveData;
+    }
+
+    private float CalculateActionCost()
+    {
+        if (myStat == null) return 0;
+
+        switch (myStateMachine.currentState)
+        {
+            case MonsterState.Idle:
+            case MonsterState.Sleep:
+            case MonsterState.Chase:
+            case MonsterState.Patrol:
+                // 이동 속도 비용 계산
+                return CalculateContext(ModifierTriggerType.OnMove)[StatType.MoveSpeed];
+
+            case MonsterState.Attack:
+                // 공격 속도 비용 계산 (OnAttack 트리거 사용)
+                return CalculateContext(ModifierTriggerType.OnAttack)[StatType.AttackSpeed];
+
+            default:
+                return 0;
+        }
+    }
+
+    #endregion
+
+    #region [7] 시각 요소 및 렌더링 (Visuals & Rendering)
+    public override void Set_Visibility(bool isVisible)
+    {
+        base.Set_Visibility(isVisible);
+        isInSight = isVisible; // 무의미한 함수 제거하고 다이렉트 바인딩
+    }
+    #endregion
+
+    #region [8] 유니티 라이프사이클 및 오버라이드 (Lifecycle & MapEntity Override)
+    // [수정] Awake는 부모의 것을 그대로 타게 두고, 상속받은 Init과 OnAwake만 깔끔하게 오버라이드합니다.
+    protected override void OnAwake()
+    {
+        base.OnAwake();
+    }
+
+    protected override void Init()
+    {
+        base.Init();
+
+        modifierController.SetMyEntity(this);
+        equipRenders = GetComponentsInChildren<SpriteRenderer>();
+
+        if (myStateMachine == null)
+        {
+            myStateMachine = new MonsterStateMachine(pathFinder, this);
+        }
     }
 
     public override void Return()
     {
-
-
+        MapManager.instance.RemoveMapEntity(Get_PosKey(), this);
+        MonsterManager.Instance.RemoveMonster(this);
         PoolManager.instance.Return(GetMyType(), this.gameObject);
     }
+    #endregion
 
+    #region [9] 세이브 앤 로드 (Save & Load)
+    public LivingEntitySaveData SaveMonster()
+    {
+        LivingEntitySaveData saveData = new LivingEntitySaveData { id = id };
+
+        if (GetMyStat() != null)
+        {
+            Dictionary<StatType, float> stat = GetMyStat().GetBase();
+            saveData.currentHp = Mathf.RoundToInt(stat[StatType.HP]);
+        }
+
+        Vector2Int posKey = Get_PosKey();
+        saveData.x = posKey.x;
+        saveData.y = posKey.y;
+
+        if (modifierController != null)
+        {
+            saveData.buffs = modifierController.BuffSave();
+            saveData.modifiers = modifierController.MutetionSave();
+        }
+
+        if (equipSystem != null)
+        {
+            saveData.equipMentsData.AddRange(equipSystem.SaveEquips());
+        }
+
+        if (inventoryData?.inventory != null)
+        {
+            for (int i = 0; i < inventoryData.inventory.Length; i++)
+            {
+                if (inventoryData.inventory[i] == null) continue;
+                saveData.equipMentsData.Add(inventoryData.inventory[i].SaveData());
+            }
+        }
+        return saveData;
+    }
     #endregion
 }

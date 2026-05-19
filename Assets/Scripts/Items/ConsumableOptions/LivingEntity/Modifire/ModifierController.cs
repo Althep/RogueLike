@@ -27,7 +27,7 @@ public class ModifierController
         {
             if (!contexts.ContainsKey(type))
             {
-                contexts.Add(type, new ModifierContext());
+                contexts.Add(type, new ModifierContext(myEntity));
                 contexts[type].InitContext(type);
                 dirtyFlags.Add(type, false);
             }
@@ -120,11 +120,11 @@ public class ModifierController
     // ==========================================
     // 2. 컨텍스트 획득 (패시브 지연 갱신 처리)
     // ==========================================
-    public ModifierContext Get_Context(ModifierTriggerType trigger)
+    ModifierContext Get_Context(ModifierTriggerType trigger)
     {
         if (!contexts.TryGetValue(trigger, out ModifierContext context))
         {
-            context = new ModifierContext();
+            context = new ModifierContext(myEntity);
             context.InitContext(trigger);
             contexts.Add(trigger, context);
             dirtyFlags[trigger] = true;
@@ -165,7 +165,7 @@ public class ModifierController
     // ==========================================
     // 3. 액티브 발동 (매 이벤트마다 초기화 후 장전)
     // ==========================================
-    public ModifierContext ApplyModifiers(ModifierTriggerType type)
+    public ModifierContext GetUpdatedContext(ModifierTriggerType type)
     {
         ModifierContext context = Get_Context(type);
 
@@ -187,7 +187,7 @@ public class ModifierController
         return context;
     }
 
-    // 헬퍼 함수가 '소모된 액션이 있는지'를 bool로 반환하도록 수정
+
     private bool ApplyActiveModifiersFrom(Dictionary<ModifierTriggerType, List<Modifier>> targetDict, ModifierTriggerType type)
     {
         bool removedAny = false;
@@ -214,7 +214,7 @@ public class ModifierController
         if (!hasMutation && !hasEquip)
             return false;
 
-        ModifierContext tempContext = new ModifierContext();
+        ModifierContext tempContext = new ModifierContext(myEntity);
         tempContext.InitContext(trigger);
 
         if (hasMutation) CheckRestrictionModifiers(mutateList, item, tempContext);

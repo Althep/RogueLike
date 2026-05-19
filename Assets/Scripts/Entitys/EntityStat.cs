@@ -79,7 +79,7 @@ public class EntityStat
         OnStatChange?.Invoke(type,value);
     }
 
-    public void AddBaseStat(StatType type, float value)
+    void AddBaseStat(StatType type, float value)
     {
         if (baseStat.ContainsKey(type))
             baseStat[type] += value;
@@ -100,11 +100,21 @@ public class EntityStat
         switch (type)
         {
             case StatType.HP:
-                float maxHP = GetBaseStat(StatType.MaxHP);
+                float maxHP = CalculateContext(ModifierTriggerType.Passive)[StatType.MaxHP];
                 if (baseStat[type] > maxHP) SetBaseStat(type, maxHP);
-                else if (baseStat[type] <= 0) isDead = true;
+                else if (baseStat[type] <= 0)
+                {
+                    isDead = true;
+                    OnDeadActions?.Invoke();
+                }
                 break;
-
+            case StatType.MaxHP:
+                float maxHp = CalculateContext(ModifierTriggerType.Passive)[StatType.MaxHP];
+                if (value>0)
+                {
+                    AddingStat(StatType.HP, maxHp);
+                }
+                break;
             case StatType.MP:
                 float maxMP = GetBaseStat(StatType.MaxMP);
                 if (baseStat[type] > maxMP) SetBaseStat(type, maxMP);
@@ -132,7 +142,7 @@ public class EntityStat
         }
 
         // 패시브 컨텍스트 로드
-        ModifierContext passive = modifierController.ApplyModifiers(ModifierTriggerType.Passive);
+        ModifierContext passive = modifierController.GetUpdatedContext(ModifierTriggerType.Passive);
 
         // 2. 데이터가 Dirty 상태면 패시브 캐시 재계산
         if (isDirty)
@@ -152,7 +162,7 @@ public class EntityStat
         if (trigger == ModifierTriggerType.Passive) return finalStat;
 
         // 4. 액티브 트리거(공격 등) 요청일 경우 별도 캐시 사용
-        ModifierContext context = modifierController.ApplyModifiers(trigger);
+        ModifierContext context = modifierController.GetUpdatedContext(trigger);
         foreach (var key in baseStat.Keys)
         {
             float baseVal = baseStat[key];

@@ -119,7 +119,7 @@ public class MonsterStateMachine
 
     public bool CheckAttackSpeed()
     {
-        var stat = myEntity.CalculateContext(ModifierTriggerType.Passive);
+        var stat = myEntity.CalculateContext(ModifierTriggerType.OnAttack);
         return myEntity.Get_ActPoint() >= stat[StatType.AttackSpeed];
     }
 
@@ -133,16 +133,23 @@ public class MonsterStateMachine
     public bool IsAttackable(ITargetable target)
     {
         if (target == null || !target.IsValid) return false;
-
-        // 패턴 매칭: 타겟이 LocationTarget(단순 허공 좌표)라면 공격할 수 없음
         if (!(target is MapEntity)) return false;
 
         float attackRange = myEntity.CalculateContext(ModifierTriggerType.Passive)[StatType.AttackRange];
 
-        // GridPos 기반 거리 계산 (루트 연산 없이 빠름)
-        float distSqr = ((Vector2)myEntity.GridPos - (Vector2)target.GridPos).sqrMagnitude;
+        // [상세 설명]
+        // 1. x축으로 몇 칸 떨어져 있는지 절댓값으로 구합니다.
+        float dx = Mathf.Abs(myEntity.GridPos.x - target.GridPos.x);
 
-        return distSqr < (attackRange * attackRange) && MapManager.instance.CheckLineOfSight(myEntity.GridPos, target.GridPos);
+        // 2. y축으로 몇 칸 떨어져 있는지 절댓값으로 구합니다.
+        float dy = Mathf.Abs(myEntity.GridPos.y - target.GridPos.y);
+
+        // 3. 체비쇼프 거리 공식: dx와 dy 중 더 '큰' 값을 진짜 거리로 취급합니다.
+        // 이렇게 하면 대각선(dx=1, dy=1)이어도 거리가 2가 아닌 1로 계산됩니다.
+        float maxDist = Mathf.Max(dx, dy);
+
+        // 4. 이제 거듭제곱(sqrMagnitude) 연산 없이 깔끔하게 사거리와 비교합니다.
+        return maxDist <= attackRange && MapManager.instance.CheckLineOfSight(myEntity.GridPos, target.GridPos);
     }
 
     public bool IsInVision(ITargetable target)
