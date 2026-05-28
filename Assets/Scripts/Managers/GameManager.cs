@@ -236,14 +236,7 @@ public class GameManager : MonoBehaviour
     {
         mapManager.EntityMove(entity,origin,target);
     }
-    public bool CanMove(Vector2Int dir)
-    {
-        if (!mapManager.CanMove(dir))
-        {
-            Debug.Log("Can't");
-        }
-        return mapManager.CanMove(dir);
-    }
+
     #endregion
     #region UIs
     public void Bind_UI_PopUp(UI_PopUpObj bindTarget)

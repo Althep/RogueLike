@@ -7,24 +7,26 @@ public class MonsterStateMachine
     Dictionary<MonsterState, MonsterBaseState> states = new Dictionary<MonsterState, MonsterBaseState>();
 
     Astar pathFindger;
+    GBFS GBFS;
     MonsterEntity myEntity;
     public MonsterState currentState { get; private set; }
     MonsterBaseState currentMachine;
-
+    public Vector2Int lastPos;
     // ?? [핵심 변경 1] MapEntity가 아닌 ITargetable로 타겟을 관리합니다.
     public ITargetable currentTarget { get; private set; }
 
     // 이벤트로 들은 소리 위치를 기억하는 가짜 타겟
     private LocationTarget heardTarget = null;
 
-    public MonsterStateMachine(Astar astar, MonsterEntity myEntity)
+    public MonsterStateMachine(Astar astar, GBFS gbfs,MonsterEntity myEntity)
     {
         pathFindger = astar;
+        GBFS = gbfs;
         states.Add(MonsterState.Idle, new MonsterState_Idle(astar));
         states.Add(MonsterState.Sleep, new MonsterState_Sleep(astar));
-        states.Add(MonsterState.Patrol, new MonsterState_Patrol(astar));
-        states.Add(MonsterState.Attack, new MonsterState_Attack(astar));
-        states.Add(MonsterState.Chase, new MonsterState_Chase(astar));
+        states.Add(MonsterState.Patrol, new MonsterState_Patrol(GBFS));
+        states.Add(MonsterState.Attack, new MonsterState_Attack(GBFS));
+        states.Add(MonsterState.Chase, new MonsterState_Chase(GBFS));
         this.myEntity = myEntity;
     }
 
@@ -33,10 +35,9 @@ public class MonsterStateMachine
         ChangeState(MonsterState.Idle);
     }
 
-    // [추가] 외부(SoundEventManager 등)에서 소리를 들었을 때 이 함수를 호출해 줍니다.
     public void OnHearSound(Vector2Int soundPos)
     {
-        heardTarget = new LocationTarget(soundPos); // 순회 없이 좌표만 생성해서 기억!
+        heardTarget = new LocationTarget(soundPos);
     }
 
     public Vector2Int Get_Destination()
@@ -45,7 +46,10 @@ public class MonsterStateMachine
         if (currentTarget == null || !currentTarget.IsValid) return myEntity.GridPos;
         return states[currentState].Get_Destination(myEntity.GridPos, currentTarget.GridPos);
     }
-
+    public List<Node> Get_Path()
+    {
+        return states[currentState].Get_Path();
+    }
     // ?? [핵심 변경 2] 인자로 타겟을 받지 않고, 내부에서 우선순위에 따라 타겟을 결정합니다.
     public void UpdateMonsterState()
     {
@@ -57,8 +61,10 @@ public class MonsterStateMachine
         if (player != null && IsInVision(player))
         {
             currentTarget = player; // 시야에 있으면 진짜 플레이어로 타겟 재할당 (캐스팅 불필요)
+            lastPos = player.Get_PosKey();
             heardTarget = null;     // 플레이어를 발견했으므로 소리 기억은 지움
         }
+
         else if (heardTarget != null)
         {
             currentTarget = heardTarget; // 안 보이지만 소리를 들었다면 가짜 타겟(좌표)을 할당
@@ -125,7 +131,7 @@ public class MonsterStateMachine
 
     public bool CheckMoveSpeed()
     {
-        var stat = myEntity.CalculateContext(ModifierTriggerType.Passive);
+        var stat = myEntity.CalculateContext(ModifierTriggerType.OnMove);
         return myEntity.Get_ActPoint() >= stat[StatType.MoveSpeed];
     }
 
@@ -135,21 +141,28 @@ public class MonsterStateMachine
         if (target == null || !target.IsValid) return false;
         if (!(target is MapEntity)) return false;
 
-        float attackRange = myEntity.CalculateContext(ModifierTriggerType.Passive)[StatType.AttackRange];
+        if (target is MapEntity targetEntity)
+        {
+            float attackRange = myEntity.CalculateContext(ModifierTriggerType.Passive)[StatType.AttackRange];
 
-        // [상세 설명]
-        // 1. x축으로 몇 칸 떨어져 있는지 절댓값으로 구합니다.
-        float dx = Mathf.Abs(myEntity.GridPos.x - target.GridPos.x);
+            Vector2Int gridPos = myEntity.Get_PosKey();
+            Vector2Int targetPos = targetEntity.Get_PosKey();
+            // [상세 설명]
+            // 1. x축으로 몇 칸 떨어져 있는지 절댓값으로 구합니다.
+            float dx = Mathf.Abs(gridPos.x - target.GridPos.x);
 
-        // 2. y축으로 몇 칸 떨어져 있는지 절댓값으로 구합니다.
-        float dy = Mathf.Abs(myEntity.GridPos.y - target.GridPos.y);
+            // 2. y축으로 몇 칸 떨어져 있는지 절댓값으로 구합니다.
+            float dy = Mathf.Abs(gridPos.y - target.GridPos.y);
 
-        // 3. 체비쇼프 거리 공식: dx와 dy 중 더 '큰' 값을 진짜 거리로 취급합니다.
-        // 이렇게 하면 대각선(dx=1, dy=1)이어도 거리가 2가 아닌 1로 계산됩니다.
-        float maxDist = Mathf.Max(dx, dy);
+            // 3. 체비쇼프 거리 공식: dx와 dy 중 더 '큰' 값을 진짜 거리로 취급합니다.
+            // 이렇게 하면 대각선(dx=1, dy=1)이어도 거리가 2가 아닌 1로 계산됩니다.
+            float maxDist = Mathf.Max(dx, dy);
 
-        // 4. 이제 거듭제곱(sqrMagnitude) 연산 없이 깔끔하게 사거리와 비교합니다.
-        return maxDist <= attackRange && MapManager.instance.CheckLineOfSight(myEntity.GridPos, target.GridPos);
+            // 4. 이제 거듭제곱(sqrMagnitude) 연산 없이 깔끔하게 사거리와 비교합니다.
+            return maxDist <= attackRange && MapManager.instance.CheckLineOfSight(myEntity.GridPos, target.GridPos);
+
+        }
+        return false;
     }
 
     public bool IsInVision(ITargetable target)
@@ -157,11 +170,18 @@ public class MonsterStateMachine
         if (target == null || !target.IsValid) return false;
 
         float vision = myEntity.CalculateContext(ModifierTriggerType.Passive)[StatType.Vision];
+        if(target is MapEntity mapEntity)
+        {
+            Vector2Int myPos = myEntity.Get_PosKey();
+            Vector2Int targetPos = mapEntity.Get_PosKey();
+            float dx = Mathf.Abs(myPos.x-targetPos.x);
+            float dy = MathF.Abs(myPos.y-targetPos.y);
 
-        // GridPos 기반 거리 계산
-        float distSqr = ((Vector2)myEntity.GridPos - (Vector2)target.GridPos).sqrMagnitude;
+            float maxDist = MathF.Max(dx, dy);
 
-        return distSqr < (vision * vision) && MapManager.instance.CheckLineOfSight(myEntity.GridPos, target.GridPos);
+            return maxDist <= vision && MapManager.instance.CheckLineOfSight(myPos,targetPos);
+        }
+        return false;
     }
 
     public bool IsSleep()

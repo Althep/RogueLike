@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using static Defines;
 using Cysharp.Threading.Tasks;
+using UnityEditor;
 
 public class MapManager : MonoBehaviour
 {
@@ -41,6 +42,7 @@ public class MapManager : MonoBehaviour
 
     MonsterManager monsterManager;
     ItemManager itemManager;
+
     public MapLayer mapLayer;
     int _width;
     int _height;
@@ -65,6 +67,7 @@ public class MapManager : MonoBehaviour
     {
 
     }
+
     private void Init()
     {
         if (monsterManager == null)
@@ -201,7 +204,7 @@ public class MapManager : MonoBehaviour
         LeftDataUpdate();
         
         mapLayer.Prepare(mapSize.x, mapSize.y);
-        //CalculateInitialCost();
+        CalculateInitialCost();
         OnMapGenerateComplete?.Invoke();
         Debug.Log("던전 생성 완료");
     }
@@ -582,7 +585,7 @@ public class MapManager : MonoBehaviour
 
         return canInteract;
     }
-    public bool CanMove(Vector2Int dest)
+    public bool CanMove(Vector2Int dest,LivingEntity entity)
     {
         if (enviromentData.TryGetValue(dest, out var tileType))
         {
@@ -597,8 +600,12 @@ public class MapManager : MonoBehaviour
 
         if (dynamicMapData.ContainsKey(dest))
         {
-            Debug.Log("다이나믹 엔티티 포함!");
-            return false;
+            if (dynamicMapData[dest]!=entity)
+            {
+                Debug.Log("다이나믹 엔티티 포함!");
+                return false;
+            }
+            return true;
         }
 
         if (interactiveMapData.TryGetValue(dest, out List<MapEntity> entities))
@@ -842,60 +849,26 @@ public class MapManager : MonoBehaviour
             for (int i = 0; i < entities.Count; i++)
             {
                 if (entities[i] is DoorEntity door && !door.IsOpen())
-                    return 20;
+                    return 2;
             }
         }
-        TileType type = enviromentData[pos];
-        switch (type)
+        if (enviromentData.TryGetValue(pos, out TileType type))
         {
-            case TileType.Wall: return 255;
-            case TileType.ShallowWater: return 2;
-            case TileType.DeepWater: return 255;
+            switch (type)
+            {
+                case TileType.Wall: return 255;
+                case TileType.ShallowWater: return 2;
+                case TileType.DeepWater: return 255;
+            }
         }
         return 1;
     }
     public void CalculateInitialCost()
     {
-        foreach (var kvp in enviromentData)
+        for(int i = 0; i<mapLayer.Get_Length();i++)
         {
-            Vector2Int pos = kvp.Key;
-            TileType type = kvp.Value;
-
-            if (pos.x<0||pos.x>=_width||pos.y<0||pos.y<_height) continue;
-
-            byte cost = 1;
-            if (type == TileType.Wall) cost = 255;
-            else if (type == TileType.ShallowWater) cost =2;
-            mapLayer[pos.x, pos.y] = cost;
-        }
-
-        foreach (var kvp in interactiveMapData)
-        {
-            Vector2Int pos = kvp.Key;
-            if (pos.x < 0 || pos.x >= _width || pos.y < 0 || pos.y >= _height) continue;
-
-            byte cost = mapLayer[pos.x, pos.y];
-            var entities = kvp.Value;
-            for (int i = 0; i < entities.Count; i++)
-            {
-                if (entities[i] is DoorEntity door && !door.IsOpen())
-                {
-                    cost = 255;
-                    break;
-                }
-            }
-            mapLayer[pos.x, pos.y] = cost;
-        }
-
-        foreach (var kvp in dynamicMapData)
-        {
-            Vector2Int pos = kvp.Key;
-            byte cost = 255;
-
-            if (pos.x<0||pos.x>=_width||pos.y<0||pos.y<_height) continue;
-            if (kvp.Value is PlayerEntity) cost = 10;
-
-            mapLayer[pos.x, pos.y] = cost;
+            Vector2Int pos = Utils.IntToMapPos(i, _width, _height);
+            mapLayer[pos.x, pos.y] = (byte)GetTypeCost(pos);
         }
     }
     #endregion
@@ -1036,5 +1009,50 @@ public class MapManager : MonoBehaviour
         }
         Debug.Log("TileData NotContained");
     }
+    #endregion
+    #region Debugs
+    /*
+    private void OnDrawGizmos() //맵 코스트 디버그
+    {
+        if(!Application.isPlaying || !mapLayer.IsEmpty())
+        {
+
+            for(int x = 0; x<_width; x++)
+            {
+                for(int y = 0; y<_height; y++)
+                {
+                    int cost = mapLayer[x, y];
+
+                    Vector3 worldPos = new Vector3(x, y, 0);
+
+                    if (cost>200)
+                    {
+                        Gizmos.color = new Color(1f, 0, 0, 0.4f);//이동 불가 지형 반투명 빨간색
+                    }
+                    else if (cost > 1) // 코스트가 높은 구역
+                    {
+                        Gizmos.color = new Color(1f, 0.9f, 0f, 0.4f); // 반투명 노란색
+                    }
+                    else // 이동 가능한 빈 타일 (기본 코스트 1이라고 가정)
+                    {
+                        Gizmos.color = new Color(0f, 1f, 0f, 0.2f); // 반투명 초록색
+                    }
+
+                    Gizmos.DrawCube(worldPos, new Vector3(0.5f, 0.5f, 0.5f));
+#if UNITY_EDITOR
+                    // 2. 타일 위에 실제 코스트 숫자 텍스트 띄우기 (매우 유용함)
+                    GUIStyle style = new GUIStyle();
+                    style.normal.textColor = Color.white;
+                    style.alignment = TextAnchor.MiddleCenter;
+
+                    // Scene 뷰에 텍스트 라벨 표시
+                    Handles.Label(worldPos, cost.ToString(), style);
+#endif
+                }
+            }
+
+
+        }
+    }*/
     #endregion
 }

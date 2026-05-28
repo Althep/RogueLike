@@ -2,7 +2,7 @@ using UnityEngine;
 
 public class MonsterState_Attack : MonsterBaseState
 {
-    public MonsterState_Attack(Astar pathFinder) : base(pathFinder)
+    public MonsterState_Attack(GBFS pathFinder) : base(pathFinder)
     {
         this.pathFinder = pathFinder;
     }

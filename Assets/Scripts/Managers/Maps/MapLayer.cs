@@ -1,5 +1,5 @@
 using System;
-
+using UnityEngine;
 public class MapLayer
 {
     private byte[] _data;
@@ -37,4 +37,19 @@ public class MapLayer
                 _data[y * _width + x] = value;
         }
     }
+
+    public bool IsEmpty()
+    {
+        bool isEmpty = true;
+        if (_data.Length>0)
+        {
+            isEmpty = false;
+        }
+        return isEmpty;
+    }
+    public int Get_Length()
+    {
+        return _data.Length;
+    }
+    
 }

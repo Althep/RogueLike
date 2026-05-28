@@ -13,13 +13,15 @@ public class PlayerEntity : LivingEntity
 
     [Header("State Flags")]
     public bool actable { get; private set; } = true;
+
+    
     #endregion
 
     #region [2] 상태 및 스탯 (Stats & Level)
     public event Action<StatType> OnStatChangedUI;
     public event Action OnLevelUp;
     public event Action OnAddExp;
-
+    public Action OnVisionUpdated;
     protected override void InitStat()
     {
         base.InitStat();
@@ -298,7 +300,7 @@ public class PlayerEntity : LivingEntity
     #region [7] 시각 요소 및 시야 처리 (Visuals & FoV)
     [Header("FoV Cache")]
     private List<Vector2Int> previousView = new List<Vector2Int>();
-
+    public Action<Vector2Int> OnPlayerVisionUpdate;
     public void UpdateFoV(Vector2Int playerPos, int viewRadius)
     {
         foreach (Vector2Int pos in previousView)
@@ -307,6 +309,7 @@ public class PlayerEntity : LivingEntity
 
             MonsterEntity entity = mapManager.GetMonsterEntity(pos);
             if (entity != null) entity.Set_Visibility(false);
+            
         }
 
         List<Vector2Int> currentView = new List<Vector2Int>();
@@ -321,6 +324,8 @@ public class PlayerEntity : LivingEntity
 
                 MonsterEntity entity = mapManager.GetMonsterEntity(targetPos);
                 if (entity != null) entity.Set_Visibility(true);
+
+                OnPlayerVisionUpdate?.Invoke(targetPos);
             }
         }
 

@@ -3,7 +3,7 @@ using System;
 using System.Collections.Generic;
 public class MonsterState_Chase : MonsterBaseState
 {
-    public MonsterState_Chase(Astar pathFinder) : base(pathFinder)
+    public MonsterState_Chase(GBFS pathFinder) : base(pathFinder)
     {
         this.pathFinder = pathFinder;
     }

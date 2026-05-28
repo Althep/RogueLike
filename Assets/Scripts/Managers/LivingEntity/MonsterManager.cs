@@ -180,6 +180,33 @@ public class MonsterManager : MonoBehaviour
         }
         return faction;
     }
+
+    List<MonsterEntity> Get_HeardMonsters(PlayerEntity player)
+    {
+        Vector2Int playerPos = player.Get_PosKey();
+        float sound = player.CalculateContext(Defines.ModifierTriggerType.OnMove)[Defines.StatType.Sound];
+        List<MonsterEntity> heardMonsters = monsters
+            .Where(m => 
+            {
+            Vector2Int monsterPos = m.Get_PosKey();
+            float dx = Mathf.Abs(monsterPos.x - playerPos.x);
+            float dy = Mathf.Abs(monsterPos.y - playerPos.y);
+            float maxDist = Mathf.Max(dx, dy);
+            return maxDist < sound;
+        }).ToList();
+
+        return heardMonsters;
+    }
+    public void Set_HeardMonstersTarget()
+    {
+        PlayerEntity player = GameManager.instance.Get_PlayerEntity();
+        List<MonsterEntity> hearedMonsters = Get_HeardMonsters(player);
+        Vector2Int playerPos = player.Get_PosKey();
+        for(int i = 0; i<hearedMonsters.Count; i++)
+        {
+            hearedMonsters[i].OnHeardTarget(playerPos);
+        }
+    }
     public List<MonsterSpawnDataBundle> GetMonsterSpawnBundles()
     {
         List<MonsterSpawnDataBundle> bundleList = new List<MonsterSpawnDataBundle>();
@@ -243,7 +270,8 @@ public class MonsterManager : MonoBehaviour
     public async UniTask OnTurnEnd(float actPoint)
     {
         int ap = (int)actPoint;
-        for(int i = 0; i <monsters.Count; i++)
+        Set_HeardMonstersTarget();
+        for (int i = 0; i <monsters.Count; i++)
         {
             monsters[i].Add_ActPoint(ap);
             await monsters[i].ReadyAction();

@@ -4,11 +4,13 @@ using static Defines;
 
 public class MinimapManager : MonoBehaviour
 {
+    PlayerEntity playerEntity;
     public RawImage minimapImage; // UI 캔버스에 올려둔 빈 RawImage
     private Texture2D mapTexture;
 
     private int mapWidth = 50;  // 맵 가로 사이즈
     private int mapHeight = 50; // 맵 세로 사이즈
+
 
     private void OnEnable()
     {
@@ -22,8 +24,16 @@ public class MinimapManager : MonoBehaviour
         if (FogOfWarManager.Instance != null)
         {
             FogOfWarManager.Instance.OnFogUpdateComplete += ApplyTexture;   // 다 찍고 한 번에 반영
-            FogOfWarManager.Instance.OnFogTileChanged += UpdateSinglePixel; // 점만 찍기 (Apply 없음)
+            //FogOfWarManager.Instance.OnFogTileChanged += UpdateSinglePixel; // 점만 찍기 (Apply 없음)
         }
+
+        if(playerEntity == null)
+        {
+            playerEntity = GameManager.instance.Get_PlayerEntity();
+            playerEntity.OnPlayerVisionUpdate+=UpdateSinglePixel;
+        }
+
+        
     }
 
     private void OnDisable()

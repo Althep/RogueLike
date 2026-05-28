@@ -281,5 +281,12 @@ public static class Utils
         }
     }
 
-    
+    public static Vector2Int IntToMapPos(int value, int width, int height)
+    {
+        int x = value % width;
+        int y = value / width; 
+
+        return new Vector2Int(x, y);
+    }
+
 }

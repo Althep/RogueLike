@@ -139,6 +139,7 @@ public class LivingEntity : MapEntity
     public Vector2Int CurrentTilePos => new Vector2Int(Mathf.RoundToInt(transform.position.x), Mathf.RoundToInt(transform.position.y));
 
     protected Astar pathFinder;
+    protected GBFS GBFS;
     protected Vector2Int destination;
     protected Defines.MoveState moveState;
     public float animSpeed = 10f;
@@ -153,7 +154,7 @@ public class LivingEntity : MapEntity
 
     public void Start_Move()
     {
-        if (CurrentTilePos != destination && !MapManager.instance.CanMove(destination))
+        if (CurrentTilePos != destination && !MapManager.instance.CanMove(destination,this))
         {
             Debug.Log($"이동 불가 타일: {destination}");
             moveState = Defines.MoveState.Idle;
@@ -238,6 +239,8 @@ public class LivingEntity : MapEntity
     {
         myUIs?.SetActive(isVisible);
     }
+
+    
     #endregion
 
     #region [8] 유니티 라이프사이클 및 오버라이드 (Lifecycle & MapEntity Override)
@@ -267,7 +270,12 @@ public class LivingEntity : MapEntity
 
         if (pathFinder == null)
         {
-            pathFinder = new Astar(this.gameObject);
+            pathFinder = new Astar(this);
+            
+        }
+        if(GBFS == null)
+        {
+            GBFS = new GBFS(this);
         }
 
         // [수정] 중복 new() 방지 및 이벤트 리스너 중복 방지 타이트하게 제어
