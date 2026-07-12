@@ -1,11 +1,14 @@
 using UnityEngine;
 using Cysharp.Threading.Tasks;
+using System;
+using System.Collections.Generic;
 using static Defines;
 
 public class ModifierFactory
 {
     private ModifierDataManager modifierDataManager;
     public static ModifierFactory _instance;
+    ModifierPooler modifierPooler;
 
     // 생성자
     private ModifierFactory() { }
@@ -18,25 +21,77 @@ public class ModifierFactory
             _instance = new ModifierFactory();
             // 팩토리가 생성될 때 데이터 매니저도 확실하게 세팅하고 대기합니다.
             _instance.modifierDataManager = await ModifierDataManager.CreateAsync();
+            
         }
         return _instance;
     }
 
+    public List<Modifier> CreateNewInstance(string id)
+    {
+        List<ModifierData> modifierDatas = modifierDataManager.GetModifierDataList(id);
+        List<Modifier> mods = new();
+        foreach(var modData in modifierDatas)
+        {
+            ModifierType modType = modData.modifierType;
+            Modifier newMod = CreateNewModifierToType(modType);
+            mods.Add(newMod);
+        }
+        return mods;
+    }
+
+    private Modifier CreateNewModifierToType(ModifierType type)
+    {
+        Modifier newMod = null;
+        switch (type)
+        {
+            case ModifierType.StatModifier:
+                newMod = new StatModifier();
+                break;
+            case ModifierType.ItemModifier:
+                newMod = new ItemModifier();
+                break;
+            case ModifierType.BuffModifier:
+                newMod = new BuffModifier();
+                break;
+            case ModifierType.DamageModifier:
+                newMod = new DamageModifier();
+                break;
+            case ModifierType.ActionModifier:
+                newMod = new ActionModifier();
+                break;
+            default:
+                break;
+        }
+        return newMod;
+    }
     // 풀러(Pooler)가 호출할 단일 진입점 (이전 대화에서 풀러가 호출하던 이름과 통일)
     public Modifier CreateNewInstance(string id)
     {
         // Init().Forget() 제거: 팩토리는 이미 생성 시점에 초기화가 끝났어야 정상입니다.
-
+        
         Modifier targetTemplate = modifierDataManager.GetModifier(id);
         if (targetTemplate == null)
         {
             Debug.LogError($"[ModifierFactory] {id}에 해당하는 원본 데이터를 찾을 수 없습니다!");
             return null;
         }
-
+        if(modifierPooler == null)
+        {
+            modifierPooler = GameManager.instance.Get_ModifierManager().GetModifierPooler();
+        }
         return GetCopyModifier(targetTemplate);
     }
 
+    public ModifierOption CreatNewOption(string id)
+    {
+        ModifierOption modifierOption = modifierDataManager.Get_ModifierOptions(id);
+        if(modifierOption == null)
+        {
+            Debug.Log($"ModifierFactory {id}에 해당하는 원본 데이터 찾을 수 없음 ");
+            return null;
+        }
+        return GetCopyModifierOption(modifierOption);
+    }
     // 내부적으로 객체를 찍어내고 복사하는 로직
     private Modifier GetCopyModifier(Modifier template)
     {
@@ -81,5 +136,17 @@ public class ModifierFactory
                 Debug.LogError($"[ModifierFactory] 정의되지 않은 ModifierType입니다: {template.modifierType}");
                 return null;
         }
+    }
+
+    private ModifierOption GetCopyModifierOption(ModifierOption tamplate)
+    {
+        ModifierOption newOption = tamplate.Copy();
+        List<string> modIds = modifierDataManager.Get_ModifierOptionKeys(newOption.optionKey);
+        foreach(var id in modIds)
+        {
+            Modifier newMod = modifierPooler.GetModifier(id);
+            newOption.myMods.Add(newMod);
+        }
+        return tamplate.Copy();
     }
 }

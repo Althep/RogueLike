@@ -73,19 +73,29 @@ public class LivingEntity : MapEntity
 
     public virtual void Add_Buff(Modifier modifier)
     {
+
+
         if (modifier is BuffModifier buff)
         {
             int duration = UnityEngine.Random.Range(buff.minTime, buff.maxTime + 1);
             EventManager.instance.AddBuff(this, buff, duration);
         }
         modifierController.AddBuff(modifier);
+
     }
 
-    public virtual void Add_Mutation(Modifier modifier) => modifierController.AddMutation(modifier);
+    public virtual void Add_Mutation(ModifierOption modifier) => modifierController.AddMutation(modifier);
     public ModifierContext GetContext(ModifierTriggerType trigger) => modifierController.GetUpdatedContext(trigger);
+
     public void Remove_BuffModifier(Modifier modifier) => modifierController.RemoveBuff(modifier);
+    public void Remove_BuffModifier(ModifierOption modifier) => modifierController.RemoveBuff(modifier);
+
+    public void Remove_Mutate(ModifierOption modifier) => modifierController.RemoveMutate(modifier);
     public void Remove_Mutate(Modifier modifier) => modifierController.RemoveMutate(modifier);
+
+    public void Remove_Equip(ModifierOption modifier) => modifierController.RemoveEquipment(modifier);
     public void Remove_Equip(Modifier modifier) => modifierController.RemoveEquipment(modifier);
+
     public Dictionary<ModifierTriggerType, List<Modifier>> GetBuffs() => modifierController.Get_Buffs();
 
     public void OnModifierChange(Modifier modifier)
@@ -154,7 +164,7 @@ public class LivingEntity : MapEntity
 
     public void Start_Move()
     {
-        if (CurrentTilePos != destination && !MapManager.instance.CanMove(destination,this))
+        if (CurrentTilePos != destination && !MapManager.instance.CanMove(destination, this))
         {
             Debug.Log($"이동 불가 타일: {destination}");
             moveState = Defines.MoveState.Idle;
@@ -240,7 +250,7 @@ public class LivingEntity : MapEntity
         myUIs?.SetActive(isVisible);
     }
 
-    
+
     #endregion
 
     #region [8] 유니티 라이프사이클 및 오버라이드 (Lifecycle & MapEntity Override)
@@ -271,9 +281,9 @@ public class LivingEntity : MapEntity
         if (pathFinder == null)
         {
             pathFinder = new Astar(this);
-            
+
         }
-        if(GBFS == null)
+        if (GBFS == null)
         {
             GBFS = new GBFS(this);
         }
@@ -287,8 +297,8 @@ public class LivingEntity : MapEntity
 
     public void Set_RaceData(RaceData race)
     {
-        List<Modifier> modifiers = race.modifiers;
-        foreach (Modifier modi in modifiers)
+        List<ModifierOption> modifiers = race.modifiers;
+        foreach (ModifierOption modi in modifiers)
         {
             modifierController.AddMutation(modi);
         }

@@ -14,7 +14,7 @@ public class RaceData
 
     public List<string> startItems = new List<string>();
 
-    public List<Modifier> modifiers = new List<Modifier>();
+    public List<ModifierOption> modifiers = new List<ModifierOption>();
 
 
 

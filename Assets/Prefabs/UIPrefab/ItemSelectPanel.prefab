@@ -164,6 +164,7 @@ MonoBehaviour:
   itemKeys: []
   myContents: {fileID: 5902816884786454203}
   selectViewObj: {fileID: 3177471646891411889}
+  _parent: {fileID: 0}
 --- !u!1 &2248233583210112428
 GameObject:
   m_ObjectHideFlags: 0

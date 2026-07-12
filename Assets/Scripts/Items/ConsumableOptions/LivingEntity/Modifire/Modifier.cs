@@ -23,6 +23,10 @@ public class Modifier : IPoolScript
     {
         poolType = type;
     }
+    public void SetData(ModifierData modData)
+    {
+
+    }
     public virtual void Copy(Modifier newOne)
     {
         newOne.poolType = this.poolType;
@@ -150,6 +154,7 @@ public class BuffModifier : Modifier
     {
 
     }
+    
     public override void Copy(Modifier newOne)
     {
         base.Copy(newOne);

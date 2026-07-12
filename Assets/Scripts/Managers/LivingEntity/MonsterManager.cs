@@ -355,11 +355,15 @@ public class MonsterManager : MonoBehaviour
                 }
                 if (savedData[i].modifiers!=null)
                 {
-                    for(int j = 0; j<savedData[i].modifiers.Count; j++)
+                    foreach(var option in savedData[i].modifiers)
                     {
-                        ModifierSaveData modifierData = savedData[i].modifiers[j];
-                        Modifier modi = ModifierManager.instance.Get_Modifier(modifierData.modifierId);
-                        monsterEntity.Add_Mutation(modi);
+                        ModifierOption newOption = ModifierManager.instance.Get_ModifierOption(option.optionKey);
+                        foreach(ModifierSaveData mod in option.modifiers)
+                        {
+                            Modifier modi = ModifierManager.instance.Get_Modifier(mod.modifierId);
+                            newOption.AddNotIncludeMod(modi);
+                        }
+                        monsterEntity.Add_Mutation(newOption);
                     }
                 }
 

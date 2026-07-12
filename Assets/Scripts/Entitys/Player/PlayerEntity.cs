@@ -14,7 +14,7 @@ public class PlayerEntity : LivingEntity
     [Header("State Flags")]
     public bool actable { get; private set; } = true;
 
-    
+
     #endregion
 
     #region [2] 상태 및 스탯 (Stats & Level)
@@ -63,30 +63,50 @@ public class PlayerEntity : LivingEntity
     #region [3] 모디파이어 및 상태 이상 (Modifiers & Buffs)
     public override void Add_Equip(Modifier modifier)
     {
+
         base.Add_Equip(modifier);
         if (modifier.triggerType == ModifierTriggerType.Passive)
         {
             // [최적화] 불필요한 CalculateContext 연산 캐싱 제거
             OnStatChangedUI?.Invoke(modifier.stat);
         }
+
+
     }
 
+    public void Add_EquipOption(ModifierOption mod)
+    {
+        List<Modifier> mods = mod.myMods;
+
+        foreach(var option in mods)
+        {
+            Add_Equip(option);
+        }
+    }
     public override void Add_Buff(Modifier modifier)
     {
+
         base.Add_Buff(modifier);
         if (modifier.triggerType == ModifierTriggerType.Passive)
         {
             OnStatChangedUI?.Invoke(modifier.stat);
         }
+
+
     }
 
-    public override void Add_Mutation(Modifier modifier)
+    public override void Add_Mutation(ModifierOption modifier)
     {
-        base.Add_Mutation(modifier);
-        if (modifier.triggerType == ModifierTriggerType.Passive)
+        for (int i = 0; i<modifier.myMods.Count; i++)
         {
-            OnStatChangedUI?.Invoke(modifier.stat);
+            Modifier mod = modifier.myMods[i];
+            base.Add_Mutation(modifier);
+            if (mod.triggerType == ModifierTriggerType.Passive)
+            {
+                OnStatChangedUI?.Invoke(mod.stat);
+            }
         }
+
     }
     #endregion
 
@@ -309,7 +329,7 @@ public class PlayerEntity : LivingEntity
 
             MonsterEntity entity = mapManager.GetMonsterEntity(pos);
             if (entity != null) entity.Set_Visibility(false);
-            
+
         }
 
         List<Vector2Int> currentView = new List<Vector2Int>();

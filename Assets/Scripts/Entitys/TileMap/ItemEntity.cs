@@ -47,14 +47,14 @@ public class ItemEntity : MapEntity
     {
         for(int i = 0; i<item.options.Count; i++)
         {
-            myModifiers.Add(item.options[i].id);
+            myModifiers.Add(item.options[i].descKey);
         }
 
         if(item is EquipItem equip)
         {
             for(int i = 0; i<equip.addOptions.Count; i++)
             {
-                myAddOptions.Add(equip.addOptions[i].id);
+                myAddOptions.Add(equip.addOptions[i].descKey);
             }
             rarity = equip.rarity;
         }

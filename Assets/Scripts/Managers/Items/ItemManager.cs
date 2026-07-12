@@ -107,28 +107,33 @@ public class ItemManager :MonoBehaviour
             // 3. 정상적으로 뽑혔다면 리스트에 담습니다.
             options.Add(rolledOption);
 
-            // 4. 중복 방지: 다중 부여 가능(isMulti) 옵션이 아니라면, 다음 뽑기에서 제외되도록 바구니에 이름을 적습니다.
-            if (!rolledOption.isMulti)
-            {
-                excludeOptionNames.Add(rolledOption.optionName);
-            }
+            
+            excludeOptionNames.Add(rolledOption.optionCategory);
         }
 
-        // options의 개수가 0개면 자연스럽게 스킵됩니다.
         for (int i = 0; i < options.Count; i++)
         {
-            string targetName = options[i].optionName;
-            Debug.Log($"옵션 이름 {options[i].optionName}");
-            Modifier modi = ModifierManager.instance.Get_Modifier(options[i].optionName);
-            if (modi == null)
+            string targetName = options[i].optionKey;
+            Debug.Log($"옵션 이름 {options[i].optionKey}");
+            ModifierOption modOption = ModifierManager.instance.Get_ModifierOption(options[i].optionKey);
+            if (modOption == null)
             {
-                Debug.LogError($"?? 범인 발견! ModifierManager가 {options[i].id} 의  '{targetName}'(을)를 찾지 못했습니다. CSV 오타나 풀(Pool) 등록 상태를 확인하세요!");
+                Debug.LogError($"?? 범인 발견! ModifierManager가 {options[i].optionKey} 의  '{targetName}'(을)를 찾지 못했습니다. CSV 오타나 풀(Pool) 등록 상태를 확인하세요!");
                 continue; // 에러를 띄우고, 빈칸이 리스트에 들어가는 것을 막습니다.
             }
+            List<string> modKeys = ModifierManager.instance.Get_ModOptionKeys(targetName);
+
+            foreach(var key in modKeys)
+            {
+                Modifier mod = ModifierManager.instance.Get_Modifier(key);
+                modOption.AddNotIncludeMod(mod);
+            }
+            equip.addOptions.Add(modOption);
+            /*
             modi.value = options[i].value;
             modi.isMulti = options[i].isMulti;
             modi.id = options[i].optionName;
-            equip.addOptions.Add(modi);
+            equip.addOptions.Add(modi);*/
         }
     }
 
@@ -276,7 +281,7 @@ public class ItemManager :MonoBehaviour
 
         if (loadedItem is EquipItem equip)
         {
-            List<ModifierSaveData> addOptions = saveData.addOptionsData;
+            List<ModifierOptionSaveData> addOptions = saveData.addOptionsData;
 
             // 방어 코드 1: 추가 옵션 데이터가 존재하는지 (Null 체크)
             if (addOptions != null && addOptions.Count > 0)
@@ -284,9 +289,25 @@ public class ItemManager :MonoBehaviour
                 // 방어 코드 2: 장비 객체 내부에 옵션을 담을 리스트가 생성되어 있는지 확인
                 if (equip.addOptions == null)
                 {
-                    equip.addOptions = new List<Modifier>();
+                    equip.addOptions = new List<ModifierOption>();
                 }
 
+                foreach(var option in addOptions)
+                {
+                    ModifierOption newOption = ModifierManager.instance.Get_ModifierOption(option.optionKey);
+                    foreach(var modSave in option.modifiers)
+                    {
+                        Modifier mod = ModifierManager.instance.Get_Modifier(modSave.modifierId);
+
+                        if(mod != null)
+                        {
+                            mod.value = modSave.value;
+                            newOption.AddNotIncludeMod(mod);
+                        }
+                    }
+                    equip.addOptions.Add(newOption);
+                }
+                /*
                 for (int i = 0; i < addOptions.Count; i++)
                 {
                     // 앞서 만든 풀러를 통해 모디파이어 획득
@@ -302,7 +323,7 @@ public class ItemManager :MonoBehaviour
                     {
                         Debug.LogWarning($"[LoadItem] 세이브된 모디파이어를 찾을 수 없습니다: {addOptions[i].modifierId}");
                     }
-                }
+                }*/
             }
         }
 

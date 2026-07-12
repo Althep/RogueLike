@@ -147,14 +147,17 @@ public class ItemDataManager : AsyncDataManager<ItemDataManager>
             Utils.TrySetValue<string>(originData[i], "ID", ref ID);
             string Name = null;
             string modifierId = null;
+            string modifierOptionKey = null;
             Utils.TrySetValue<string>(originData[i], "ModifierID", ref modifierId);
+            Utils.TrySetValue<string>(originData[i],"OptionKey",ref modifierOptionKey);
             Utils.TrySetValue<string>(originData[i], "Name", ref Name);
             Debug.Log($"Item Name {Name} ID : {ID}");
             int tier = 0;
             float weight = 0f;
+            string tooltipKey = null;
             Utils.TrySetValue<int>(originData[i], "Tier", ref tier);
             Utils.TrySetValue(originData[i], "Weight", ref weight);
-            
+            Utils.TrySetValue(originData[i], "TooltipKey", ref tooltipKey);
             if (!itemDatas.ContainsKey(Name))
             {
                 Debug.Log($"{Name} , {ID}");
@@ -162,6 +165,7 @@ public class ItemDataManager : AsyncDataManager<ItemDataManager>
                 equip.id = Name;
                 equip.tier = tier;
                 equip.category = ItemCategory.Equipment;
+                equip.tooltipKey = tooltipKey;
                 Utils.TrySetValue<string>(originData[i], "Name", ref equip.name);
                 Utils.TryConvertEnum<EquipmentType>(originData[i], "ItemCategory", ref equip.equipmentType);
                 Utils.TryConvertEnum<SlotType>(originData[i], "SlotType", ref equip.slot);
@@ -169,7 +173,7 @@ public class ItemDataManager : AsyncDataManager<ItemDataManager>
                 Utils.TryConvertEnum(originData[i], "ItemSubType", ref equip.itemSubType);
                 itemDatas.Add(Name, equip);
                 equip.weight = weight;
-                equip.options = new List<Modifier>();
+                equip.options = new List<ModifierOption>();
             }
             if(modifierFactory == null)
             {
@@ -181,14 +185,23 @@ public class ItemDataManager : AsyncDataManager<ItemDataManager>
                 Debug.Log("ModifierID Null");
                 continue;
             }
-            bool exist = itemDatas[Name].options.Any(d => d.id == ID);
-            if (!exist)
+            bool existOption = itemDatas[Name].options.Any(k => k.optionKey == modifierOptionKey);
+            ModifierOption modOption;
+            if (!existOption)
             {
-                Modifier modi = modifierFactory.CreateNewInstance(modifierId);
-                Utils.TrySetValue(originData[i], "Value", ref modi.value);
-                Debug.Log($"{Name} 모디파이어 ID : {modifierId} 등록 값 : {modi.value} 타입 {modi.modifierType} 스탯 타입{modi.stat} 모디파이어 ID {modi.id}");
-                itemDatas[Name].options.Add(modi);
+                modOption = new ModifierOption();
+                itemDatas[Name].options.Add(modOption);
             }
+            modOption = itemDatas[Name].options.FirstOrDefault(m => m.optionKey == modifierOptionKey);
+            bool existModifier = modOption.myMods.Any(m => m.id == ID);
+            if (!existModifier)
+            {
+                Modifier mod = modifierFactory.CreateNewInstance(modifierId);
+                Utils.TrySetValue(originData[i], "Value", ref mod.value);
+                Debug.Log($"{Name} 모디파이어 ID : {modifierId} 등록 값 : {mod.value} 타입 {mod.modifierType} 스탯 타입{mod.stat} 모디파이어 ID {mod.id}");
+                modOption.myMods.Add(mod);
+            }
+
             Debug.Log($"{Name} 등록 완료");
             await Utils.WaitYield(i);
 
@@ -231,10 +244,11 @@ public class ItemDataManager : AsyncDataManager<ItemDataManager>
         {
 
             string id = null;
+            string optionKey = null;
             string name = null;
             Utils.TrySetValue<string>(originData[i], "ID", ref id);
             Utils.TrySetValue<string>(originData[i], "Name", ref name);
-
+            Utils.TrySetValue<string>(originData[i], "OptionKey", ref optionKey);
 
             if (string.IsNullOrEmpty(name))
             {
@@ -254,7 +268,7 @@ public class ItemDataManager : AsyncDataManager<ItemDataManager>
                 Utils.TrySetValue<int>(originData[i], "Tier", ref consum.tier);
                 Utils.TrySetValue<float>(originData[i], "Weight", ref consum.weight);
 
-                consum.options = new List<Modifier>();
+                consum.options = new List<ModifierOption>();
 
                 itemDatas.Add(name, consum);
             }
@@ -267,10 +281,11 @@ public class ItemDataManager : AsyncDataManager<ItemDataManager>
 
                 if (modifierPooler != null)
                 {
-                    Modifier mod = modifierPooler.GetModifier(id);
-                    if (mod != null)
+                    ModifierOption option = modifierPooler.GetModifierOption(optionKey);
+                    
+                    if (option != null)
                     {
-                        itemDatas[name].options.Add(mod);
+                        itemDatas[name].options.Add(option);
                     }
                 }
                 else

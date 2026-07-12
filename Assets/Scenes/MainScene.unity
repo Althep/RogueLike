@@ -3703,6 +3703,7 @@ MonoBehaviour:
   itemSelectPrefab: {fileID: 1202924272449545584, guid: 4cee00dfad0ba474685cd648dad017db, type: 3}
   selectViewPrefab: {fileID: 2095454033652956570, guid: dea346c7c49657546bc1ce3dd059a079, type: 3}
   inventorySlotPrefab: {fileID: 7248237687719772417, guid: 7497a118f75acc741b6b11a42174de37, type: 3}
+  itemOptionPrefab: {fileID: 3160685783286891746, guid: 9b4e11df9c981ab4d8fdd431adc7611a, type: 3}
 --- !u!1 &1638592089
 GameObject:
   m_ObjectHideFlags: 0

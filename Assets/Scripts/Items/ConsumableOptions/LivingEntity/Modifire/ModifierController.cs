@@ -6,6 +6,12 @@ using static Defines;
 
 public class ModifierController
 {
+    private Dictionary<string, ModifierOption> buffOptions = new Dictionary<string, ModifierOption>();
+    private Dictionary<string, ModifierOption> mutationOptions = new Dictionary<string, ModifierOption>();
+    private Dictionary<string, ModifierOption> equipsOptions = new Dictionary<string, ModifierOption>();
+
+
+
     private Dictionary<ModifierTriggerType, List<Modifier>> buffs = new Dictionary<ModifierTriggerType, List<Modifier>>();
     private Dictionary<ModifierTriggerType, List<Modifier>> mutation = new Dictionary<ModifierTriggerType, List<Modifier>>();
     private Dictionary<ModifierTriggerType, List<Modifier>> equips = new Dictionary<ModifierTriggerType, List<Modifier>>();
@@ -45,8 +51,8 @@ public class ModifierController
     // ==========================================
     public void EquipItem(EquipItem equip)
     {
-        List<Modifier> equipModifiers = equip.options;
-        List<Modifier> equipAddOptions = equip.addOptions;
+        List<ModifierOption> equipModifiers = equip.options;
+        List<ModifierOption> equipAddOptions = equip.addOptions;
 
 
         if (equipModifiers != null)
@@ -59,37 +65,40 @@ public class ModifierController
             for (int i = 0; i < equipAddOptions.Count; i++) AddEquipment(equipAddOptions[i]);
         }
     }
-    private void AddModifierInternal(Dictionary<ModifierTriggerType, List<Modifier>> targetDict, Modifier modifier)
+    private void AddModifierOptionInternal(Dictionary<ModifierTriggerType, List<Modifier>> targetDict, ModifierOption modifier)
     {
-        ModifierTriggerType trigger = modifier.triggerType;
+        for(int i = 0; i<modifier.myMods.Count; i++)
+        {
+            AddModifierInternal(targetDict, modifier.myMods[i]);
+        }
+        
+    }
+
+    private void AddModifierInternal(Dictionary<ModifierTriggerType,List<Modifier>> targetDict, Modifier mod)
+    {
+        ModifierTriggerType trigger = mod.triggerType;
 
         if (!targetDict.ContainsKey(trigger))
         {
             targetDict.Add(trigger, new List<Modifier>());
         }
 
-        targetDict[trigger].Add(modifier);
+        targetDict[trigger].Add(mod);
         targetDict[trigger].Sort((a, b) => a.priority.CompareTo(b.priority));
 
         // 재계산 없이 플래그만 오염
         dirtyFlags[trigger] = true;
         //myEntity.OnStatOrModifierChange();
-        OnModifierChanged?.Invoke(modifier);
+        OnModifierChanged?.Invoke(mod);
     }
 
-    private void RemoveModifierInternal(Dictionary<ModifierTriggerType, List<Modifier>> targetDict, Modifier modifier)
+    private void RemoveModifierOptionInternal(Dictionary<ModifierTriggerType, List<Modifier>> targetDict, ModifierOption modifier)
     {
-        if (modifier == null || !targetDict.ContainsKey(modifier.triggerType)) return;
-
-        ModifierTriggerType trigger = modifier.triggerType;
-
-        if (targetDict[trigger].Remove(modifier))
+        for(int i = 0; i<modifier.myMods.Count; i++)
         {
-            dirtyFlags[trigger] = true;
+            RemoveModifiernInternal(targetDict, modifier.myMods[i]);
         }
-        //myEntity.OnStatOrModifierChange();
-        OnModifierChanged?.Invoke(modifier);
-        ModifierManager.instance.Return_Modifier(modifier);
+        
     }
 
     public void ConsumeOneTimeActions(ModifierTriggerType trigger)
@@ -109,13 +118,37 @@ public class ModifierController
         }
     }
 
+    public void AddBuff(ModifierOption modifier) => AddModifierOptionInternal(buffs, modifier);
+    public void AddEquipment(ModifierOption modifier) => AddModifierOptionInternal(equips, modifier);
+    public void AddMutation(ModifierOption modifier) => AddModifierOptionInternal(mutation, modifier);
+
     public void AddBuff(Modifier modifier) => AddModifierInternal(buffs, modifier);
     public void AddEquipment(Modifier modifier) => AddModifierInternal(equips, modifier);
     public void AddMutation(Modifier modifier) => AddModifierInternal(mutation, modifier);
 
-    public void RemoveBuff(Modifier modifier) => RemoveModifierInternal(buffs, modifier);
-    public void RemoveEquipment(Modifier modifier) => RemoveModifierInternal(equips, modifier);
-    public void RemoveMutate(Modifier modifier) => RemoveModifierInternal(mutation, modifier);
+
+    public void RemoveBuff(ModifierOption modifier) => RemoveModifierOptionInternal(buffs, modifier);
+    public void RemoveEquipment(ModifierOption modifier) => RemoveModifierOptionInternal(equips, modifier);
+    public void RemoveMutate(ModifierOption modifier) => RemoveModifierOptionInternal(mutation, modifier);
+
+    public void RemoveBuff(Modifier modifier) => RemoveModifiernInternal(buffs, modifier);
+    public void RemoveEquipment(Modifier modifier) => RemoveModifiernInternal(equips, modifier);
+    public void RemoveMutate(Modifier modifier) => RemoveModifiernInternal(mutation, modifier);
+
+    public void RemoveModifiernInternal(Dictionary<ModifierTriggerType, List<Modifier>> targetDict, Modifier modifier)
+    {
+        if (modifier == null || !targetDict.ContainsKey(modifier.triggerType)) return;
+
+        ModifierTriggerType trigger = modifier.triggerType;
+
+        if (targetDict[trigger].Remove(modifier))
+        {
+            dirtyFlags[trigger] = true;
+        }
+        //myEntity.OnStatOrModifierChange();
+        OnModifierChanged?.Invoke(modifier);
+        ModifierManager.instance.Return_Modifier(modifier);
+    }
 
     // ==========================================
     // 2. 컨텍스트 획득 (패시브 지연 갱신 처리)
@@ -278,9 +311,20 @@ public class ModifierController
     public Dictionary<ModifierTriggerType, List<Modifier>> Get_Equips() => equips;
 
     public List<ModifierSaveData> MutetionSave() => SaveModifierInternal(mutation);
+    public List<ModifierOptionSaveData> MutateOptionSave() => SaveModifierOptionInternal(mutationOptions);
 
+    private List<ModifierOptionSaveData> SaveModifierOptionInternal(Dictionary<string,ModifierOption> target)
+    {
+        List<ModifierOptionSaveData> saveData = new List<ModifierOptionSaveData>();
+        foreach(var key in target.Keys)
+        {
+            saveData.Add(target[key].SaveData());
+        }
+        return saveData;
+    }
     private List<ModifierSaveData> SaveModifierInternal(Dictionary<ModifierTriggerType, List<Modifier>> target)
     {
+        
         List<ModifierSaveData> modifierSaves = new List<ModifierSaveData>();
         foreach (var triggerModifiers in target.Values)
         {

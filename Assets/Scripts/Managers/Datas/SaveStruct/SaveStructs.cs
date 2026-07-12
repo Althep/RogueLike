@@ -23,6 +23,11 @@ public struct TileEntityData
     public TileType type;
 }
 
+public struct ModifierOptionSaveData
+{
+    public string optionKey;
+    public List<ModifierSaveData> modifiers;
+}
 
 public struct ModifierSaveData
 {
@@ -40,7 +45,7 @@ public class ItemSaveData
     public int spriteIndex;
     public int itemCount;
     public string itemId;
-    public List<ModifierSaveData> addOptionsData;
+    public List<ModifierOptionSaveData> addOptionsData;
 }
 
 
@@ -58,7 +63,7 @@ public class LivingEntitySaveData
     public int y;
     public List<ItemSaveData> itemdata;//인벤토리
     public List<ItemSaveData> equipMentsData;//장착중인 아이템 등
-    public List<ModifierSaveData> modifiers;//종족특성,돌연변이등
+    public List<ModifierOptionSaveData> modifiers;//종족특성,돌연변이등
     public List<BuffSaveData> buffs;//버프 데이터
     
     

@@ -76,12 +76,18 @@ public class ModifierManager : MonoBehaviour
         }
         return modifierPooler;
     }
-
+    public ModifierOption Get_ModifierOption(string id)
+    {
+        return modifierPooler.GetModifierOption(id);
+    }
     public Modifier Get_Modifier(string id)
     {
         return modifierPooler.GetModifier(id);
     }
-
+    public List<string> Get_ModOptionKeys(string id)
+    {
+        return modifierDataManager.Get_ModifierOptionKeys(id);
+    }
     public void Return_Modifier(Modifier modifier)
     {
         modifierPooler.ReturnModifier(modifier);

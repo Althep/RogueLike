@@ -291,7 +291,7 @@ public class MonsterEntity : LivingEntity
         if (modifierController != null)
         {
             saveData.buffs = modifierController.BuffSave();
-            saveData.modifiers = modifierController.MutetionSave();
+            saveData.modifiers = modifierController.MutateOptionSave();
         }
 
         if (equipSystem != null)

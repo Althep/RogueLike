@@ -32,6 +32,8 @@ public class StartDataManager : AsyncDataManager<StartDataManager>
     ModifierManager modifierManager;
 
     ModifierPooler modifierPooler;
+
+    ModifierDataManager modifierDataManager;
     StartDataManager()
     {
 
@@ -86,6 +88,10 @@ public class StartDataManager : AsyncDataManager<StartDataManager>
         {
             modifierPooler = GameManager.instance.Get_ModifierManager().GetModifierPooler();
         }
+        if(modifierDataManager == null)
+        {
+            modifierDataManager = await ModifierDataManager.CreateAsync();
+        }
     }
 
     public async UniTask ReadRaceData_Stat(List<Dictionary<string, object>> originData)
@@ -107,7 +113,24 @@ public class StartDataManager : AsyncDataManager<StartDataManager>
             }
             RaceData racedata = raceDatas[race];
             string id = originData[i]["ID"].ToString();
-            if (!racedata.modifiers.Any(m => m.id == id))
+            
+            if(!racedata.modifiers.Any(m => m.optionKey == id))
+            {
+                ModifierOption modOption = modifierManager.Get_ModifierOption(id);
+                List<string> modKeys = modifierDataManager.Get_ModifierOptionKeys(id);
+
+                foreach(var key in modKeys)
+                {
+                    if (modOption.myMods.Any(m => m.id == id))
+                        continue;
+                    Modifier mod = modifierManager.Get_Modifier(key);
+                    modOption.myMods.Add(mod);
+                }
+                modOption.optionKey = id;
+                racedata.modifiers.Add(modOption);
+            }
+            /*
+            if (!racedata.modifiers.Any(m => m.optionKey == id))
             {
                 StatModifier modi = new StatModifier();
                 modi.id = id;
@@ -117,11 +140,12 @@ public class StartDataManager : AsyncDataManager<StartDataManager>
                 Utils.TrySetValue<bool>(originData[i], "isMuti", ref modi.isMulti);
                 Utils.TrySetValue<float>(originData[i], "Value", ref modi.value);
                 racedata.modifiers.Add(modi);
-            }
+            }*/
             await Utils.WaitYield(i);
         }
 
     }
+    
     public async UniTask ReadRaceData_Item(List<Dictionary<string, object>> originData)
     {
 
@@ -141,8 +165,21 @@ public class StartDataManager : AsyncDataManager<StartDataManager>
                 raceDatas.Add(race, new RaceData());
             }
             RaceData racedata = raceDatas[race];
+            string optionKey = originData[i]["OptionKey"].ToString();
             string id = originData[i]["ID"].ToString();
-            if (!racedata.modifiers.Any(m => m.id == id))
+            bool existOption = racedata.modifiers.Any(o => o.optionKey == optionKey);
+            ModifierOption modOption;
+            if (!existOption)
+            {
+                modOption = new ModifierOption();
+                racedata.modifiers.Add(modOption);
+            }
+            else
+            {
+                modOption = racedata.modifiers.FirstOrDefault(o => o.optionKey == optionKey);
+            }
+            
+            if (!racedata.modifiers.Any(m => m.optionKey == id))
             {
                 ItemModifier modi = new ItemModifier();
                 modi.id = id;
@@ -157,7 +194,7 @@ public class StartDataManager : AsyncDataManager<StartDataManager>
                 Enum specificType = Utils.Get_ItemSpecificType(originData[i]["SpecificType"].ToString());
                 modi.specificType = specificType;
                 //Utils.TryConvertEnum<> string=> 구체적 타입 변경 필요
-                racedata.modifiers.Add(modi);
+                modOption.AddNotIncludeMod(modi);
             }
 
             await Utils.WaitYield(i);
@@ -269,7 +306,6 @@ public class StartDataManager : AsyncDataManager<StartDataManager>
             jobTrait_Stat[job].Add(stat);
             await Utils.WaitYield(i);
         }
-
     }
 
     public async UniTask ReadStatTrait(List<Dictionary<string, object>> originData)

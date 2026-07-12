@@ -281,7 +281,7 @@ public static class Utils
         }
     }
 
-    public static Vector2Int IntToMapPos(int value, int width, int height)
+    public static Vector2Int IntToMapPos(int value, int width, int height) // 맵레이어 관련되어서 맵코스트 계산 시 좌표필요해 작성
     {
         int x = value % width;
         int y = value / width; 

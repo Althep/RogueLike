@@ -4,9 +4,104 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using static Defines;
+public class ModifierData
+{
+    public string id;
+    public ModifierType modifierType;
+    public StatType stat;
+    public ModifierTriggerType triggerType;
+    public int priority;
+    public bool isMulti;
+    public float value;
+
+    // 아이템 및 버프, 액션 전용 변수들도 여기에 통합해서 선언합니다.
+    // (어차피 런타임 인스턴스가 아니라 초기 로딩 시에만 파싱되는 순수 데이터이므로 메모리 부담이 없습니다)
+    public ItemTargetType itemTargetType;
+    public ItemCategory itemCategory;
+    public bool unEquipable;
+    public int specificType;
+    public float minTime, maxTime;
+    public BuffCategory buffCategory;
+    public BuffType buffType;
+    public string effectName, stringValue;
+
+    // CSV 행(Row) 데이터를 통째로 받아 스스로의 빈칸을 채우는 파싱 함수
+    public void ParseFromCsv(Dictionary<string, object> row)
+    {
+        Utils.TrySetValue(row, "ID", ref id);
+        Utils.TryConvertEnum(row, "ModifierType", ref modifierType);
+        Utils.TryConvertEnum(row, "StatType", ref stat);
+        Utils.TryConvertEnum(row, "ModifierTrigger", ref triggerType);
+        Utils.TrySetValue(row, "Priority", ref priority);
+        Utils.TrySetValue(row, "isMulti", ref isMulti);
+        Utils.TrySetValue(row, "Value", ref value);
+
+        // 변수가 아무리 많아도 옵셔널하게 파싱하므로 에러가 나지 않습니다.
+        Utils.TryConvertEnum(row, "ItemTargetType", ref itemTargetType);
+        Utils.TryConvertEnum(row, "ItemCategory", ref itemCategory);
+        Utils.TrySetValue(row, "UnEquipable", ref unEquipable);
+        Utils.TrySetValue(row, "MinTime", ref minTime);
+        Utils.TrySetValue(row, "MaxTime", ref maxTime);
+        Utils.TrySetValue(row, "EffectName", ref effectName);
+    }
+}
+
 public class ModifierDataManager : AsyncDataManager<ModifierDataManager>
 {
+    // ★ 핵심: 1개의 ID 키가 여러 개의 '설계도 데이터(ModifierData)' 리스트를 가집니다.
+    private Dictionary<string, List<ModifierData>> modifierDataGroup = new();
+
+    public override async UniTask Init() { /* 초기화 */ }
+
+    public async UniTask SetUp(List<TextAsset> myAssets)
+    {
+        foreach (var asset in myAssets)
+        {
+            List<Dictionary<string, object>> originData = Utils.TextAssetParse(asset);
+            await ReadAllModifierGroups(originData);
+        }
+    }
+
+    private async UniTask ReadAllModifierGroups(List<Dictionary<string, object>> originData)
+    {
+        for (int i = 0; i < originData.Count; i++)
+        {
+            var row = originData[i];
+            if (!row.TryGetValue("ID", out object idObj)) continue;
+            string id = idObj.ToString();
+
+            // 1. 순수 데이터 객체를 생성하고 행(Row) 데이터를 파싱합니다.
+            ModifierData data = new ModifierData();
+            data.ParseFromCsv(row); // (이전 답변에서 만든 다용도 파싱 함수)
+
+            // 2. ★ 딕셔너리에 ID 키가 아직 없다면, 새로운 리스트를 만들어서 등록합니다.
+            if (!modifierDataGroup.ContainsKey(id))
+            {
+                modifierDataGroup[id] = new List<ModifierData>();
+            }
+
+            // 3. 해당 ID의 리스트에 데이터 설계도를 추가합니다!
+            // (예: OPT_DAGGER_01 리스트에 공격력 데이터 추가 -> 다음 루프에서 명중률 데이터 추가)
+            modifierDataGroup[id].Add(data);
+
+            await Utils.WaitYield(i);
+        }
+        Debug.Log($"총 {modifierDataGroup.Count}종류의 모디파이어 옵션 그룹 로딩 완료!");
+    }
+
+    // 외부에서 특정 옵션 ID에 묶인 모든 설계도 리스트를 요청할 때 사용
+    public List<ModifierData> GetModifierDataList(string id)
+    {
+        return modifierDataGroup.GetValueOrDefault(id);
+    }
+}
+/*
+public class ModifierDataManager : AsyncDataManager<ModifierDataManager>
+{
+    public Dictionary<string,List<ModifierData>> ModifierDatas = new(); 
     Dictionary<string, Modifier> Modifiers = new();
+    Dictionary<string, ModifierOption> modifierOptions = new();
+    Dictionary<string, List<string>> modifierOptionKeys = new();
 
     EffectManager effectManager;
 
@@ -147,9 +242,25 @@ public class ModifierDataManager : AsyncDataManager<ModifierDataManager>
         }
     }
 
+    public ModifierOption Get_ModifierOptions(string id)
+    {
+        if (!modifierOptions.ContainsKey(id))
+        {
+            Debug.Log($"ModifierOption Data Wrong {id}");
+        }
+        return modifierOptions[id];
+    }
 
+    public List<string> Get_ModifierOptionKeys(string id)
+    {
+        if (!modifierOptionKeys.ContainsKey(id))
+        {
+            Debug.Log($"ModifierOption ListData Wrong {id}");
+            return null;
+        }
 
-
+        return modifierOptionKeys[id];
+    }
 
     public void ReadModifier(Dictionary<string, object> data, Modifier modifier)
     {
@@ -434,3 +545,4 @@ public class ModifierDataManager : AsyncDataManager<ModifierDataManager>
 
 
 }
+*/

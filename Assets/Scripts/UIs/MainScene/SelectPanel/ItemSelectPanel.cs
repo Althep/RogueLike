@@ -123,7 +123,7 @@ public class ItemSelectPanel : SelectSubPanel
         }
 
         RaceData raceData = dm.startDataManager.raceDatas[selectRace];
-        List<Modifier> modifiers = raceData.modifiers;
+        List<ModifierOption> modifiers = raceData.modifiers;
 
         Dictionary<SlotType, StartData> jobItems = dm.startDataManager.startDatas[selectJob];
         Dictionary<SlotType, List<string>> selects = new Dictionary<SlotType, List<string>>();

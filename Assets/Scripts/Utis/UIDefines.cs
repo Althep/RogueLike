@@ -16,7 +16,8 @@ public static class UIDefines
         MainSelect,
         ItemSelect,
         SelectView,
-        InventorySlot
+        InventorySlot,
+        ItemOption
     }
 
 }

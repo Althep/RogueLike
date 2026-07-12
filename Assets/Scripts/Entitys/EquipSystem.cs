@@ -20,8 +20,8 @@ public class EquipSystem
         equipments[slot] = target; // 장비 착용
 
         // 새 장비 모디파이어 적용
-        foreach (Modifier option in target.options) modifierController.AddEquipment(option);
-        foreach (Modifier option in target.addOptions) modifierController.AddEquipment(option);
+        foreach (ModifierOption option in target.options) modifierController.AddEquipment(option);
+        foreach (ModifierOption option in target.addOptions) modifierController.AddEquipment(option);
     }
 
     public void UnEquipItem(SlotType slot)
@@ -29,8 +29,8 @@ public class EquipSystem
         if (equipments.ContainsKey(slot) && equipments[slot] != null)
         {
             EquipItem origin = equipments[slot];
-            foreach (Modifier modi in origin.options) modifierController.RemoveEquipment(modi);
-            foreach (Modifier modi in origin.addOptions) modifierController.RemoveEquipment(modi);
+            foreach (ModifierOption modi in origin.options) modifierController.RemoveEquipment(modi);
+            foreach (ModifierOption modi in origin.addOptions) modifierController.RemoveEquipment(modi);
         }
     } 
 

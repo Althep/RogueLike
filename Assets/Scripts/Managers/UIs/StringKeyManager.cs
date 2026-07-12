@@ -83,7 +83,6 @@ public class StringKeyManager : MonoBehaviour
 
     public string Get_StringData(string key)
     {
-
         if (!stringDatas.ContainsKey(key))
         {
             Debug.Log($"Didn't Contain language Key");
@@ -96,7 +95,6 @@ public class StringKeyManager : MonoBehaviour
         }
 
         return stringDatas[key][language];
-
     }
 
     public void SetUp(TextAsset myAsset)

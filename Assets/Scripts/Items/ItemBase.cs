@@ -13,17 +13,19 @@ public abstract class ItemBase
     public int tier;
     public Defines.ItemCategory category;
     public float weight;
-    public List<Modifier> options = new List<Modifier>();
+    public string tooltipKey;
+    public List<ModifierOption> options = new List<ModifierOption>();
 
     public virtual void OnUse(LivingEntity entity)
     {
         // 1. 장전: 모디파이어들을 엔티티의 주머니(컨텍스트)에 넣습니다.
-        EffectApplier.ApplySynchronized(entity, options);
 
-        // 2. 격발 및 청소: 방금 넣은 1회용 액션들을 즉시 실행하고 비워줍니다.
-        // (이전에 논의했던 엔티티의 실행 함수를 여기서 바로 호출해버립니다!)
-
-        // 예시: 소비 아이템 전용 트리거를 사용해 실행
+        for(int i = 0; i <options.Count; i++)
+        {
+            List<Modifier> mod = options[i].myMods;
+            EffectApplier.ApplySynchronized(entity,mod);
+        }
+        
         entity.ExecuteAction(entity, Defines.ModifierTriggerType.OnUseItem);
     }
     public bool CanStack(int amount)
@@ -60,12 +62,29 @@ public abstract class ItemBase
         // 엔티티 참조는 그대로 넘겨주거나 null로 초기화합니다. (상황에 맞게 선택)
 
         // ?? 핵심: 리스트 내부의 옵션들까지 '깊은 복사' 수행
-        cloneObj.options = new List<Modifier>();
+        cloneObj.options = new List<ModifierOption>();
+
+
+        for(int i = 0; i<this.options.Count; i++)
+        {
+            ModifierOption option = this.options[i];
+        }
+        foreach(var option in this.options)
+        {
+            List<Modifier> mods = option.myMods;
+
+            for(int i = 0; i <mods.Count; i++)
+            {
+                Modifier copied = ModifierManager.instance.Get_Modifier(mods[i].id);
+                Debug.Log($"아이템 데이터 클로닝 아이디{id}, 모디파이어 아이디{copied.id}");
+                
+            }
+        }
         foreach (var option in this.options)
         {
             // option.Clone()을 호출하여 Modifier도 새롭게 생성해서 넣습니다.
-            Modifier copied = ModifierManager.instance.Get_Modifier(option.id);
-            Debug.Log($"아이템 데이터 클로닝 아이디{id}, 모디파이어 아이디{copied.id}");
+            ModifierOption copied = ModifierManager.instance.Get_ModifierOption(option.optionKey);
+            
             cloneObj.options.Add(copied);
         }
     }
@@ -73,7 +92,7 @@ public abstract class ItemBase
     public virtual ItemSaveData SaveData()
     {
         ItemSaveData itemSaveData = new ItemSaveData();
-        List<ModifierSaveData> myModifiers = new List<ModifierSaveData>();
+        List<ModifierOptionSaveData> myModifiers = new List<ModifierOptionSaveData>();
         for(int i = 0; i<options.Count; i++)
         {
             myModifiers.Add(options[i].SaveData());

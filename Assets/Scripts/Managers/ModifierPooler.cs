@@ -7,6 +7,9 @@ public class ModifierPooler
     public Dictionary<string, Queue<IPoolScript>> inactiveModifiers = new Dictionary<string, Queue<IPoolScript>>();
     public Dictionary<string, List<IPoolScript>> activeModifiers = new Dictionary<string, List<IPoolScript>>();
 
+    public Dictionary<string, Queue<IPoolScript>> inactiveModifierOptions = new();
+    public Dictionary<string, List<IPoolScript>> activeModifierOptions = new();
+
     private ModifierManager modifierManager;
     private ModifierFactory modifierFactory;
 
@@ -14,6 +17,32 @@ public class ModifierPooler
     {
         modifierManager = MM;
         modifierFactory = MF;
+    }
+
+    public ModifierOption GetModifierOption(string id)
+    {
+        if (string.IsNullOrEmpty(id))
+        {
+            Debug.LogWarning("[ModifierPooler] 유효하지 않은 ID");
+            return null;
+        }
+        if (!inactiveModifierOptions.ContainsKey(id))
+        {
+            inactiveModifierOptions[id] = new Queue<IPoolScript>();
+        }
+        if (!activeModifierOptions.ContainsKey(id))
+        {
+            activeModifierOptions[id] = new List<IPoolScript>();
+        }
+        if (inactiveModifierOptions[id].Count == 0)
+        {
+            CreateNewOption(id);
+        }
+
+        IPoolScript value = inactiveModifierOptions[id].Dequeue();
+        activeModifierOptions[id].Add(value);
+
+        return value as ModifierOption;
     }
 
     public Modifier GetModifier(string id)
@@ -47,7 +76,7 @@ public class ModifierPooler
         return value as Modifier;
     }
 
-    public IPoolScript CreateNew(string id)
+    IPoolScript CreateNew(string id)
     {
         if (modifierFactory == null)
         {
@@ -72,6 +101,46 @@ public class ModifierPooler
         inactiveModifiers[id].Enqueue(newModifier);
 
         return newModifier;
+    }
+
+    IPoolScript CreateNewOption(string id)
+    {
+        if(modifierFactory == null)
+        {
+            modifierFactory = modifierManager.GetModifierFactory();
+        }
+
+        ModifierOption newOption = modifierFactory.CreatNewOption(id);
+
+        if(newOption == null)
+        {
+            Debug.Log($"[ModifierPooler] 팩토리에서 {id} 생성 실패!");
+            return null;
+        }
+        if (inactiveModifierOptions.ContainsKey(id))
+        {
+            inactiveModifierOptions[id] = new Queue<IPoolScript>();
+        }
+        inactiveModifierOptions[id].Enqueue(newOption);
+        return newOption;
+    }
+
+    public void ReturnModifierOption(IPoolScript script)
+    {
+        ModifierOption modOption = script as ModifierOption;
+        if (modOption == null) return;
+
+        string id = modOption.optionKey;
+
+        if (activeModifierOptions.ContainsKey(id))
+        {
+            activeModifierOptions[id].Remove(script);
+        }
+        if (!inactiveModifierOptions.ContainsKey(id))
+        {
+            inactiveModifierOptions[id] = new Queue<IPoolScript>();
+        }
+        inactiveModifierOptions[id].Enqueue(script);
     }
 
     public void ReturnModifier(IPoolScript script)

@@ -85,6 +85,7 @@ public static class Defines
         StatAddEffect,
         StatBuffEffect,
         ItemModifier,
+        ModifierOption
     }
     public enum TileType
     {

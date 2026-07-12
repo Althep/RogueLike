@@ -127,10 +127,52 @@ WishScroll,WishScroll,소원의 두루마리
 GorgonScroll,GorgonScroll,석화의 두루마리
 VoidScroll,VoidScroll,공허의 두루마리
 Scroll of Essence Extraction,Scroll of Essence Extraction,추출의 두루마리
+CurePotion_Desc,CurePotion_Description,치유 물약 묘사
+HealingPotion_Desc,HealingPotion_Description,회복 물약 묘사
+PoisonPotion_Desc,PoisonPotion_Description,독 물약 묘사
+DizzyPotion_Desc,DizzyPotion_Description,혼란의 물약 묘사
+StrengthPotion_Desc,StrengthPotion_Description,힘의 물약 묘사
+AgilityPotion_Desc,AgilityPotion_Description,민첩의 물약 묘사
+IntelligencePotion_Desc,IntelligencePotion_Description,지능의 물약 묘사
+WarriorPotion_Desc,WarriorPotion_Description,전사의 물약 묘사
+MpHealingPotion_Desc,MpHealingPotion_Description,마나 회복 물약 묘사
+InvisiblePotion_Desc,InvisiblePotion_Description,투명화 물약 묘사
+RandomPotion_Desc,RandomPotion_Description,무작위 효과 물약 묘사
+MutatePotion_Desc,MutatePotion_Description,돌연변이 물약 묘사
+QuicknessPotion_Desc,QuicknessPotion_Description,신속의 물약 묘사
+EagleEyePotion_Desc,EagleEyePotion_Description,독수리의 눈 물약 묘사
+FireResistPotion_Desc,FireResistPotion_Description,화염 저항의 물약 묘사
+IceResistPotion_Desc,IceResistPotion_Description,냉기 저항의 물약 묘사
+RegenerationPotion_Desc,RegenerationPotion_Description,재생의 물약 묘사
+GhostPotion_Desc,GhostPotion_Description,유령화의 물약 묘사
+TrollsBlood_Desc,TrollsBlood_Description,트롤의 피 묘사
+VamfierBlood_Desc,VamfierBlood_Description,흡혈귀의 피 묘사
+PhoenixTears_Desc,PhoenixTears_Description,불사조의 눈물 묘사
+ElixirOfApex_Desc,ElixirOfApex_Description,정점의 영약 묘사
+ElixirOfSoul_Desc,ElixirOfSoul_Description,영혼의 영약 묘사
+ElixirOfAccelerate_Desc,ElixirOfAccelerate_Description,가속의 영약 묘사
+IdentifyScroll_Desc,IdentifyScroll_Description,확인의 두루마리 묘사
+CurseScroll_Desc,CurseScroll_Description,저주의 두루마리 묘사
+PurificationScroll_Desc,PurificationScroll_Description,정화의 두루마리 묘사
+LongScroll_Desc,LongScroll_Description,긴 두루마리 묘사
+TellevisionScroll_Desc,TellevisionScroll_Description,시야의 두루마리 묘사
+ArmorrReinforceScroll_Desc,ArmorrReinforceScroll_Description,방어구 강화의 두루마리 묘사
+WeaponReinforceScroll_Desc,WeaponReinforceScroll_Description,무기 강화의 두루마리 묘사
+ParchmentOfNagging_Desc,ParchmentOfNagging_Description,재잘거리는 양피지 묘사
+BlinkScroll_Desc,BlinkScroll_Description,순간이동의 두루마리 묘사
+TelleprtScroll_Desc,TelleprtScroll_Description,공간이동의 두루마리 묘사
+InfernoScroll_Desc,InfernoScroll_Description,지옥의 두루마리 묘사
+XrayScroll_Desc,XrayScroll_Description,투과의 두루마리 묘사
+SleepScroll_Desc,SleepScroll_Description,수면의 두루마리 묘사
+SilenceScroll_Desc,SilenceScroll_Description,침묵의 두루마리 묘사
+WishScroll_Desc,WishScroll_Description,소원의 두루마리 묘사
+GorgonScroll_Desc,GorgonScroll_Description,석화의 두루마리 묘사
+VoidScroll_Desc,VoidScroll_Description,공허의 두루마리 묘사
+Scroll of Essence Extraction_Desc,Scroll of Essence Extraction_Description,추출의 두루마리 묘사
 CombatKnife,CombatKnife,전투용 단검
 Dagger,Dagger,단검
 ShortSword,ShortSword,숏소드
-Stiletto,Stiletto,스틸레토
+Twindgger,Twindgger,쌍둥이 단검
 Kris,Kris,크리스
 LongSword,LongSword,장검
 BroadSword,BroadSword,브로드소드
@@ -163,3 +205,44 @@ PlateMail,PlateMail,플레이트 아머
 GothicPlate,GothicPlate,고딕 플레이트
 Glove,Glove,글러브
 Boots,Boots,부츠
+CombatKnife_Desc,CombatKnife_Description,전투용 단검 묘사
+CombatKnife_Desc_Desc,CombatKnife_Description_Description,전투용단검 묘사 묘사
+Dagger_Desc,Dagger_Description,단검 묘사
+Dagger_Desc_Desc,Dagger_Description_Description,단검 묘사 묘사
+ShortSword_Desc,ShortSword_Description,숏소드 묘사
+ShortSword_Desc_Desc,shortSword_Description_Description,숏소드 묘사 묘사
+Twindgger_Desc,Twindgger_Description,쌍둥이 단검 묘사
+Twindgger_Desc_Desc,Twindgger_Description_Description,쌍둥이 단검 묘사 묘사
+Kris_Desc,Kris_Description,크리스 묘사
+Kris_Desc_Desc,Kris__Description_Description,크리스 묘사 묘사
+LongSword_Desc,LongSword_Description,장검 묘사
+BroadSword_Desc,BroadSword_Description,브로드소드 묘사
+Falchion_Desc,Falchion_Description,팔치온 묘사
+GreatSword_Desc,GreatSword_Description,그레이트소드 묘사
+Claymore_Desc,Claymore_Description,클레이모어 묘사
+Katana_Desc,Katana_Description,카타나 묘사
+Club_Desc,Club_Description,몽둥이 묘사
+Mace_Desc,Mace_Description,메이스 묘사
+MorningStar_Desc,MorningStar_Description,모닝스타 묘사
+WarHammer_Desc,WarHammer_Description,워해머 묘사
+HandAxe_Desc,HandAxe_Description,손도끼 묘사
+BattleAxe_Desc,BattleAxe_Description,전투도끼 묘사
+BroadAxe_Desc,BroadAxe_Description,브로드액스 묘사
+Executioner’s Axe_Desc,Executioner’s Axe_Description,처형자의 도끼 묘사
+Spear_Desc,Spear_Description,창 묘사
+Trident_Desc,Trident_Description,트라이던트 묘사
+Glaive_Desc,Glaive_Description,글레이브 묘사
+Bardiche_Desc,Bardiche_Description,바디셰 묘사
+ShortBow_Desc,ShortBow_Description,숏보우 묘사
+CompositeBow_Desc,CompositeBow_Description,컴포짓보우 묘사
+Crossbow_Desc,Crossbow_Description,크로스보우 묘사
+Longbow_Desc,Longbow_Description,롱보우 묘사
+Rob_Desc,Rob_Description,로브 묘사
+LeatherArmor_Desc,LeatherArmor_Description,가죽값옷 묘사
+ChainMail_Desc,ChainMail_Description,체인 메일 묘사
+ScaleMail_Desc,ScaleMail_Description,스케일 메일 묘사
+HalfPlate_Desc,HalfPlate_Description,하프 플레이트 묘사
+PlateMail_Desc,PlateMail_Description,플레이트 아머 묘사
+GothicPlate_Desc,GothicPlate_Description,고딕 플레이트 묘사
+Glove_Desc,Glove_Description,글러브 묘사
+Boots_Desc,Boots_Description,부츠 묘사

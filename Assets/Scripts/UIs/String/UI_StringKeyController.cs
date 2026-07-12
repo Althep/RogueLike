@@ -4,15 +4,15 @@ using System.Collections.Generic;
 using TMPro;
 public class UI_StringKeyController : MonoBehaviour
 {
-    [SerializeField] string myKey;
-    TextMeshProUGUI myTmp;
+    [SerializeField] protected string myKey;
+    protected TextMeshProUGUI myTmp;
 
     private void Awake()
     {
         Set_MyTMP();
     }
 
-    public void Set_MyKey(string key)
+    public virtual void Set_MyKey(string key)
     {
         myKey = key;
         StringKeyManager.Instance.FontUpdate(this);
@@ -38,6 +38,10 @@ public class UI_StringKeyController : MonoBehaviour
         if (myTmp == null)
         {
             myTmp = Utils.GetOrAddComponent<TextMeshProUGUI>(this.gameObject);
+        }
+        if(myTmp == null)
+        {
+            myTmp = GetComponentInChildren<TextMeshProUGUI>();
         }
         StringKeyManager keyManager = StringKeyManager.Instance;
         keyManager.Add_StringKey(this);

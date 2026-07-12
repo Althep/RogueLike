@@ -152,6 +152,25 @@ public class ItemFactory
                 Debug.Log("ItemCategoryError");
                 return null;
         }
+        foreach(ModifierOption option in origin.options)
+        {
+            ModifierOption newOption = ModifierManager.instance.Get_ModifierOption(option.optionKey);
+            foreach(Modifier modi in option.myMods)
+            {
+                ModifierType modType = modi.modifierType;
+
+                // Pool에서 해당 타입 객체 가져오기
+                PoolScriptType poolType = (PoolScriptType)Enum.Parse(typeof(PoolScriptType), modType.ToString());
+                IPoolScript pooled = pooler.GetModifier(modi.id);
+
+                if (pooled is Modifier newOne)
+                {
+                    modi.Copy(newOne);
+                    newOption.myMods.Add(newOne);
+                }
+            }
+        }
+        /*
         foreach (Modifier modi in origin.options)
         {
             ModifierType modType = modi.modifierType;
@@ -165,12 +184,12 @@ public class ItemFactory
                 modi.Copy(newOne);
                 item.options.Add(newOne);
             }
-            /*
+            
             else
             {
                 Debug.LogError($"Pool returned wrong type for {modType}");
-            }*/
-        }
+            }
+        }*/
         item.tier = origin.tier;
         return item;
     }

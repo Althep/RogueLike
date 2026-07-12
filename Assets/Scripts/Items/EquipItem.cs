@@ -8,7 +8,7 @@ public class EquipItem : ItemBase
     public Defines.ItemSubType itemSubType;
     public Defines.SlotType slot;
     public Defines.ItemRarity rarity;
-    public List<Modifier> addOptions = new List<Modifier>();
+    public List<ModifierOption> addOptions = new List<ModifierOption>();
 
     
     public override ItemBase Clone()
@@ -29,8 +29,16 @@ public class EquipItem : ItemBase
     {
         ItemSaveData itemSaveData = new ItemSaveData();
 
-        List<ModifierSaveData> addOptions = new List<ModifierSaveData>(); // 장비의 추가 옵션
+        List<ModifierOptionSaveData> modifierOptionSaveData = new List<ModifierOptionSaveData>();
 
+        for(int i = 0; i<addOptions.Count; i++)
+        {
+            ModifierOptionSaveData modSaved = addOptions[i].SaveData();
+            itemSaveData.addOptionsData.Add(modSaved);
+        }
+        //List<ModifierSaveData> addOptions = new List<ModifierSaveData>(); // 장비의 추가 옵션
+        return itemSaveData;
+        /*
         for (int i = 0; i<addOptions.Count; i++)
         {
             addOptions.Add(this.addOptions[i].SaveData());
@@ -38,6 +46,6 @@ public class EquipItem : ItemBase
         itemSaveData.itemCount = itemCount;
         itemSaveData.itemId = id;
         itemSaveData.addOptionsData = addOptions;
-        return itemSaveData;
+        return itemSaveData;*/
     }
 }

@@ -17,6 +17,11 @@ public class UI_Inventory : UI_GridSelect
     UI_InventoryConfirm inventoryConfirm;
 
     int selectedIndex = 0;
+
+    ItemBase selectedItem;
+    Action<ItemBase> OnSelectItem;
+    Action<ItemBase> OnChangeSelection;
+    [SerializeField] UI_ItemInfo itemInfo;
     private void Awake()
     {
         Init();
@@ -32,11 +37,17 @@ public class UI_Inventory : UI_GridSelect
     protected override void EnableFunc()
     {
         InputManager.instance.ChangeContext(GetInputType(), this, true);
+        SetActive_ItemInfoPanel();
     }
 
     private void OnDisable()
     {
         inventoryConfirmObj.SetActive(false);
+        if(selectedItem != null)
+        {
+            itemInfo.gameObject.SetActive(true);
+        }
+        
     }
 
     public void Init()
@@ -57,11 +68,23 @@ public class UI_Inventory : UI_GridSelect
         inventoryConfirmObj.SetActive(false);
         Set_InventorySlots();
         Set_Grid();
-
+        Add_SelectItemEvents();
+        Add_OnChangeSelectionEvent();
         Set_SelectedOBJ(new Vector2Int(0, 0));
         inventoryConfirm.Set_InventoryUI(this);
+
     }
 
+    public void Add_SelectItemEvents()
+    {
+        OnSelectItem -= inventoryConfirm.Set_SelectedItem;
+        OnSelectItem += inventoryConfirm.Set_SelectedItem;
+    }
+    public void Add_OnChangeSelectionEvent()
+    {
+        OnChangeSelection -= itemInfo.OnSelectItem;
+        OnChangeSelection += itemInfo.OnSelectItem;
+    }
     void Set_InventorySlots()
     {
         int inventoryMaxCount = inventory.maxInventory;
@@ -149,6 +172,10 @@ public class UI_Inventory : UI_GridSelect
 
         SelectObj.transform.SetParent(currentSelected.transform);
         SelectObj.transform.localPosition = Vector2.zero;
+
+        selectedItem = inventory.inventory[selectedIndex];
+        OnChangeSelection?.Invoke(selectedItem);
+        SetActive_ItemInfoPanel();
     }
 
 
@@ -191,7 +218,7 @@ public class UI_Inventory : UI_GridSelect
             return;
         }
         currentSelected.Excute();
-        if (inventory.inventory[selectedIndex] != null)
+        if (selectedItem != null)
         {
             InitInventoryConfirmPanel();
         }
@@ -199,11 +226,23 @@ public class UI_Inventory : UI_GridSelect
 
     public void InitInventoryConfirmPanel()
     {
-        //UI_InventorySlot current = currentSelected as UI_InventorySlot;
         int index = selectedIndex;
-        ItemBase selectedItem = inventory.inventory[index];
-
+        selectedItem = inventory.inventory[index]; // 선택 아이템 데이터
+        OnSelectItem(selectedItem);//이벤트 실행
         inventoryConfirm.Set_SelectedItem(selectedItem);
         inventoryConfirmObj.SetActive(true);
+    }
+
+    public void SetActive_ItemInfoPanel()
+    {
+        if(selectedItem!= null)
+        {
+            itemInfo.gameObject.SetActive(true);
+            
+        }
+        else
+        {
+            itemInfo.gameObject.SetActive(false);
+        }
     }
 }
