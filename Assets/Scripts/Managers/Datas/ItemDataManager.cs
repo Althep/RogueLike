@@ -140,7 +140,7 @@ public class ItemDataManager : AsyncDataManager<ItemDataManager>
     }
     async UniTask Read_EquipDatas(List<Dictionary<string,object>> originData)
     {
-        
+        /*
         for (int i = 0; i < originData.Count; i++)
         {
             string ID = null;
@@ -198,7 +198,7 @@ public class ItemDataManager : AsyncDataManager<ItemDataManager>
             {
                 Modifier mod = modifierFactory.CreateNewInstance(modifierId);
                 Utils.TrySetValue(originData[i], "Value", ref mod.value);
-                Debug.Log($"{Name} 모디파이어 ID : {modifierId} 등록 값 : {mod.value} 타입 {mod.modifierType} 스탯 타입{mod.stat} 모디파이어 ID {mod.id}");
+                Debug.Log($"{Name} 모디파이어 ID : {modifierId} 등록 값 : {mod.value} 타입 {mod.modifierType} 스탯 타입{mod.stat} 모디파이어 ID {mod.id}"); 
                 modOption.myMods.Add(mod);
             }
 
@@ -209,6 +209,7 @@ public class ItemDataManager : AsyncDataManager<ItemDataManager>
 
 
         }
+        */
     }
 
     /*

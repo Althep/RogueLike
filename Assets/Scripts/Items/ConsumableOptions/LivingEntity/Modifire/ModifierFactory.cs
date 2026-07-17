@@ -26,20 +26,14 @@ public class ModifierFactory
         return _instance;
     }
 
-    public List<Modifier> CreateNewInstance(string id)
+    public Modifier CreateNewModifier(string id)
     {
-        List<ModifierData> modifierDatas = modifierDataManager.GetModifierDataList(id);
-        List<Modifier> mods = new();
-        foreach(var modData in modifierDatas)
-        {
-            ModifierType modType = modData.modifierType;
-            Modifier newMod = CreateNewModifierToType(modType);
-            mods.Add(newMod);
-        }
-        return mods;
+        ModifierData modifierDatas = modifierDataManager.GetModifierData(id);
+        Modifier newMod = CreateNewModifierToType(modifierDatas.modifierType);
+        return newMod;
     }
 
-    private Modifier CreateNewModifierToType(ModifierType type)
+    Modifier CreateNewModifierToType(ModifierType type)
     {
         Modifier newMod = null;
         switch (type)
@@ -65,6 +59,7 @@ public class ModifierFactory
         return newMod;
     }
     // 풀러(Pooler)가 호출할 단일 진입점 (이전 대화에서 풀러가 호출하던 이름과 통일)
+    /*
     public Modifier CreateNewInstance(string id)
     {
         // Init().Forget() 제거: 팩토리는 이미 생성 시점에 초기화가 끝났어야 정상입니다.
@@ -81,10 +76,10 @@ public class ModifierFactory
         }
         return GetCopyModifier(targetTemplate);
     }
-
+    */
     public ModifierOption CreatNewOption(string id)
     {
-        ModifierOption modifierOption = modifierDataManager.Get_ModifierOptions(id);
+        ModifierOption modifierOption = modifierPooler.GetModifierOption(id);
         if(modifierOption == null)
         {
             Debug.Log($"ModifierFactory {id}에 해당하는 원본 데이터 찾을 수 없음 ");

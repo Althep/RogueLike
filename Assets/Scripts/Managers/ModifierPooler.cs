@@ -12,11 +12,12 @@ public class ModifierPooler
 
     private ModifierManager modifierManager;
     private ModifierFactory modifierFactory;
-
-    public void Set_ModifierManager(ModifierManager MM, ModifierFactory MF)
+    private ModifierDataManager modifierDataManager;
+    public void Set_ModifierManager(ModifierManager MM, ModifierFactory MF,ModifierDataManager MD)
     {
         modifierManager = MM;
         modifierFactory = MF;
+        modifierDataManager = MD;
     }
 
     public ModifierOption GetModifierOption(string id)
@@ -78,29 +79,12 @@ public class ModifierPooler
 
     IPoolScript CreateNew(string id)
     {
-        if (modifierFactory == null)
-        {
-            modifierFactory = modifierManager.GetModifierFactory();
-        }
-
-        // 핵심: 풀러는 switch문으로 타입을 구분하지 않습니다. 
-        // 팩토리에게 "이 ID에 맞는 완성된 모디파이어 객체를 하나 만들어줘"라고 지시만 합니다.
-        Modifier newModifier = modifierFactory.CreateNewInstance(id);
-
-        if (newModifier == null)
-        {
-            Debug.LogError($"[ModifierPooler] 팩토리에서 {id} 생성에 실패했습니다.");
-            return null;
-        }
-
-        // 비활성 큐가 없으면 초기화 후 삽입
-        if (!inactiveModifiers.ContainsKey(id))
-        {
-            inactiveModifiers[id] = new Queue<IPoolScript>();
-        }
-        inactiveModifiers[id].Enqueue(newModifier);
-
-        return newModifier;
+        Modifier newMod = modifierFactory.CreateNewModifier(id); //새로운 모디파이어 생성
+        ModifierData modData = modifierDataManager.GetModifierData(id); //데이터 가져오기
+        Defines.ModifierType modType = modData.modifierType; 
+        
+        newMod.SetData(modData); // 데이터셋팅
+        return newMod;
     }
 
     IPoolScript CreateNewOption(string id)

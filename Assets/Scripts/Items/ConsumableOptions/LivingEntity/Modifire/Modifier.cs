@@ -23,9 +23,15 @@ public class Modifier : IPoolScript
     {
         poolType = type;
     }
-    public void SetData(ModifierData modData)
+    public virtual void SetData(ModifierData modData)
     {
-
+        id = modData.id;
+        triggerType = modData.triggerType;
+        stat = modData.stat;
+        priority = modData.priority;
+        isMulti = modData.isMulti;
+        value = modData.value;
+        modifierType = modData.modifierType;
     }
     public virtual void Copy(Modifier newOne)
     {
@@ -149,7 +155,17 @@ public class BuffModifier : Modifier
 
         this.duration = 0;
     }
-    
+
+    public override void SetData(ModifierData modData)
+    {
+        base.SetData(modData);
+        minTime = (int)modData.minTime;
+        maxTime = (int)modData.maxTime;
+        stringValue = modData.stringValue;
+        effectName = modData.effectName;
+        buffType = modData.buffType;
+    }
+
     void GetStats()
     {
 

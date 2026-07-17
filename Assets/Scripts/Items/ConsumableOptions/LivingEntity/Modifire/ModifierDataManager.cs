@@ -49,8 +49,8 @@ public class ModifierData
 public class ModifierDataManager : AsyncDataManager<ModifierDataManager>
 {
     // ★ 핵심: 1개의 ID 키가 여러 개의 '설계도 데이터(ModifierData)' 리스트를 가집니다.
-    private Dictionary<string, List<ModifierData>> modifierDataGroup = new();
-
+    private Dictionary<string, ModifierData> modifierDataGroup = new();
+    private Dictionary<string, List<string>> modifierids = new();
     public override async UniTask Init() { /* 초기화 */ }
 
     public async UniTask SetUp(List<TextAsset> myAssets)
@@ -74,15 +74,7 @@ public class ModifierDataManager : AsyncDataManager<ModifierDataManager>
             ModifierData data = new ModifierData();
             data.ParseFromCsv(row); // (이전 답변에서 만든 다용도 파싱 함수)
 
-            // 2. ★ 딕셔너리에 ID 키가 아직 없다면, 새로운 리스트를 만들어서 등록합니다.
-            if (!modifierDataGroup.ContainsKey(id))
-            {
-                modifierDataGroup[id] = new List<ModifierData>();
-            }
-
-            // 3. 해당 ID의 리스트에 데이터 설계도를 추가합니다!
-            // (예: OPT_DAGGER_01 리스트에 공격력 데이터 추가 -> 다음 루프에서 명중률 데이터 추가)
-            modifierDataGroup[id].Add(data);
+            modifierDataGroup[id] = (data);
 
             await Utils.WaitYield(i);
         }
@@ -90,9 +82,14 @@ public class ModifierDataManager : AsyncDataManager<ModifierDataManager>
     }
 
     // 외부에서 특정 옵션 ID에 묶인 모든 설계도 리스트를 요청할 때 사용
-    public List<ModifierData> GetModifierDataList(string id)
+    public ModifierData GetModifierData(string id)
     {
         return modifierDataGroup.GetValueOrDefault(id);
+    }
+
+    public List<string> Get_ModifierOptionKeys(string id)
+    {
+        return modifierids[id];
     }
 }
 /*

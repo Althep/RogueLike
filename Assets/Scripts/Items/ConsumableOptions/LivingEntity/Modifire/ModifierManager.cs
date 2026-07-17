@@ -41,14 +41,15 @@ public class ModifierManager : MonoBehaviour
             modifierFactory = await ModifierFactory.CreateAsync();
             //await modifierFactory.Init();
         }
-        if (modifierPooler == null)
-        {
-            modifierPooler = new ModifierPooler();
-            modifierPooler.Set_ModifierManager(this,modifierFactory);
-        }
+        
         if(modifierDataManager == null)
         {
             modifierDataManager = await ModifierDataManager.CreateAsync();
+        }
+        if (modifierPooler == null)
+        {
+            modifierPooler = new ModifierPooler();
+            modifierPooler.Set_ModifierManager(this, modifierFactory, modifierDataManager);
         }
         /*
         if(startDataManager == null)
@@ -72,7 +73,7 @@ public class ModifierManager : MonoBehaviour
         if(modifierPooler == null)
         {
             modifierPooler = new ModifierPooler();
-            modifierPooler.Set_ModifierManager(this,modifierFactory);
+            modifierPooler.Set_ModifierManager(this,modifierFactory,modifierDataManager);
         }
         return modifierPooler;
     }
