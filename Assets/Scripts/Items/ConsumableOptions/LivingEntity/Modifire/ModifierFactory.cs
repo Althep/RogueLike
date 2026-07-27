@@ -33,7 +33,7 @@ public class ModifierFactory
         return newMod;
     }
 
-    Modifier CreateNewModifierToType(ModifierType type)
+    public Modifier CreateNewModifierToType(ModifierType type)
     {
         Modifier newMod = null;
         switch (type)

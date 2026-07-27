@@ -1,6 +1,6 @@
 using UnityEngine;
 
-public class ElementalDamage : ModifierAction
+public class DotDamage : ModifierAction
 {
     public override void Reset()
     {

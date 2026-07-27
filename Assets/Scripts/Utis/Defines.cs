@@ -229,7 +229,7 @@ public static class Defines
         DamageReduce,
         ShieldDefense,
         Damage,
-        Accurancy,
+        Accuracy,
         AttackRange,
         SpellDamage,
         SpellAccurancy,

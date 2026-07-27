@@ -108,7 +108,7 @@ public class CombatManager : MonoBehaviour
         float levelFactor = 1f + attacker.Get_MyData().GetLevel() * 0.06f;
 
         // 공격자의 명중력
-        int acc = Mathf.Max(1, (int)((atk[StatType.Accurancy] + atk[StatType.Dex] / 4 + atk[StatType.Str] / 5) * levelFactor));
+        int acc = Mathf.Max(1, (int)((atk[StatType.Accuracy] + atk[StatType.Dex] / 4 + atk[StatType.Str] / 5) * levelFactor));
 
         // 방어자의 회피력
         int ev = (int)(def[StatType.Defense] + def[StatType.Dex] / 3 + def[StatType.Evasion]);

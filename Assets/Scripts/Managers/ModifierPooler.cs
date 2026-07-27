@@ -13,6 +13,7 @@ public class ModifierPooler
     private ModifierManager modifierManager;
     private ModifierFactory modifierFactory;
     private ModifierDataManager modifierDataManager;
+
     public void Set_ModifierManager(ModifierManager MM, ModifierFactory MF,ModifierDataManager MD)
     {
         modifierManager = MM;

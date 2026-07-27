@@ -12,6 +12,7 @@ public class Modifier : IPoolScript
     public int priority;
     public bool isMulti;
     public float value;
+    public string stringValue;
     public ModifierType modifierType;
 
     public PoolScriptType GetScriptType()
@@ -48,7 +49,7 @@ public class Modifier : IPoolScript
     {
         id = null;
         triggerType = ModifierTriggerType.Passive;
-        stat = StatType.Accurancy;
+        stat = StatType.Accuracy;
         priority = 0;
         isMulti = false;
         value = 0;
@@ -70,6 +71,22 @@ public class Modifier : IPoolScript
     {
         Reset();
         ModifierManager.instance.Return_Modifier(this);
+    }
+
+    public virtual void SetBaseData(Dictionary<string,object> originData)
+    {/*
+        public string id;
+    public ModifierTriggerType triggerType;
+    public StatType stat;
+    public int priority;
+    public bool isMulti;
+    public float value;
+    public ModifierType modifierType;*/
+        Utils.TrySetValue(originData, "ID", ref id);
+        Utils.TryConvertEnum(originData,"ModifierTrigger",ref triggerType);
+        Utils.TrySetValue(originData, "Priority", ref priority);
+        Utils.TrySetValue(originData, "IsMulti", ref isMulti);
+        Utils.TrySetValue(originData, "StringValue", ref stringValue);
     }
 }
 
@@ -129,7 +146,11 @@ public class StatModifier : Modifier
     {
         base.Reset();
     }
-
+    public override void SetBaseData(Dictionary<string, object> originData)
+    {
+        base.SetBaseData(originData);
+        Utils.TryConvertEnum(originData, "StringValue", ref stat);
+    }
 }
 
 public class BuffModifier : Modifier
@@ -137,7 +158,6 @@ public class BuffModifier : Modifier
     public int duration;
     public int minTime;
     public int maxTime;
-    public string stringValue;
     public string effectName;
     public ActionEffectType actionType;
     public BuffCategory buffCategory;
@@ -159,8 +179,8 @@ public class BuffModifier : Modifier
     public override void SetData(ModifierData modData)
     {
         base.SetData(modData);
-        minTime = (int)modData.minTime;
-        maxTime = (int)modData.maxTime;
+        minTime = (int)modData.minDuration;
+        maxTime = (int)modData.maxDuration;
         stringValue = modData.stringValue;
         effectName = modData.effectName;
         buffType = modData.buffType;
@@ -206,6 +226,11 @@ public class BuffModifier : Modifier
         myAction.value = value;
         myAction.stringValue = stringValue;
         myAction.SetValueToString();
+    }
+    public override void SetBaseData(Dictionary<string, object> originData)
+    {
+        base.SetBaseData(originData);
+        Utils.TrySetValue(originData,"EffectName",ref effectName);
     }
 }
 public class DamageModifier : Modifier
@@ -269,14 +294,12 @@ public class ActionModifier: Modifier
 {
     public ModifierAction action;
     public string effectName;
-    public string stringValue;
     public int minValue;
     public int maxValue;
     public override void Apply(LivingEntity entity)
     {
         ModifierContext context = entity.GetContext(triggerType);
         List<ModifierAction> effects = context.modifierActions;
-
         bool isAlreadyExist = false;
 
         // 1. 리스트를 딱 한 번만 돌면서 확인합니다.
@@ -339,6 +362,12 @@ public class ActionModifier: Modifier
         stringValue = null;
         minValue = 0;
         maxValue = 0;
+    }
+
+    public override void SetBaseData(Dictionary<string, object> originData)
+    {
+        base.SetBaseData(originData);
+        Utils.TrySetValue(originData, "EffectName", ref effectName);
     }
 }
 

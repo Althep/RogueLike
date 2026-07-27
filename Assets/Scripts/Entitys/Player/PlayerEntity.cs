@@ -41,7 +41,7 @@ public class PlayerEntity : LivingEntity
         }
 
         myStat.SetBaseStat(StatType.Damage, 1);
-        myStat.SetBaseStat(StatType.Accurancy, 1);
+        myStat.SetBaseStat(StatType.Accuracy, 1);
         myStat.SetBaseStat(StatType.AttackRange, 1);
         myStat.SetBaseStat(StatType.Vision, 6);
         myStat.SetBaseStat(StatType.Sound, 6);
