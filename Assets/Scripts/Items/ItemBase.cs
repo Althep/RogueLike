@@ -14,12 +14,15 @@ public abstract class ItemBase
     public Defines.ItemCategory category;
     public float weight;
     public string tooltipKey;
+    
+    // 설계도(Template)가 데이터를 들고 있을 때 사용하는 옵션 키 리스트
+    public List<string> optionKeys = new List<string>();
+    
+    // 실제 런타임 아이템 인스턴스가 생성되었을 때 풀에서 가져와 채워넣는 옵션 객체 리스트
     public List<ModifierOption> options = new List<ModifierOption>();
 
     public virtual void OnUse(LivingEntity entity)
     {
-        // 1. 장전: 모디파이어들을 엔티티의 주머니(컨텍스트)에 넣습니다.
-
         for(int i = 0; i <options.Count; i++)
         {
             List<Modifier> mod = options[i].myMods;
@@ -28,6 +31,7 @@ public abstract class ItemBase
         
         entity.ExecuteAction(entity, Defines.ModifierTriggerType.OnUseItem);
     }
+    
     public bool CanStack(int amount)
     {
         return category == Defines.ItemCategory.Consumable;
@@ -44,12 +48,13 @@ public abstract class ItemBase
 
         return rest;
     }
+    
     public abstract Enum GetSpecificType();
 
     public abstract ItemBase Clone();
 
-    // ?? 공통 데이터 복사를 위한 도우미 함수 (상세 설명)
-    protected void CopyBaseProperties(ItemBase cloneObj)
+    // 빈 껍데기(Clone)에 기본 속성만 복사해 주는 함수
+    public void CopyBaseProperties(ItemBase cloneObj)
     {
         cloneObj.id = this.id;
         cloneObj.name = this.name;
@@ -59,34 +64,11 @@ public abstract class ItemBase
         cloneObj.category = this.category;
         cloneObj.weight = this.weight;
 
-        // 엔티티 참조는 그대로 넘겨주거나 null로 초기화합니다. (상황에 맞게 선택)
-
-        // ?? 핵심: 리스트 내부의 옵션들까지 '깊은 복사' 수행
+        // 설계도의 텍스트(Key)만 안전하게 복사해 넘김
+        cloneObj.optionKeys = new List<string>(this.optionKeys);
+        
+        // 런타임 풀링 객체 리스트는 새로 할당할 준비만 해둠
         cloneObj.options = new List<ModifierOption>();
-
-
-        for(int i = 0; i<this.options.Count; i++)
-        {
-            ModifierOption option = this.options[i];
-        }
-        foreach(var option in this.options)
-        {
-            List<Modifier> mods = option.myMods;
-
-            for(int i = 0; i <mods.Count; i++)
-            {
-                Modifier copied = ModifierManager.instance.Get_Modifier(mods[i].id);
-                Debug.Log($"아이템 데이터 클로닝 아이디{id}, 모디파이어 아이디{copied.id}");
-                
-            }
-        }
-        foreach (var option in this.options)
-        {
-            // option.Clone()을 호출하여 Modifier도 새롭게 생성해서 넣습니다.
-            ModifierOption copied = ModifierManager.instance.Get_ModifierOption(option.optionKey);
-            
-            cloneObj.options.Add(copied);
-        }
     }
 
     public virtual ItemSaveData SaveData()

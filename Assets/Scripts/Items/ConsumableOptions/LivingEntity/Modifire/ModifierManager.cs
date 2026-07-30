@@ -63,7 +63,7 @@ public class ModifierManager : MonoBehaviour
     {
         if (modifierFactory == null)
         {
-            // 만약 Init이 끝나지 않았다면 여기서도 null이 반환될 수 있음
+            // ???? Init?? ?????? ????? ?????? null?? ????? ?? ????
             Debug.LogWarning("Factory is not initialized yet!");
         }
         return modifierFactory;
@@ -92,5 +92,9 @@ public class ModifierManager : MonoBehaviour
     public void Return_Modifier(Modifier modifier)
     {
         modifierPooler.ReturnModifier(modifier);
+    }
+    public void Return_ModifierOption(ModifierOption option)
+    {
+        modifierPooler.ReturnModifierOption(option);
     }
 }

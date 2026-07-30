@@ -1,0 +1,13 @@
+{
+    "dotrush.roslyn.projectOrSolutionFiles": [
+        "d:\\UnityProjects\\RogueLike\\RogueLike.sln",
+        "d:\\UnityProjects\\RogueLike\\Assembly-CSharp-Editor.csproj",
+        "d:\\UnityProjects\\RogueLike\\Assembly-CSharp.csproj",
+        "d:\\UnityProjects\\RogueLike\\UniTask.Addressables.csproj",
+        "d:\\UnityProjects\\RogueLike\\UniTask.csproj",
+        "d:\\UnityProjects\\RogueLike\\UniTask.DOTween.csproj",
+        "d:\\UnityProjects\\RogueLike\\UniTask.Editor.csproj",
+        "d:\\UnityProjects\\RogueLike\\UniTask.Linq.csproj",
+        "d:\\UnityProjects\\RogueLike\\UniTask.TextMeshPro.csproj"
+    ]
+}

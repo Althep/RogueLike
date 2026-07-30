@@ -30,8 +30,6 @@ public class ItemSelectPanel : SelectSubPanel
         InitMenu();
     }
 
-
-
     protected override void InitMenu()
     {
         base.InitMenu();
@@ -43,7 +41,6 @@ public class ItemSelectPanel : SelectSubPanel
         MakePanels();
     }
 
-
     public void MakePanels()
     {
         ReturnMyPools();
@@ -51,15 +48,7 @@ public class ItemSelectPanel : SelectSubPanel
         startItems.Clear();
 
         startEquips = FilterItems();
-        /*
-        foreach (SlotType slot in startEquips.Keys)
-        {
-            foreach (string value in startEquips[slot])
-            {
-                Debug.Log($"Start Item Keys {value}");
-            }
-        }
-        */
+
         foreach (SlotType slot in startEquips.Keys)
         {
             AddItemSlotList(slot);
@@ -105,7 +94,6 @@ public class ItemSelectPanel : SelectSubPanel
         {
             itemScrolls[slot] = cell;
         }
-        
     }
 
     Dictionary<SlotType, List<string>> FilterItems()
@@ -122,36 +110,37 @@ public class ItemSelectPanel : SelectSubPanel
             selectJob = Jobs.Warrior;
         }
 
-        RaceData raceData = dm.startDataManager.raceDatas[selectRace];
-        List<ModifierOption> modifiers = raceData.modifiers;
-
-        Dictionary<SlotType, StartData> jobItems = dm.startDataManager.startDatas[selectJob];
         Dictionary<SlotType, List<string>> selects = new Dictionary<SlotType, List<string>>();
         Dictionary<string, ItemBase> itemDatas = im.Get_ItemDatas();
 
-        foreach (SlotType slot in jobItems.Keys)
+        // [수정] 바뀐 StartDataManager의 구조체 참조에 맞춤
+        if (dm.startDataManager.startItemDatas.ContainsKey(selectJob))
         {
-            StartData data = jobItems[slot];
-            List<string> itemName = data.names;
+            StartItemData jobItems = dm.startDataManager.startItemDatas[selectJob];
 
-            foreach (string key in itemName)
+            foreach (SlotType slot in jobItems.slotItems.Keys)
             {
-                if (itemDatas[key] is EquipItem equip)
+                List<string> itemName = jobItems.slotItems[slot];
+
+                foreach (string key in itemName)
                 {
-                    if (!checker.IsRestricted(itemDatas[key], ModifierTriggerType.OnEquip))
+                    if (itemDatas[key] is EquipItem equip)
                     {
-                        if (!selects.ContainsKey(slot))
+                        if (!checker.IsRestricted(itemDatas[key], ModifierTriggerType.OnEquip))
                         {
-                            selects.Add(slot, new List<string>());
+                            if (!selects.ContainsKey(slot))
+                            {
+                                selects.Add(slot, new List<string>());
+                            }
+                            selects[slot].Add(key);
                         }
-                        selects[slot].Add(key);
                     }
-                }
-                else
-                {
-                    if (!checker.IsRestricted(itemDatas[key], ModifierTriggerType.OnUseItem))
+                    else
                     {
-                        startItems.Add(key);
+                        if (!checker.IsRestricted(itemDatas[key], ModifierTriggerType.OnUseItem))
+                        {
+                            startItems.Add(key);
+                        }
                     }
                 }
             }

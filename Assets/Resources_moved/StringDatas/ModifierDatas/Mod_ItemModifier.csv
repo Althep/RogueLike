@@ -1,0 +1,14 @@
+ID,ModifierTrigger,StatType,ItemTargetType,ItemCategory,Equipable,SpecificType,ModifierType
+LightArmor_Def,OnEquip,Deffense,Specific,EquipMent,TRUE,LightArmor,ItemModifier
+Sword_Damage,OnEquip,Damage,Specific,EquipMent,TRUE,Sword,ItemModifier
+Sword_Acc,OnEquip,Accuracy,Specific,EquipMent,TRUE,Sword,ItemModifier
+Bow_Damage,OnEquip,Damage,Specific,EquipMent,TRUE,Bow,ItemModifier
+Bow_Acc,OnEquip,Accuracy,Specific,EquipMent,TRUE,Bow,ItemModifier
+Axe_Damage,OnEquip,Damage,Specific,EquipMent,TRUE,Axe,ItemModifier
+Axe_Acc,OnEquip,Accuracy,Specific,EquipMent,TRUE,Axe,ItemModifier
+HeavyArmor_Def,OnEquip,Deffense,Specific,EquipMent,TRUE,HeavyArmor,ItemModifier
+HeavyArmor_DamageReduce,OnEquip,DamageReduce,Specific,EquipMent,TRUE,HeavyArmor,ItemModifier
+Blunt_Damage,OnEquip,Damage,Specific,EquipMent,TRUE,Blunt,ItemModifier
+ShortSword_Damage,OnEquip,Damage,Specific,EquipMent,TRUE,ShortSword,ItemModifier
+ShortSword_Acc,OnEquip,Accuracy,Specific,EquipMent,TRUE,ShortSword,ItemModifier
+Potion_Effect,OnUse,Value,Specific,Consumable,TRUE,Potion,ItemModifier

@@ -17,6 +17,10 @@ public class SelectPanels : UI_GridSelect
     [SerializeField] UI_ConfirmPanel confirmPanel;
     //[SerializeField] GameObject selectViewObj;
     public ModifierController checker = new ModifierController();
+    
+    // [수정] 미리보기(착용 제한 검사 등)를 위해 풀에서 가져온 임시 모디파이어 객체들 보관
+    public List<ModifierOption> previewOptions = new List<ModifierOption>();
+
     private UIManager uiManager;
 
     UI_Base CurrentSelected;
@@ -67,10 +71,8 @@ public class SelectPanels : UI_GridSelect
             _currentCol = 0;
             _currentRow = 0;
 
-            // 방향 이동량(Vector2Int.zero)을 0으로 넘겨주어, 위치값 변경 없이 현재(0,0) 위치로 UI만 갱신하도록 만듭니다.
             ChangeSelection(Vector2Int.zero);
         }
-
     }
 
 
@@ -87,16 +89,68 @@ public class SelectPanels : UI_GridSelect
     {
         return _grid.Count;
     }
-    // 하위 패널에서 선택 시 호출
+    
+    // [수정] 종족이 선택될 때 풀링 옵션 갱신
     public void OnRaceSelected(Races race)
     {
+        UpdateCheckerModifiers();
         jobSelect.RefreshContents(race);
-
     }
 
+    // [수정] 직업이 선택될 때 풀링 옵션 갱신
     public void OnJobSelected(Jobs job)
     {
+        UpdateCheckerModifiers();
         itemSelect.RefreshContents(job);
+    }
+
+    // [수정] 현재 선택된 종족과 직업을 바탕으로 checker(ModifierController)를 새로 세팅
+    private void UpdateCheckerModifiers()
+    {
+        // 1. 기존에 들고 있던 옵션들을 모두 풀로 연쇄 반납 (메모리 누수 방지)
+        foreach (var opt in previewOptions)
+        {
+            ModifierManager.instance.Return_ModifierOption(opt);
+        }
+        previewOptions.Clear();
+
+        // checker 내부 캐시 초기화
+        checker = new ModifierController(); // 안전하게 새로 생성
+        checker.InitAllContext(null); // 아직 Entity가 없으므로 null 또는 임시 객체
+
+        DataManager dm = GameManager.instance.Get_DataManager();
+        Races selectRace = raceSelect.selectRace;
+        Jobs selectJob = jobSelect.selectJob;
+
+        // 2. 종족 특성 읽어오기 및 런타임 풀 객체 조립
+        if (dm.startDataManager.raceModDatas.ContainsKey(selectRace))
+        {
+            RaceModData raceData = dm.startDataManager.raceModDatas[selectRace];
+            foreach (string optKey in raceData.optionKeys)
+            {
+                ModifierOption newOption = ModifierManager.instance.Get_ModifierOption(optKey);
+                if (newOption != null)
+                {
+                    previewOptions.Add(newOption);
+                    checker.AddMutation(newOption); // checker에 주입
+                }
+            }
+        }
+
+        // 3. 직업 특성 읽어오기 및 런타임 풀 객체 조립
+        if (dm.startDataManager.jobStartDatas.ContainsKey(selectJob))
+        {
+            JobStartData jobData = dm.startDataManager.jobStartDatas[selectJob];
+            foreach (string optKey in jobData.optionKeys)
+            {
+                ModifierOption newOption = ModifierManager.instance.Get_ModifierOption(optKey);
+                if (newOption != null)
+                {
+                    previewOptions.Add(newOption);
+                    checker.AddMutation(newOption); // checker에 주입
+                }
+            }
+        }
     }
 
     public void OnItemSelected()
@@ -134,23 +188,18 @@ public class SelectPanels : UI_GridSelect
 
         if (selectedRect != null && selectObjRect != null)
         {
-            // 1. [스케일 왜곡 방지] false를 넣어 로컬 트랜스폼 값을 깔끔하게 유지합니다.
             SelectObj.transform.SetParent(selected.transform, false);
 
-            // 2. [가려짐 방지] 부모 객체 내에서 가장 마지막 순서로 보내 최상단에 렌더링되게 합니다.
             SelectObj.transform.SetAsLastSibling();
 
             selectObjRect.anchorMin = Vector2.zero; // (0, 0)
             selectObjRect.anchorMax = Vector2.one;  // (1, 1)
             selectObjRect.pivot = new Vector2(0.5f, 0.5f);
 
-            // Stretch 앵커이므로 여백과 위치를 0으로 주면 부모와 100% 동일한 크기가 됩니다.
             selectObjRect.sizeDelta = Vector2.zero;
             selectObjRect.anchoredPosition = Vector2.zero;
         }
     }
-
-    
 
     
     public override void ExecuteSelectedMenu()
@@ -158,7 +207,6 @@ public class SelectPanels : UI_GridSelect
         CurrentSelected?.Excute();
     }
 
-    // --- 씬 이동 및 생성 로직 ---
     public void ConfirmFunction()
     {
         SetUpAndDungeonLoad().Forget();
@@ -199,11 +247,9 @@ public class SelectPanels : UI_GridSelect
 
     private async UniTask LoadDungeonSceneAsync()
     {
-        //await AddItemsAsync();
-        Debug.Log("던전씬 비동기 로드 시작!");
+        Debug.Log("던전 씬 비동기 로드 시작!");
         await SceneController.Instance.PrePostAwaits(null, Defines.Scenes.DungeonScene, CreateNewDungeon);
-        //DungeonManager.instance.ChangeFloor(1);
-        Debug.Log("던전씬 로드 완료. 던전 생성 시작.");
+        Debug.Log("던전 씬 로드 완료. 던전 생성 시작.");
         
     }
 
@@ -229,6 +275,17 @@ public class SelectPanels : UI_GridSelect
     {
         InputManager.instance.CloseInputUI(this);
     }
+    
+    // [수정] 안전망: UI가 꺼질 때 고아 객체들 풀로 돌려보내기
+    private void OnDisable()
+    {
+        foreach (var opt in previewOptions)
+        {
+            ModifierManager.instance.Return_ModifierOption(opt);
+        }
+        previewOptions.Clear();
+    }
+
     public override void CloseUI()
     {
         //base.CloseUI();

@@ -18,7 +18,7 @@ public class EquipSystem
         SlotType slot = target.slot;
         UnEquipItem(target.slot); // 기존 장비 해제 
         equipments[slot] = target; // 장비 착용
-
+        modifierController.OnChangeEquipMent();
         // 새 장비 모디파이어 적용
         foreach (ModifierOption option in target.options) modifierController.AddEquipment(option);
         foreach (ModifierOption option in target.addOptions) modifierController.AddEquipment(option);
@@ -31,6 +31,8 @@ public class EquipSystem
             EquipItem origin = equipments[slot];
             foreach (ModifierOption modi in origin.options) modifierController.RemoveEquipment(modi);
             foreach (ModifierOption modi in origin.addOptions) modifierController.RemoveEquipment(modi);
+
+            modifierController.OnChangeEquipMent();
         }
     } 
 

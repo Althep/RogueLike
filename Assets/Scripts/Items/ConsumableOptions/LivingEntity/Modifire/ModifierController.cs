@@ -54,7 +54,6 @@ public class ModifierController
         List<ModifierOption> equipModifiers = equip.options;
         List<ModifierOption> equipAddOptions = equip.addOptions;
 
-
         if (equipModifiers != null)
         {
             for (int i = 0; i < equipModifiers.Count; i++) AddEquipment(equipModifiers[i]);
@@ -64,6 +63,7 @@ public class ModifierController
         {
             for (int i = 0; i < equipAddOptions.Count; i++) AddEquipment(equipAddOptions[i]);
         }
+
     }
     private void AddModifierOptionInternal(Dictionary<ModifierTriggerType, List<Modifier>> targetDict, ModifierOption modifier)
     {
@@ -74,6 +74,11 @@ public class ModifierController
         
     }
 
+    public void OnChangeEquipMent()
+    {
+        dirtyFlags[ModifierTriggerType.OnEquip] = true;
+        GetUpdatedContext(ModifierTriggerType.OnEquip);
+    }
     private void AddModifierInternal(Dictionary<ModifierTriggerType,List<Modifier>> targetDict, Modifier mod)
     {
         ModifierTriggerType trigger = mod.triggerType;

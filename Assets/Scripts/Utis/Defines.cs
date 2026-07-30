@@ -249,6 +249,8 @@ public static class Defines
         Tir,
         ExtraLife,
         AwakeRate,
+        StatPoint,
+        Value
     }
     public enum DamageType
     {
@@ -385,7 +387,8 @@ public static class Defines
         Back,
         Hand,
         Foot,
-        SubHand
+        SubHand,
+        Default
     }
     #endregion
     #region Monster

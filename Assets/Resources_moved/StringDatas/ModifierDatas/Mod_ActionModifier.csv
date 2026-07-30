@@ -1,0 +1,6 @@
+ID,EffectName,StringValue,IsMulti,ModifierTrigger,Priority,ModifierType
+AddOption_ElementalDamage_Fire,ElementalDamage,Fire,TRUE,AfterAttack,90,ActionModifier
+AddOption_ElementalDamage_Ice,ElementalDamage,Ice,TRUE,AfterAttack,90,ActionModifier
+AddOption_ElementalDamage_Thunder,ElementalDamage,Thunder,TRUE,AfterAttack,90,ActionModifier
+AddOption_Vamp,Vamp,Vamp,TRUE,AfterAttack,100,ActionModifier
+Weapon_TwoHand,SlotBlock,SubHand,TRUE,Passive,100,ActionModifier

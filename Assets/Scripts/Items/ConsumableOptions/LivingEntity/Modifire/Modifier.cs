@@ -376,29 +376,55 @@ public class ItemModifier : Modifier
     public ItemTargetType itemTargetType;
     public ItemCategory itemCategory;
     public Enum specificType;
-    public bool unEquipable;
+    public bool Equipable;
     public ItemModifier(string name, ItemTargetType targetType, ItemCategory category, float value, int priority,bool unEquipable)
     {
         this.id = name;
         this.itemTargetType = targetType;
         itemCategory = category;
-        this.unEquipable = unEquipable;
+        this.Equipable = unEquipable;
         modifierType = ModifierType.ItemModifier;
     }
     public ItemModifier()
     {
         modifierType = ModifierType.ItemModifier;
     }
+    public override void SetBaseData(Dictionary<string, object> originData)
+    {
+        base.SetBaseData(originData);
+        string specificString = null;
+        Utils.TryConvertEnum(originData, "ItemTargetType",ref itemTargetType);
+        Utils.TryConvertEnum(originData, "ItemCategory", ref itemCategory);
+        Utils.TrySetValue(originData, "Equipable", ref Equipable);
+        Utils.TrySetValue(originData, "SpecificType", ref specificString);
+        if (Utils.Get_ItemSpecificType(specificString)!=null)
+        {
+            specificType =  Utils.Get_ItemSpecificType(specificString);
+        }
+        else
+        {
+            Debug.LogError($"아이템 타입이 잘못 되었음!ID {id} , {originData["SpecificType"].ToString()}");
+        }
+    }
     public void Set(string name, ItemTargetType targetType, ItemCategory category, float value, int priority, bool unEquipable)
     {
         this.id = name;
         this.itemTargetType = targetType;
         itemCategory = category;
-        this.unEquipable = unEquipable;
+        this.Equipable = unEquipable;
     }
     public override void Apply(LivingEntity entity)
     {
-        ModifierContext context = entity.GetContext(triggerType);
+        if (Utils.ItemModifierCheck(this,entity.usingItem))
+        {
+            ApplyModifiers(entity.GetContext(triggerType));
+        }
+    }
+    
+
+
+    public void ApplyModifiers(ModifierContext context)
+    {
         if (isMulti)
         {
             if (!context.multifle.ContainsKey(stat))
@@ -424,7 +450,7 @@ public class ItemModifier : Modifier
             item.itemTargetType = itemTargetType;
             item.itemCategory = itemCategory;
             item.specificType = specificType;
-            item.unEquipable = unEquipable;
+            item.Equipable = Equipable;
         }
     }
     public override void Reset()

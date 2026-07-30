@@ -12,6 +12,7 @@ public class LivingEntity : MapEntity
     public string Objname;
     public string id;
     protected Races race;
+    public ItemBase usingItem;
     #endregion
 
     #region [2] »óÅÂ ¹× ½ºÅÈ (Stats & Level)
@@ -125,12 +126,15 @@ public class LivingEntity : MapEntity
     {
         if (item is EquipItem equip)
         {
+            usingItem = equip;
             equipSystem.ItemEquip(equip);
         }
         else if (item is ConsumableItem consum)
         {
+            usingItem = consum;
             consum.OnUse(this);
         }
+        usingItem = null;
     }
 
     public bool IsRistricted(ItemBase item, ModifierTriggerType trigger) => modifierController.IsRestricted(item, trigger);

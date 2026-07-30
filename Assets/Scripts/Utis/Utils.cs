@@ -4,6 +4,8 @@ using System.Collections.Generic;
 using System.Collections;
 using System.Linq;
 using Cysharp.Threading.Tasks;
+using static Defines;
+
 public static class Utils
 {
 
@@ -279,6 +281,22 @@ public static class Utils
             list[k] = list[n];
             list[n] = value;
         }
+    }
+    public static bool ItemModifierCheck(ItemModifier itemMod, ItemBase item)
+    {
+        bool isMatch = false;
+        switch (itemMod.itemTargetType)
+        {
+            case ItemTargetType.Category:
+                isMatch = (item.category == itemMod.itemCategory);
+                break;
+            case ItemTargetType.Specific:
+                isMatch = (itemMod.itemCategory == item.category && itemMod.specificType.Equals(item.GetSpecificType()));
+                break;
+            default:
+                break;
+        }
+        return isMatch;
     }
 
     public static Vector2Int IntToMapPos(int value, int width, int height) // 맵레이어 관련되어서 맵코스트 계산 시 좌표필요해 작성

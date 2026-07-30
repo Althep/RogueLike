@@ -103,6 +103,7 @@ public class DataManager
 
         await effectDataManager.SetUp(allAssets.Where(a => a.name.StartsWith("Act_")).ToList());
         await modifierDataMgr.SetUp(allAssets.Where(a => a.name.StartsWith("Mod_")).ToList());
+        await modifierDataMgr.SetUp(allAssets.Where(a => a.name.StartsWith("ModOption_")).ToList());
         await itemDataMgr.SetUp(allAssets.Where(a => a.name.StartsWith("Item_")).ToList());
         await startDataMgr.SetUp(allAssets.Where(a => a.name.StartsWith("Start_")).ToList());
         await monsterManager .SetUp(allAssets.Where(a => a.name.StartsWith("Monster_")).ToList());
