@@ -14,7 +14,73 @@ MonoBehaviour:
   m_EditorClassIdentifier: Unity.Addressables.Editor::UnityEditor.AddressableAssets.Settings.AddressableAssetGroup
   m_GroupName: ModifierDatas
   m_GUID: b02b7978f75eef14da8980ec6f65b1ec
-  m_SerializeEntries: []
+  m_SerializeEntries:
+  - m_GUID: 343fb92669f7d184695dc40201b2080f
+    m_Address: Mod_BuffModifier
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - GameData
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 5f4bc3c131092644da4cc8bdc4b28d34
+    m_Address: ModOption_AddOptions
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - GameData
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 63ef6d127b00005499bef84ad3caf1e8
+    m_Address: ModOption_Item
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - GameData
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 70054186ab6d34d478a361841a4232d1
+    m_Address: Mod_StatModifier
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - GameData
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 7819d055816c0524abbbbabc901795ed
+    m_Address: ModOption_JobStat
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - GameData
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 7aa7ce06ddd847f429c007577b321b4c
+    m_Address: ModOption_Stat
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - GameData
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 8ca999e4e22faf1439dac9912d6b8a28
+    m_Address: Mod_ActionModifier
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - GameData
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: b9eac0f2989380a48853a72cdde69a00
+    m_Address: ModOption_Action
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - GameData
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: df54d6ed17accee4482aa0dfefefd613
+    m_Address: Mod_ItemModifier
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - GameData
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: f815dfe8d4e9f2c4690879bf9941f938
+    m_Address: ModOption_StartStat
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - GameData
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: fa4bb6d8e5b450e42b9b948092a4a8ba
+    m_Address: ModOption_Buff
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - GameData
+    FlaggedDuringContentUpdateRestriction: 0
   m_ReadOnly: 0
   m_Settings: {fileID: 11400000, guid: 00a5296a1b4732249abf9572ed243582, type: 2}
   m_SchemaSet:

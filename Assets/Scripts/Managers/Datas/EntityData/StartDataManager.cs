@@ -243,5 +243,6 @@ public class StartDataManager : AsyncDataManager<StartDataManager>
 
             raceJobList[race] = allJobs.Where(job => job != Jobs.Default && !bannedSet.Contains(job)).ToList();
         }
+        Debug.Log("Banned jobs processed");
     }
 }

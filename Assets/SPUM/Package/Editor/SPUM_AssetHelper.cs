@@ -8,6 +8,8 @@ using UnityEngine.SceneManagement;
 
 public class SPUM_AssetHelper : AssetPostprocessor
 {
+    public const string NoticeFilePath = "Assets/SPUM/README.txt";
+    private const string LastSeenNoticeFileTimeKey = "SPUM.Notice.LastSeenFileTimeUtc";
     
     public static void OnPostprocessAllAssets(
         string[] importedAssets,
@@ -17,13 +19,55 @@ public class SPUM_AssetHelper : AssetPostprocessor
     {
         foreach (string asset in importedAssets)
         {
-            //Debug.Log(asset);
-        
-            if (asset.Contains("Assets/SPUM/ReadMe"))// || ContainsPattern(asset))
+            if (asset.Replace("\\", "/") == NoticeFilePath)
             {
-                ShowHelpWindow(asset);
+                if (!TryGetNoticeFileTime(out long noticeFileTimeUtc))
+                {
+                    continue;
+                }
+
+                if (noticeFileTimeUtc == GetLastSeenNoticeFileTime())
+                {
+                    continue;
+                }
+
+                SPUM_NoticeWindow.ShowWindow(noticeFileTimeUtc);
             }
         }
+    }
+
+    public static bool TryGetNoticeFileTime(out long noticeFileTimeUtc)
+    {
+        noticeFileTimeUtc = 0;
+
+        if (!File.Exists(NoticeFilePath))
+        {
+            Debug.LogWarning($"SPUM notice skipped. README not found: {NoticeFilePath}");
+            return false;
+        }
+
+        noticeFileTimeUtc = File.GetLastWriteTimeUtc(NoticeFilePath).Ticks;
+        return true;
+    }
+
+    public static long GetLastSeenNoticeFileTime()
+    {
+        if (!long.TryParse(EditorPrefs.GetString(LastSeenNoticeFileTimeKey, "0"), out long fileTimeUtc))
+        {
+            return 0;
+        }
+
+        return fileTimeUtc;
+    }
+
+    public static void SetLastSeenNoticeFileTime(long noticeFileTimeUtc)
+    {
+        if (noticeFileTimeUtc <= 0)
+        {
+            return;
+        }
+
+        EditorPrefs.SetString(LastSeenNoticeFileTimeKey, noticeFileTimeUtc.ToString());
     }
 
     static void ShowHelpWindow(string assetName)
@@ -31,6 +75,59 @@ public class SPUM_AssetHelper : AssetPostprocessor
         HelpWindow.ShowWindow(assetName);
     }
 
+}
+
+public class SPUM_NoticeWindow : EditorWindow
+{
+    private const string WindowTitle = "SPUM Notice";
+    private string noticeText;
+    private Vector2 scrollPosition;
+    private bool doNotShowAgain;
+    private long noticeFileTimeUtc;
+
+    public static void ShowWindow(long currentNoticeFileTimeUtc)
+    {
+        SPUM_NoticeWindow window = GetWindow<SPUM_NoticeWindow>(true, WindowTitle);
+        window.minSize = new Vector2(520, 260);
+        window.maxSize = new Vector2(520, 260);
+        window.noticeFileTimeUtc = currentNoticeFileTimeUtc;
+        window.noticeText = LoadNoticeText();
+        window.doNotShowAgain = false;
+        window.Show();
+    }
+
+    private static string LoadNoticeText()
+    {
+        if (!File.Exists(SPUM_AssetHelper.NoticeFilePath))
+        {
+            return string.Empty;
+        }
+
+        return File.ReadAllText(SPUM_AssetHelper.NoticeFilePath);
+    }
+
+    private void OnGUI()
+    {
+        EditorGUILayout.LabelField("Latest notice", EditorStyles.boldLabel);
+        EditorGUILayout.Space(4);
+
+        using (var scroll = new EditorGUILayout.ScrollViewScope(scrollPosition))
+        {
+            scrollPosition = scroll.scrollPosition;
+            EditorGUILayout.TextArea(noticeText, GUILayout.ExpandHeight(true));
+        }
+
+        doNotShowAgain = EditorGUILayout.ToggleLeft("Do not show again for this version", doNotShowAgain);
+        EditorGUILayout.Space(6);
+        if (GUILayout.Button("Close", GUILayout.Height(28)))
+        {
+            if (doNotShowAgain)
+            {
+                SPUM_AssetHelper.SetLastSeenNoticeFileTime(noticeFileTimeUtc);
+            }
+            Close();
+        }
+    }
 }
 
 public class HelpWindow : EditorWindow
@@ -471,47 +568,7 @@ public class HelpWindow : EditorWindow
     [MenuItem("SPUM/Clean Install")]
     public static void ShowPackage()
     {
-        string directoryPath = @"Assets/SPUM/";
-
-        string pattern = @"ReadMe\s*[-\s]*([\d\.]+)\.txt$";
-
-        var files = Directory.GetFiles(directoryPath, "ReadMe*.txt");
-        foreach (var item in files )
-        {
-            Debug.Log(item);
-        }
-        var matchedFiles = files
-            .Select(file => new
-            {
-                FileName = file,
-                Match = Regex.Match(Path.GetFileName(file), pattern)
-            })
-            .Where(x => x.Match.Success)
-            .Select(x => new
-            {
-                FileName = x.FileName,
-                Version = new System.Version(x.Match.Groups[1].Value.Trim())  
-            })
-            .ToList();
-
-        foreach (var file in matchedFiles)
-        {
-            Debug.Log($"Matched File: {file.FileName}, Version: {file.Version}");
-        }
-
-        var maxVersionFile = matchedFiles
-            .OrderByDescending(x => x.Version)
-            .FirstOrDefault();
-
-        if (maxVersionFile != null)
-        {
-            Debug.Log($"Highest Version File: {maxVersionFile.FileName}");
-            ShowWindow(maxVersionFile.FileName);
-        }
-        else
-        {
-            Debug.Log("No matching ReadMe files found.");
-        }
+        ShowWindow(SPUM_AssetHelper.NoticeFilePath);
     }
     private void ImportNewPackage()
     {

@@ -15,32 +15,14 @@ MonoBehaviour:
   m_GroupName: StartingDatas
   m_GUID: 7ea92799b4aa098409167a4e010204fe
   m_SerializeEntries:
-  - m_GUID: 38b85a0d9c243f947947469eeea9d5d5
-    m_Address: Start_RaceTrait_Item
-    m_ReadOnly: 0
-    m_SerializedLabels:
-    - GameData
-    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 3915a5248f7543e4f832e2c46ec60a5f
     m_Address: Start_JobStat
     m_ReadOnly: 0
     m_SerializedLabels:
     - GameData
     FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: 5a68e392167671d44ac31261f8ce7199
-    m_Address: Start_BanedJob
-    m_ReadOnly: 0
-    m_SerializedLabels:
-    - GameData
-    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 6bc38d70636d3334e8e14a94cb292154
     m_Address: Start_StartItems
-    m_ReadOnly: 0
-    m_SerializedLabels:
-    - GameData
-    FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: d775a436c0fa68b43a9ae36beab92579
-    m_Address: Start_RaceTrait_Stat
     m_ReadOnly: 0
     m_SerializedLabels:
     - GameData

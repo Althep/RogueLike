@@ -27,4 +27,3 @@ Potion_ElixirOfAccelerate_1,Buff_AttackSpeed,Potion_ElixirOfAccelerate,-0.3,10,1
 Potion_ElixirOfAccelerate_2,Buff_SpellSpeed,Potion_ElixirOfAccelerate,-0.3,10,12,Buff,StatBuff,SpellSpeed,FALSE,string_Buff_Quick,2
 Scroll_Blink,Buff_Blink,Scroll_Blink,0,1,3,Buff,ActionBuff,Blink,FALSE,string_Buff_Blink,0
 Scroll_Telleport,Buff_Telleport,Scroll_Telleport,0,1,3,Buff,ActionBuff,Telleport,FALSE,string_Buff_Telleport,0
-,,,,,,Buff,,,,,

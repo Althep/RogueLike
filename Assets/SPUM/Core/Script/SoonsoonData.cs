@@ -109,59 +109,37 @@ public class SoonsoonData
         }
     }
 
-    public void SavePackageData()
+    private const string PackageFilterKey = "SPUM_PackageFilter";
+
+    public void SavePackageData(Dictionary<string, bool> filterList)
     {
-        // SoonsoonData.instance._soonData2.packageList.Clear();
-        // #if UNITY_EDITOR
-        // for( var i = 0 ; i < _spumManager._textureList.Count;i++)
-        // {
-        //     Dictionary<string,bool> tList = new Dictionary<string,bool>();
-        //     for(var j = 0 ; j < _spumManager._textureList[i]._packageList.Count;j++)
-        //     {
-        //         tList.Add(_spumManager._textureList[i]._packageNameList[j], _spumManager._textureList[i]._packageList[j]);
-        //     }
-        //     SoonsoonData.instance._soonData2.packageList.Add(tList);
-            
-        // }
-        
-        // SaveData();
-        // #endif
+        var data = new PackageFilterData();
+        foreach (var kvp in filterList)
+        {
+            data.keys.Add(kvp.Key);
+            data.values.Add(kvp.Value);
+        }
+        PlayerPrefs.SetString(PackageFilterKey, JsonUtility.ToJson(data));
     }
 
-    public void LoadPackageData()
+    public Dictionary<string, bool> LoadPackageData()
     {
-        Debug.Log(this + "LoadPackageData");
-        // #if UNITY_EDITOR
-        // if(_soonData2.packageList==null) return;
-        // if(_soonData2.packageList.Count ==0 ) return;
+        var result = new Dictionary<string, bool>();
+        if (!PlayerPrefs.HasKey(PackageFilterKey)) return result;
+        var json = PlayerPrefs.GetString(PackageFilterKey);
+        var data = JsonUtility.FromJson<PackageFilterData>(json);
+        if (data == null) return result;
+        for (int i = 0; i < data.keys.Count; i++)
+        {
+            result[data.keys[i]] = data.values[i];
+        }
+        return result;
+    }
 
-
-        // for( var i = 0 ; i < _spumManager._textureList.Count;i++)
-        // {
-        //     List<bool> tList = new List<bool>();
-
-        //     for(var j = 0 ; j < _spumManager._textureList[i]._packageList.Count;j++)
-        //     {
-        //         string tName = _spumManager._textureList[i]._packageNameList[j];
-        //         if(_soonData2.packageList[i].ContainsKey(tName))
-        //         {
-        //             tList.Add(_soonData2.packageList[i][tName]);
-        //         }
-        //         else
-        //         {
-        //             tList.Add(true);
-        //         }
-        //     }
-
-        //     _spumManager._textureList[i]._packageList.Clear();
-
-        //     for ( var j = 0 ; j < tList.Count;j++)
-        //     {
-        //          _spumManager._textureList[i]._packageList.Add(tList[j]);
-        //     } 
-        // }
-
-        // _spumManager.LinkPackageList();
-        // #endif
+    [Serializable]
+    private class PackageFilterData
+    {
+        public List<string> keys = new List<string>();
+        public List<bool> values = new List<bool>();
     }
 }

@@ -15,14 +15,14 @@ MonoBehaviour:
   m_GroupName: ItemDatas
   m_GUID: 0859f91808e32eb488bd4bb63987be59
   m_SerializeEntries:
-  - m_GUID: 3651e45d30120db47b90e0f8af6e48d9
-    m_Address: Item_Equipments
+  - m_GUID: 194caa2f5925aa046bd58ca33c4b8470
+    m_Address: Item_ConsumData.csv
     m_ReadOnly: 0
     m_SerializedLabels:
     - GameData
     FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: 6946d2af07184364499c8ea58411726c
-    m_Address: Item_AddOptions
+  - m_GUID: 306b7941178acc04ea107afbe69d77e9
+    m_Address: Item_EquipData.csv
     m_ReadOnly: 0
     m_SerializedLabels:
     - GameData

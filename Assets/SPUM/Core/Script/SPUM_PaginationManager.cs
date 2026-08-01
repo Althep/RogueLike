@@ -9,7 +9,6 @@ public partial class SPUM_PaginationManager : MonoBehaviour
     public Transform contentParent;
     public Button prevButton;
     public Button nextButton;
-    public Button ConvertAllButton;
     public Button ApplyPresetAllButton;
     public Button CloseButton;
     public Toggle BatchModeButton;
@@ -26,73 +25,10 @@ public partial class SPUM_PaginationManager : MonoBehaviour
     void Start()
     {
         LoadPrefabs();
-        // 버튼 이벤트 설정
         prevButton.onClick.AddListener(PrevPage);
         nextButton.onClick.AddListener(NextPage);
-        ConvertAllButton.onClick.AddListener(ConvertAll);
         ApplyPresetAllButton.onClick.AddListener(ApplyPresetAll);
-        // 초기 페이지 표시
         BatchModeButton.isOn = false;
-        //DisplayPage();
-    }
-    public void ConvertAll()
-    {
-        List<SPUM_Prefabs> convertedPrefabs = new List<SPUM_Prefabs>();
-        List<int> indicesToRemove = new List<int>();
-
-        foreach (var kvp in sortedItems)
-        {
-            int prefabIndex = kvp.Key;
-            SPUM_Prefabs savedPrefab = kvp.Value;
-            Debug.Log(savedPrefab._code + " " + savedPrefab.EditChk);
-            if(!savedPrefab.EditChk) continue;
-            bool needsConversion = savedPrefab._version < SPUM_Manager._version || 
-                                !SPUM_Manager.fileHandler.ValidateSpumFile(savedPrefab, SPUM_Manager).Item2.Count.Equals(0) || savedPrefab.EditChk;
-
-            if (needsConversion)
-            {
-                SPUM_Manager.MissingPackageNames.Clear();
-                var tuple = SPUM_Manager.fileHandler.ValidateSpumFile(savedPrefab, SPUM_Manager);
-                SPUM_Manager.DebugList.Clear();
-
-                switch (tuple.Item1)
-                {
-                    case 2:
-                        SPUM_Manager.DebugList.AddRange(SPUM_Manager.ReSyncSpumElementDataList(tuple.Item2));
-                        break;
-                    case 1:
-                        SPUM_Manager.DebugList.AddRange(tuple.Item2);
-                        break;
-                }
-
-                var distinctPackageList = SPUM_Manager.MissingPackageNames.Distinct().ToList();
-                if (distinctPackageList.Count.Equals(0))
-                {
-                    var UnitType = savedPrefab.UnitType.Equals("") ? "Unit" : savedPrefab.UnitType;
-                    SPUM_Manager.SetUnitConverter(UnitType);
-                    savedPrefab.PopulateAnimationLists();
-                    var newPrefab = SPUM_Manager.SaveConvertPrefabs(savedPrefab);
-                    
-                    //SPUM_Manager.MoveOldPrefabBackup(savedPrefab);
-                    convertedPrefabs.Add(newPrefab);
-                    indicesToRemove.Add(prefabIndex);
-                }
-            }
-        }
-
-        // Remove old prefabs and add new ones
-        foreach (int index in indicesToRemove)
-        {
-            DeleteUnit(index, sortedItems[index]);
-        }
-
-        foreach (var newPrefab in convertedPrefabs)
-        {
-            AddNewPrefab(newPrefab);
-            newPrefab.EditChk = false;
-        }
-        SPUM_Manager.NewMake();
-        DisplayPage();
     }
     public void ApplyPresetAll()
     {
@@ -112,53 +48,49 @@ public partial class SPUM_PaginationManager : MonoBehaviour
     }
     public void ApplyPresetToAll(SPUM_Preset preset)
     {
-        List<SPUM_Prefabs> updatedPrefabs = new List<SPUM_Prefabs>();
-        List<int> indicesToRemove = new List<int>();
-
         foreach (var kvp in sortedItems)
         {
-            int prefabIndex = kvp.Key;
             SPUM_Prefabs savedPrefab = kvp.Value;
-        
             if(!savedPrefab.EditChk) continue;
-            // 프리셋 적용
             savedPrefab.spumPackages = preset.Packages;
             savedPrefab.PopulateAnimationLists();
-            // 필요한 경우 추가적인 업데이트 로직
             savedPrefab._version = SPUM_Manager._version;
             savedPrefab.EditChk = false;
-
-            // 새로운 프리팹으로 저장
-            // var UnitType = savedPrefab.UnitType.Equals("") ? "Unit" : savedPrefab.UnitType;
-            // SPUM_Manager.SetUnitConverter(UnitType);
-            // var newPrefab = SPUM_Manager.SaveConvertPrefabs(savedPrefab);
-            // updatedPrefabs.Add(newPrefab);
-            // indicesToRemove.Add(prefabIndex);
             Debug.Log(savedPrefab._code);
-            //EditorUtility.SetDirty(savedPrefab);
         }
-            //AssetDatabase.SaveAssets();
- 
-        // 이전 프리팹 제거 및 새 프리팹 추가
-        // foreach (int index in indicesToRemove)
-        // {
-        //     DeleteUnit(index, sortedItems[index]);
-        // }
-
-        // foreach (var newPrefab in updatedPrefabs)
-        // {
-        //     AddNewPrefab(newPrefab);
-        // }
-
         SPUM_Manager.NewMake();
         DisplayPage();
     }
 
     public void LoadPrefabs(){
+        SPUM_Manager.MissingPackageNames.Clear();
         LoadItems();
+        CheckMissingPackages();
         DisplayPage();
-
         BatchModeButton.isOn = false;
+        if (SPUM_Manager.MissingPackageNames.Count > 0)
+        {
+            var names = string.Join(", ", SPUM_Manager.MissingPackageNames);
+            Debug.LogWarning($"[SPUM] Missing packages: {names}");
+            SPUM_Manager.UIManager.ToastOn($"Missing packages: {names}");
+        }
+    }
+    void CheckMissingPackages()
+    {
+        var installed = SPUM_Manager.SpritePackageNameList;
+        foreach (var kvp in sortedItems)
+        {
+            // ImageElement에서 실제 사용 중인 패키지만 검사
+            foreach (var elem in kvp.Value.ImageElement)
+            {
+                if (string.IsNullOrEmpty(elem.ItemPath)) continue;
+                string[] pathParts = elem.ItemPath.Replace("\\", "/").Split('/');
+                string pkgName = pathParts[0];
+                if (pkgName == "Addons" && pathParts.Length >= 3) pkgName = pathParts[1];
+                if (!installed.Contains(pkgName))
+                    SPUM_Manager.MissingPackageNames.Add(pkgName);
+            }
+        }
     }
     void LoadItems()
     {
@@ -166,7 +98,7 @@ public partial class SPUM_PaginationManager : MonoBehaviour
         sortedItems.Clear();
         deletedIndexes.Clear();
         nextAvailableIndex = 0;
-        var SavedPrefabs = SPUM_Manager.fileHandler.Load(); // Resources.LoadAll<SPUM_Prefabs>("");
+        var SavedPrefabs = SPUM_Manager.fileHandler.Load();
         foreach (var prefab in SavedPrefabs)
         {
             AddItemToSortedDictionary(prefab);
@@ -208,16 +140,15 @@ public partial class SPUM_PaginationManager : MonoBehaviour
         SelectAllToggleButton.isOn = false;
 
         int startIndex = (currentPage - 1) * itemsPerPage;
-        int endIndex = Mathf.Min(startIndex + itemsPerPage, sortedItems.Count); 
+        int endIndex = Mathf.Min(startIndex + itemsPerPage, sortedItems.Count);
         int i = 0;
         foreach (var kvp in sortedItems)
         {
             if (i >= startIndex && i < endIndex)
             {
-
             GameObject PreviewElement = Instantiate(itemPrefab, contentParent);
             Text UnitName = PreviewElement.GetComponentInChildren<Text>();
-            SPUM_Prefabs PreviewData = PreviewElement.GetComponentInChildren<SPUM_Prefabs>(); 
+            SPUM_Prefabs PreviewData = PreviewElement.GetComponentInChildren<SPUM_Prefabs>();
             SPUM_Prefabs SavedPrefab = kvp.Value;
             int prefabIndex = kvp.Key;
             PreviewData.spumPackages = SavedPrefab.spumPackages;
@@ -235,29 +166,39 @@ public partial class SPUM_PaginationManager : MonoBehaviour
             PreviewData.UnitType = UnitType;
             PreviewData.PopulateAnimationLists();
             PreviewData.OverrideControllerInit();
-            if(contentParent.gameObject.activeInHierarchy) PreviewData.PlayAnimation(PlayerState.IDLE, 0);
+
+            if(contentParent.gameObject.activeInHierarchy && PreviewData._anim != null)
+            {
+                try
+                {
+                    PreviewData.PlayAnimation(PlayerState.IDLE, 0);
+                }
+                catch (System.ArgumentOutOfRangeException)
+                {
+                    Debug.LogWarning($"Animation index out of range for {SavedPrefab._code}, skipping animation play");
+                }
+            }
 
             var matchingTables = PreviewElement.GetComponentsInChildren<SPUM_MatchingList>();
             bool isInvalidPath = false;
             var allMatchingElements = matchingTables.SelectMany(mt => mt.matchingTables).ToList();
             foreach (var matchingElement in allMatchingElements)
             {
-                var matchingTypeElement = SavedPrefab.ImageElement.FirstOrDefault(ie => 
+                var matchingTypeElement = SavedPrefab.ImageElement.FirstOrDefault(ie =>
                 (ie.UnitType == matchingElement.UnitType)
                 && (ie.PartType == matchingElement.PartType)
-                //&& ie.Index == matchingElement.Index
                 && (ie.Dir == matchingElement.Dir)
-                && (ie.Structure == matchingElement.Structure) 
+                && (ie.Structure == matchingElement.Structure)
                 && ie.PartSubType == matchingElement.PartSubType
                 );
-                //Debug.Log(matchingTypeElement != null);
-                if (matchingTypeElement != null)
+                if (matchingTypeElement != null && !string.IsNullOrEmpty(matchingTypeElement.ItemPath))
                 {
-                    var LoadSprite = SPUM_Manager.LoadSpriteFromMultiple(matchingTypeElement.ItemPath , matchingTypeElement.Structure);
+                    matchingTypeElement.ItemPath = matchingTypeElement.ItemPath.Replace("/Unit/", "/0_Unit/");
+                    var LoadSprite = SPUM_Manager.LoadSpriteFromMultiple(matchingTypeElement.ItemPath, matchingTypeElement.Structure);
                     isInvalidPath = LoadSprite == null;
                     matchingElement.renderer.sprite = LoadSprite;
                     matchingElement.renderer.maskInteraction = (SpriteMaskInteraction)matchingTypeElement.MaskIndex;
-                    matchingElement.renderer.color = matchingTypeElement.Color; 
+                    matchingElement.renderer.color = matchingTypeElement.Color;
                     matchingElement.ItemPath = matchingTypeElement.ItemPath;
                     matchingElement.MaskIndex = matchingTypeElement.MaskIndex;
                     matchingElement.Color = matchingTypeElement.Color;
@@ -272,9 +213,7 @@ public partial class SPUM_PaginationManager : MonoBehaviour
             });
             SelectAllToggleButton.onValueChanged.AddListener((On) => {
                 if (ButtonPanel != null && ButtonPanel.CheckedButton != null)
-                {
                     ButtonPanel.CheckedButton.isOn = On;
-                }
             });
             BatchModeButton.onValueChanged.AddListener((On) => {
                 if (ButtonPanel != null && ButtonPanel.CheckedButton != null)
@@ -295,16 +234,45 @@ public partial class SPUM_PaginationManager : MonoBehaviour
             {
                 SPUM_Manager.EditPrefab = SavedPrefab;
                 SPUM_Manager.UIManager.LoadButtonSet(true);
-                SPUM_Manager.ItemLoadButtonActive(SavedPrefab.ImageElement);
                 SPUM_Manager.ItemResetAll();
                 SPUM_Manager.SetType(SavedPrefab.UnitType);
+                SPUM_Manager.ItemLoadButtonActive(SavedPrefab.ImageElement);
                 SPUM_Manager.SetSprite(SavedPrefab.ImageElement);
-                SPUM_Manager.PreviewPrefab.spumPackages = SavedPrefab.spumPackages;
-                
+
+                // 기존 모든 패키지를 깊은 복사
+                var allPackages = SPUM_Manager.GetSpumPackageData();
+                SPUM_Manager.PreviewPrefab.spumPackages = allPackages
+                    .Select(p => (SpumPackage)p.Clone())
+                    .ToList();
+
+                for (int j = 0; j < SPUM_Manager.PreviewPrefab.spumPackages.Count; j++)
+                {
+                    var previewPackage = SPUM_Manager.PreviewPrefab.spumPackages[j];
+                    var savedPackage = SavedPrefab.spumPackages
+                        .FirstOrDefault(p => p.Name == previewPackage.Name);
+
+                    for (int k = 0; k < previewPackage.SpumAnimationData.Count; k++)
+                    {
+                        var previewAnimData = previewPackage.SpumAnimationData[k];
+                        var savedAnimData = savedPackage?.SpumAnimationData
+                            .FirstOrDefault(a => a.Name == previewAnimData.Name);
+
+                        if (savedAnimData != null)
+                        {
+                            SPUM_Manager.PreviewPrefab.spumPackages[j].SpumAnimationData[k].index = savedAnimData.index;
+                            SPUM_Manager.PreviewPrefab.spumPackages[j].SpumAnimationData[k].HasData = savedAnimData.HasData;
+                        }
+                        else
+                        {
+                            SPUM_Manager.PreviewPrefab.spumPackages[j].SpumAnimationData[k].index = -1;
+                            SPUM_Manager.PreviewPrefab.spumPackages[j].SpumAnimationData[k].HasData = false;
+                        }
+                    }
+                }
+
                 SPUM_Manager.PreviewPrefab._version = SavedPrefab._version;
                 SPUM_Manager.PreviewPrefab._code = SavedPrefab._code;
                 SPUM_Manager.UIManager._loadObjCanvas.SetActive(false);
-
                 SPUM_Manager.animationManager.PlayFirstAnimation();
             });
 
@@ -312,72 +280,101 @@ public partial class SPUM_PaginationManager : MonoBehaviour
                 DeleteUnit(prefabIndex, SavedPrefab);
                 DisplayPage();
             });
-            bool isOldVersion =  SavedPrefab._version < SPUM_Manager._version;
-            
-            bool isInvalidClipPath = false;
-            var ClipList = SavedPrefab.spumPackages.SelectMany(package => package.SpumAnimationData).ToList();
-            
-            foreach (var clip in ClipList)
+
+            // 누락 이미지 감지 — ImageElement에서 실제 사용 중인 이미지의 패키지가 설치되어 있는지
+            var installed = SPUM_Manager.SpritePackageNameList;
+            var missingImageSet = new HashSet<(string imageName, string packageName)>();
+            foreach (var elem in SavedPrefab.ImageElement)
             {
-                isInvalidClipPath = SPUM_Manager.ValidateAnimationClips(clip);
-                if(!isInvalidClipPath) break;
+                if (string.IsNullOrEmpty(elem.ItemPath)) continue;
+                string[] pathParts = elem.ItemPath.Replace("\\", "/").Split('/');
+                string pkgName = pathParts[0];
+                if (pkgName == "Addons" && pathParts.Length >= 3) pkgName = pathParts[1];
+                if (!installed.Contains(pkgName))
+                {
+                    string fileName = pathParts[pathParts.Length - 1];
+                    missingImageSet.Add((fileName, pkgName));
+                }
+            }
+            var missingImages = missingImageSet.ToList();
+
+            // 애니메이션 클립 유효성 검사 — 프리팹의 실제 클립 리스트에서 null 레퍼런스 감지
+            // spumPackages.SpumAnimationData에서 역매칭하여 패키지명/클립경로 복원
+            var invalidClips = new List<(string clipName, string packageName)>();
+            var animSourceMap = SavedPrefab.spumPackages
+                .SelectMany(pkg => pkg.SpumAnimationData.Select(clip => new { pkg.Name, clip }))
+                .Where(x => x.clip.HasData && x.clip.UnitType == UnitType && x.clip.index > -1)
+                .GroupBy(x => x.clip.StateType)
+                .ToDictionary(
+                    g => g.Key,
+                    g => g.OrderBy(x => x.clip.index).ToList()
+                );
+
+            var clipLists = new Dictionary<string, List<AnimationClip>>
+            {
+                ["IDLE"] = SavedPrefab.IDLE_List,
+                ["MOVE"] = SavedPrefab.MOVE_List,
+                ["ATTACK"] = SavedPrefab.ATTACK_List,
+                ["DAMAGED"] = SavedPrefab.DAMAGED_List,
+                ["DEBUFF"] = SavedPrefab.DEBUFF_List,
+                ["DEATH"] = SavedPrefab.DEATH_List,
+                ["OTHER"] = SavedPrefab.OTHER_List
+            };
+            foreach (var clipEntry in clipLists)
+            {
+                if (clipEntry.Value == null) continue;
+                for (int ci = 0; ci < clipEntry.Value.Count; ci++)
+                {
+                    if (clipEntry.Value[ci] == null)
+                    {
+                        string clipName = $"{clipEntry.Key}[{ci}]";
+                        string pkgName = clipEntry.Key;
+                        if (animSourceMap.TryGetValue(clipEntry.Key, out var sources) && ci < sources.Count)
+                        {
+                            var src = sources[ci];
+                            clipName = System.IO.Path.GetFileName(src.clip.ClipPath);
+                            pkgName = src.Name;
+                        }
+                        invalidClips.Add((clipName, pkgName));
+                        Debug.LogWarning($"[SPUM] Missing animation clip, {clipName} (package: {pkgName}) in {SavedPrefab._code}");
+                    }
+                }
             }
 
-            bool IsActive = isOldVersion || isInvalidPath || !isInvalidClipPath;
-            ButtonPanel.ConvertButton.transform.parent.gameObject.SetActive(IsActive);
-            ButtonPanel.SelectButton.image.enabled = !IsActive;
+            bool hasIssues = missingImages.Count > 0 || invalidClips.Count > 0;
 
+            if (ButtonPanel.ConvertButton != null)
+            {
+                ButtonPanel.ConvertButton.transform.parent.gameObject.SetActive(hasIssues);
+                ButtonPanel.SelectButton.image.enabled = !hasIssues;
 
-            ButtonPanel.ConvertButton.onClick.AddListener(()=> {
-                SPUM_Manager.MissingPackageNames.Clear();
-                var tupple = SPUM_Manager.fileHandler.ValidateSpumFile(SavedPrefab, SPUM_Manager);
-                SPUM_Manager.DebugList.Clear();
-                SPUM_Manager.UIManager.ConvertView.PrefabVersion.text = $"Prefab Version {SavedPrefab._version}";
-
-                
-                switch (tupple.Item1)
+                if (hasIssues)
                 {
-                    case 2:
-                        Debug.Log("2.0 Convert");
-                        var data = SPUM_Manager.ReSyncSpumElementDataList(tupple.Item2);
-                        SPUM_Manager.DebugList.AddRange(data);
-                       
+                    ButtonPanel.ConvertButton.onClick.AddListener(() => {
+                        var convertView = SPUM_Manager.UIManager.ConvertView;
+                        if (convertView != null)
+                        {
+                            convertView.Show(SavedPrefab._version, missingImages, invalidClips);
 
-                    break;
-                    case 1:
-                        Debug.Log("1.0 Convert");
-                        var data2 = tupple.Item2;
-                        SPUM_Manager.DebugList.AddRange(data2);
-                    break;
-                    default:
-                    break;
-                }
-                SPUM_Manager.SetUnitConverter(UnitType);
-                var DistinctPackageList = SPUM_Manager.MissingPackageNames.Distinct().ToList();
-                ConvertAllButton.interactable = IsActive;
-                SPUM_Manager.UIManager.ConvertView.Convert.interactable = DistinctPackageList.Count.Equals(0);
-
-                SPUM_Manager.UIManager.ConvertView.Convert.onClick.AddListener(()=>{
-                    var newPrefab = SPUM_Manager.SaveConvertPrefabs(SavedPrefab);
-                    //SPUM_Manager.MoveOldPrefabBackup(SavedPrefab);
-       
-                    DeleteUnit(prefabIndex, SavedPrefab);
-                    AddNewPrefab(newPrefab);
-                    DisplayPage();
+                            if (convertView.ForceSelectButton != null)
+                            {
+                                convertView.ForceSelectButton.onClick.RemoveAllListeners();
+                                convertView.ForceSelectButton.onClick.AddListener(() => {
+                                    convertView.gameObject.SetActive(false);
+                                    ButtonPanel.SelectButton.onClick.Invoke();
+                                });
+                            }
+                        }
                     });
-                
-                PreviewPanel.SetActive(true);
-                //LoadPrefabs();
-            });
+                }
+            }
+
             }
             i++;
             if (i >= endIndex) break;
         }
 
-        // 페이지 텍스트 업데이트
         pageText.text = $"Page {currentPage} / {Mathf.Ceil(sortedItems.Count / (float)itemsPerPage)}";
-
-        // 버튼 활성화/비활성화
         prevButton.interactable = (currentPage > 1);
         nextButton.interactable = (endIndex < sortedItems.Count);
     }

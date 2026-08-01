@@ -27,6 +27,7 @@ public class SPUM_PackageButton : MonoBehaviour
             if(_Manager.SpritePackagesFilterList.TryGetValue(PackageName, out bool value)){
                 _Manager.SpritePackagesFilterList[PackageName] = On;
                 button.DrawItem();
+                SoonsoonData.Instance.SavePackageData(_Manager.SpritePackagesFilterList);
             }
         });
     }

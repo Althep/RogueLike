@@ -2,8 +2,8 @@
     "custom_styles_list": [
         {
             "id": "broken",
-            "name": "파손",
-            "description": "손상된 상태",
+            "name": "broken",
+            "description": "broken",
             "elements": [
                 "broken"
             ],
@@ -15,8 +15,8 @@
         },
         {
             "id": "common",
-            "name": "일반",
-            "description": "기본 등급",
+            "name": "common",
+            "description": "common",
             "elements": [
                 "common"
             ],
@@ -28,8 +28,8 @@
         },
         {
             "id": "rare",
-            "name": "희귀",
-            "description": "희귀 등급",
+            "name": "rare",
+            "description": "rare",
             "elements": [
                 "rare"
             ],
@@ -41,8 +41,8 @@
         },
         {
             "id": "epic",
-            "name": "서사시",
-            "description": "서사시 등급",
+            "name": "epic",
+            "description": "epic",
             "elements": [
                 "epic"
             ],
@@ -55,8 +55,8 @@
         },
         {
             "id": "legendary",
-            "name": "전설",
-            "description": "전설 등급",
+            "name": "legendary",
+            "description": "legendary",
             "elements": [
                 "legendary"
             ],
@@ -70,8 +70,8 @@
         },
         {
             "id": "mythic",
-            "name": "신화",
-            "description": "신화 등급",
+            "name": "mythic",
+            "description": "mythic",
             "elements": [
                 "mythic"
             ],
@@ -86,8 +86,8 @@
         },
         {
             "id": "fire",
-            "name": "화염",
-            "description": "화염 속성",
+            "name": "fire",
+            "description": "fire",
             "elements": [
                 "fire"
             ],
@@ -98,8 +98,8 @@
         },
         {
             "id": "dark",
-            "name": "어둠",
-            "description": "어둠 속성",
+            "name": "dark",
+            "description": "dark",
             "elements": [
                 "dark"
             ],
@@ -110,8 +110,8 @@
         },
         {
             "id": "wind",
-            "name": "바람",
-            "description": "바람 속성",
+            "name": "wind",
+            "description": "wind",
             "elements": [
                 "wind"
             ],
@@ -122,8 +122,8 @@
         },
         {
             "id": "earth",
-            "name": "대지",
-            "description": "대지 속성",
+            "name": "earth",
+            "description": "earth",
             "elements": [
                 "earth"
             ],
@@ -134,8 +134,8 @@
         },
         {
             "id": "water",
-            "name": "물",
-            "description": "물 속성",
+            "name": "water",
+            "description": "water",
             "elements": [
                 "water"
             ],
@@ -145,11 +145,11 @@
             ]
         },
         {
-            "id": "Light",
-            "name": "빛",
-            "description": "빛 속성",
+            "id": "light",
+            "name": "light",
+            "description": "light",
             "elements": [
-                "Light"
+                "light"
             ],
             "required_parts": [],
             "negative": [

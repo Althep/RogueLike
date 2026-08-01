@@ -2,7 +2,7 @@
   "combat_classes_list": [
     {
       "id": "warrior",
-      "description": "전사 - 근거리 물리 전투 전문가",
+      "description": "warrior",
       "type": [
         "sword",
         "axe",
@@ -50,7 +50,7 @@
     },
     {
       "id": "archer",
-      "description": "궁수 - 원거리 물리 전투 전문가",
+      "description": "archer",
       "type": [
         "bow",
         "quiver",
@@ -90,7 +90,7 @@
     },
     {
       "id": "mage",
-      "description": "마법사 - 원거리 마법 전투 전문가",
+      "description": "mage",
       "type": [
         "staff",
         "wand",

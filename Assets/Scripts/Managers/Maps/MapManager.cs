@@ -193,7 +193,7 @@ public class MapManager : MonoBehaviour
     #region MapMake
     public async UniTask MapMake()
     {
-        Debug.Log($"[생성기] 맵을 만드는 매니저: {gameObject.name} / ID: {GetInstanceID()}");
+        Debug.Log($"[생성기] 맵을 만드는 매니저: {gameObject.name} / ID: {gameObject.GetEntityId()}");
         float mapMakeStart = Time.realtimeSinceStartup;
         await SetMapData();
         Debug.Log($"[Profile] 오브젝트 배치 시간: {Time.realtimeSinceStartup - mapMakeStart}s");

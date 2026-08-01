@@ -87,6 +87,7 @@ public class UIPooler : MonoBehaviour
             go.SetActive(true);
             go.transform.SetParent(parents.transform);
             ui_active[type].Add(poolUI);
+            go.transform.SetAsLastSibling();
             return go;
         }
         else

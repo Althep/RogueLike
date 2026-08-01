@@ -112,7 +112,7 @@ public static class Utils
             }
             catch (Exception ex)
             {
-                Debug.LogError($"Failed to convert{key}: {ex.Message}");
+                Debug.LogError($"Failed to convert {key}: {ex.Message}");
                 return false;
             }
         }

@@ -25,6 +25,8 @@ public class SPUM_AssetExporterWithPreview : EditorWindow
     private string rootPath = "Assets/SPUM/Resources/Addons";
     private Dictionary<string, bool> folderStates = new Dictionary<string, bool>();
     private Dictionary<string, bool> DefualtAssetStates = new Dictionary<string, bool>();
+    private Dictionary<string, bool> manualAssetStates = new Dictionary<string, bool>();
+    private Vector2 manualAssetsScrollPosition;
     [MenuItem("SPUM/Export Assets with Dependencies")]
     static void Init()
     {
@@ -119,6 +121,33 @@ public class SPUM_AssetExporterWithPreview : EditorWindow
         {
             ReadMeFilePath();
         }
+        EditorGUILayout.Space();
+        GUILayout.Label("Manual Files", EditorStyles.boldLabel);
+        EditorGUILayout.BeginHorizontal();
+        if (GUILayout.Button("Add Selected Files"))
+        {
+            AddSelectedFiles();
+        }
+        if (GUILayout.Button("Clear"))
+        {
+            manualAssetStates.Clear();
+            UpdateAssetsToExport();
+        }
+        EditorGUILayout.EndHorizontal();
+        manualAssetsScrollPosition = EditorGUILayout.BeginScrollView(manualAssetsScrollPosition, GUILayout.MaxHeight(100));
+        foreach (var asset in manualAssetStates.Keys.ToList())
+        {
+            EditorGUILayout.BeginHorizontal();
+            EditorGUILayout.LabelField(asset, EditorStyles.wordWrappedLabel);
+            bool isChecked = EditorGUILayout.Toggle(manualAssetStates[asset], GUILayout.Width(20));
+            EditorGUILayout.EndHorizontal();
+            if (isChecked != manualAssetStates[asset])
+            {
+                manualAssetStates[asset] = isChecked;
+                UpdateAssetsToExport();
+            }
+        }
+        EditorGUILayout.EndScrollView();
     }
     void SetDefaultAsset(){
         DefaultExport.Clear();
@@ -210,6 +239,18 @@ public class SPUM_AssetExporterWithPreview : EditorWindow
                 assetsToExport.Remove(asset);
             }
         }
+        foreach (var asset in manualAssetStates.Keys)
+        {
+            if (manualAssetStates[asset])
+            {
+                if (!assetsToExport.Contains(asset))
+                    assetsToExport.Add(asset);
+            }
+            else
+            {
+                assetsToExport.Remove(asset);
+            }
+        }
     }
     List<string> GetAssetsInFolder(string folderPath)
     {
@@ -274,7 +315,7 @@ public class SPUM_AssetExporterWithPreview : EditorWindow
         DefaultExport.Clear();
         DefualtAssetStates.Clear();
         string ReadMePath = ReadMeFilePath();
-        string[] array = new string[] {
+        List<string> list = new List<string> {
             "Assets/SPUM/Resources/Addons/Legacy", 
             "Assets/SPUM/Resources/Addons/Ver121", 
             "Assets/SPUM/Resources/Addons/Ver300", 
@@ -284,10 +325,13 @@ public class SPUM_AssetExporterWithPreview : EditorWindow
             "Assets/SPUM/Script",
             "Assets/SPUM/Sprite_SheetExporter(Beta)",
             "Assets/SPUM/Sprite_Editor(Beta)",
-            "Assets/SPUM/Sample",
-            ReadMePath
-            
+            "Assets/SPUM/Sample"
         };
+        if (!string.IsNullOrEmpty(ReadMePath))
+        {
+            list.Add(ReadMePath);
+        }
+        string[] array = list.ToArray();
         DefaultExport.AddRange(array);
 
         foreach (string asset in array)
@@ -300,39 +344,27 @@ public class SPUM_AssetExporterWithPreview : EditorWindow
         
         UpdateAssetsToExport();
     }
+    void AddSelectedFiles()
+    {
+        string[] selectedPaths = Selection.assetGUIDs.Select(AssetDatabase.GUIDToAssetPath).ToArray();
+        foreach (string path in selectedPaths)
+        {
+            if (!manualAssetStates.ContainsKey(path))
+                manualAssetStates[path] = true;
+        }
+        UpdateAssetsToExport();
+    }
     string ReadMeFilePath()
     {
-        string specificPath = "Assets/SPUM"; 
-        string[] files = Directory.GetFiles(specificPath, "*ReadMe*", SearchOption.AllDirectories);
-
-        string highestVersionFile = null;
-        int highestVersion = -1;
-        Regex versionPattern = new Regex(@"\d{1,3}"); // 최대 세 자리 숫자에 매칭되는 정규 표현식
-
-        foreach (string file in files)
+        string readMePath = "Assets/SPUM/README.txt";
+        if (File.Exists(readMePath))
         {
-            string fileNameWithoutSpacesAndSpecialChars = Regex.Replace(Path.GetFileName(file), @"[\s\W_]+", "");
-            Match match = versionPattern.Match(fileNameWithoutSpacesAndSpecialChars);
-            if (match.Success)
-            {
-                int version = int.Parse(match.Value);
-                if (version > highestVersion)
-                {
-                    highestVersion = version;
-                    highestVersionFile = file;
-                }
-            }
+            Debug.Log("ReadMe path: " + readMePath);
+            return readMePath;
         }
-
-        if (highestVersionFile != null)
-        {
-            Debug.Log("ReadMe path: " + highestVersionFile);
-        }
-        else
-        {
-           Debug.Log("ReadMe file not found");
-        }
-        return highestVersionFile;
+        
+        Debug.Log("ReadMe file not found");
+        return null;
     }
     void DeleteFilesWithExtension(string directory, string extension)
     {

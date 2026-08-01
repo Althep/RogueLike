@@ -213,7 +213,8 @@ public class ModifierDataManager : AsyncDataManager<ModifierDataManager>
                 continue;
             }
 
-            ModifierType modType = (ModifierType)modTypeObj;
+            ModifierType modType = Utils.ConvertToEnum<ModifierType>(modTypeObj.ToString());
+            
             Modifier mod = modFactory.CreateNewModifierToType(modType);
             mod.SetBaseData(originData[i]);
             modifierBases.Add(id, mod);

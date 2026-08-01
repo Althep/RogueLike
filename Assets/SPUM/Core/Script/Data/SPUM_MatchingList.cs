@@ -18,8 +18,6 @@ public class MatchingElement
 public class SPUM_MatchingList : MonoBehaviour
 {
     public List<MatchingElement> matchingTables = new List<MatchingElement>();
-
-    
     public void LoadItems()
     {
         matchingTables = new List<MatchingElement>();
@@ -33,7 +31,6 @@ public class SPUM_MatchingList : MonoBehaviour
             item.Color = Color.white;
             Text +=item.Structure+"\n";
             matchingTables.Add(item);
-            Debug.Log($"Item Name : {sr.name} Item Structure : {item.Structure} ItemPartType : {item.PartSubType}, ItemSubPartType : {item.PartSubType}");
         }
         Debug.Log(Text);
     }

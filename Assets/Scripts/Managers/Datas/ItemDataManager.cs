@@ -138,6 +138,39 @@ public class ItemDataManager : AsyncDataManager<ItemDataManager>
         /*
         장비 파싱 로직도 향후 이 패턴으로 optionKey 문자열만 추가하도록 수정하면 됩니다.
         */
+        for(int i = 0; i<originData.Count; i++)
+        {
+            string id = null;
+            string optionKey = null;
+            string name = null;
+
+            Utils.TrySetValue<string>(originData[i], "ID", ref id);
+            Utils.TrySetValue<string>(originData[i], "Name", ref name);
+            Utils.TrySetValue<string>(originData[i], "OptionKey", ref optionKey);
+
+            if (string.IsNullOrEmpty(name))
+            {
+                await Utils.WaitYield(i);
+                continue;
+            }
+
+            if (!itemDatas.ContainsKey(name))
+            {
+                EquipItem equip = new EquipItem();
+                equip.id = name;
+                equip.name = name;
+                equip.category = ItemCategory.Equipment;
+                Utils.TryConvertEnum(originData[i], "SlotType", ref equip.slot);
+                Utils.TryConvertEnum(originData[i], "EquipmentCategory", ref equip.equipCategory);
+                Utils.TryConvertEnum(originData[i], "ItemCategory", ref equip.equipmentType);
+                Utils.TrySetValue<int>(originData[i], "Tier", ref equip.tier);
+                Utils.TrySetValue<float>(originData[i], "Weight", ref equip.weight);
+                //Utils.TrySetValue(originData[i], "ItemSubType", ref equip.itemSubType);
+                itemDatas.Add(name, equip);
+            }
+            itemDatas[name].optionKeys.Add(optionKey);
+        }
+
     }
 
     async UniTask ReadConsumData(List<Dictionary<string, object>> originData)

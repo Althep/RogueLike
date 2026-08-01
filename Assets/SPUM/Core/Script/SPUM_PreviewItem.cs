@@ -23,7 +23,6 @@ public class SPUM_PreviewItem : MonoBehaviour
     public void SetSprite()
     {
         _managerST.SetSprite(ImageElement);
-        _managerST.SetPrefabToPreviewPackageData(spumPackages);
     }
     public GameObject DeleteButton;
     public void DeleteObj()

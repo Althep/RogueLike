@@ -6,9 +6,7 @@ using System.Linq;
 using System;
 using System.Globalization;
 using UnityEngine.SceneManagement;
-#if ENABLE_INPUT_SYSTEM
-using UnityEngine.InputSystem;
-#endif
+
 [Serializable]
 public class SPUM_Animator{
     public string Type;
@@ -29,6 +27,7 @@ public class SPUM_Manager : MonoBehaviour
     public List<string> StateList = new ();
     public List<string> UnitTypeList = new();
     public List<string> SpritePackageNameList = new();
+    [HideInInspector] public HashSet<string> MissingPackageNames = new();
     [Header("Manager")]
     [SerializeField] public SPUM_AnimationManager animationManager;
     [SerializeField] public SPUM_UIManager UIManager;
@@ -192,6 +191,11 @@ public class SPUM_Manager : MonoBehaviour
             var PreviewItem = UIManager.CreatePreviewItem();
             var previewButton = PreviewItem.GetComponent<SPUM_PreviewItem>();
             previewButton.name = package.Key.Name;
+            
+            // 관련 패키지 데이터 주입
+            var relatedPackages = package.Items.Select(item => item.Package).Distinct().ToList();
+            previewButton.spumPackages = relatedPackages;
+            
             // Hide Other Element
             foreach (Transform tr in previewButton.transform)
             {
@@ -378,7 +382,7 @@ public class SPUM_Manager : MonoBehaviour
                 var LoadSprite = LoadSpriteFromMultiple(matchingTypeElement.ItemPath , matchingTypeElement.Structure);
                 matchingElement.renderer.sprite = LoadSprite;
                 matchingElement.renderer.maskInteraction = (SpriteMaskInteraction) matchingTypeElement.MaskIndex;
-                Color PartColor = existingElement.ignoreColorPart.Contains(matchingTypeElement.PartType) ? Color.white : matchingTypeElement.Color;
+                Color PartColor = existingElement.ignoreColorPart.Contains(matchingElement.Structure) ? Color.white : matchingTypeElement.Color;
                 matchingElement.renderer.color = PartColor;
                 matchingElement.ItemPath = matchingTypeElement.ItemPath;
                 matchingElement.Color =  PartColor;
@@ -683,9 +687,9 @@ public class SPUM_Manager : MonoBehaviour
         Debug.Log($"Prefab Package { packages.Count } / Total Package { spumPackages.Count }");
         animationManager.PlayFirstAnimation();
     }
-    
+
 #endregion
-    
+
 #region ElementData
     private bool AreElementsEqual(PreviewMatchingElement element1, PreviewMatchingElement element2)
     {
@@ -772,7 +776,7 @@ public class SPUM_Manager : MonoBehaviour
         string prefabName = UIManager._unitCode.text;
 
         SpumPreviewUnit._code = prefabName;
-        //SpumPreviewUnit.EditChk = false;
+        SyncPackagesWithImageElement(SpumPreviewUnit);
         var Prefab = fileHandler.Save(SpumPreviewUnit, this);
         
         UIManager.ToastOn("Saved Unit Object " + prefabName);
@@ -793,6 +797,7 @@ public class SPUM_Manager : MonoBehaviour
 
         string prefabCode = SpumPreviewUnit._code;
 
+        SyncPackagesWithImageElement(SpumPreviewUnit);
         var Prefab = fileHandler.Edit(SpumPreviewUnit, this);
 
         SpumPreviewUnit._code = "";
@@ -801,6 +806,58 @@ public class SPUM_Manager : MonoBehaviour
         UIManager.ToastOn("Edited Unit Object Unit" + prefabCode);
 
         NewMake();
+    }
+
+    private void SyncPackagesWithImageElement(SPUM_Prefabs unit)
+    {
+        var usedPackageNames = new HashSet<string>();
+
+        // 이미지에서 사용 중인 패키지
+        foreach (var elem in unit.ImageElement)
+        {
+            if (string.IsNullOrEmpty(elem.ItemPath)) continue;
+            string[] pathParts = elem.ItemPath.Replace("\\", "/").Split('/');
+            string pkgName = pathParts[0];
+            if (pkgName == "Addons" && pathParts.Length >= 3) pkgName = pathParts[1];
+            usedPackageNames.Add(pkgName);
+        }
+
+        // 애니메이션 클립에서 사용 중인 패키지
+        var previousPackages = unit.spumPackages;
+        foreach (var pkg in previousPackages)
+        {
+            if (pkg.SpumAnimationData.Any(a => a.HasData && a.UnitType == unit.UnitType))
+            {
+                usedPackageNames.Add(pkg.Name);
+            }
+        }
+
+        // 사용 중인 패키지만 남기고, 마스터 데이터에서 깊은 복사로 재구성
+        unit.spumPackages = spumPackages
+            .Where(p => usedPackageNames.Contains(p.Name))
+            .Select(p => (SpumPackage)p.Clone())
+            .ToList();
+
+        // 이전 애니메이션 설정(index, HasData) 복원
+        foreach (var pkg in unit.spumPackages)
+        {
+            var prevPkg = previousPackages.FirstOrDefault(p => p.Name == pkg.Name);
+            foreach (var clip in pkg.SpumAnimationData)
+            {
+                var prevClip = prevPkg?.SpumAnimationData
+                    .FirstOrDefault(a => a.Name == clip.Name);
+                if (prevClip != null)
+                {
+                    clip.index = prevClip.index;
+                    clip.HasData = prevClip.HasData;
+                }
+                else
+                {
+                    clip.index = -1;
+                    clip.HasData = false;
+                }
+            }
+        }
     }
 
     public void NewMake()
@@ -825,131 +882,6 @@ public class SPUM_Manager : MonoBehaviour
         UIManager.SetActiveLoadPanel(true);
         paginationManager.LoadPrefabs();
     }
-    public List<PreviewMatchingElement> DebugList = new List<PreviewMatchingElement>();
-    public List<string> MissingPackageNames = new List<string>();
-    public SPUM_Prefabs previewUnit;
-    public void SetUnitConverter(string Type)
-    {
-        int UnitBodyCount = DebugList.Count(element => element.PartType == "Body");
-        if(UnitBodyCount < 6)
-        {
-            DebugList.AddRange(DefaultData("Unit", "Body", "Human_1", Color.white));
-        }
-        UIManager.ConvertView.WarningText.SetActive(UnitBodyCount < 6);
-        //Debug.Log("UnitBodyCount " + UnitBodyCount);
-        int UnitEyeCount = DebugList.Count(element => element.PartType == "Eye");
-        UIManager.ConvertView.WarningEyeText.SetActive(UnitEyeCount < 2);
-        if(UnitEyeCount < 2){
-            DebugList.AddRange(DefaultData("Unit", "Eye", "Eye0", new Color32(71, 26,26, 255)));
-        }
-        var DistinctPackageList = MissingPackageNames.Distinct().ToList();
-        MissingPackageNames = DistinctPackageList;
-
-        UIManager.ConvertView.MissingPackageNames.transform.parent.gameObject.SetActive(MissingPackageNames.Count > 0);
-        if(MissingPackageNames.Count > 0){
-            string Text = "";
-            foreach (var item in MissingPackageNames)
-            {
-                Text += "\n-" + item ;
-            }
-           
-            string format = $"Missing\nPackages\n--------------{ Text }";
-            UIManager.ConvertView.MissingPackageNames.text = format;
-        }
-        var containUnitTypes = DebugList
-        .Select(e => e.UnitType)
-        .Distinct()
-        .ToList();
-        bool shouldActivate = containUnitTypes.Any(unitType => unitType.Contains("Horse"));
-        if(shouldActivate) Type = "Horse";
-        previewUnit.UnitType = Type;
-        foreach (Transform child in previewUnit.transform)
-        {
-            child.gameObject.SetActive(child.name.Contains(Type));
-        }
-        var anim = previewUnit.GetComponentInChildren<Animator>();
-        previewUnit._anim = anim;
-
-        var matchingTables = previewUnit.GetComponentsInChildren<SPUM_MatchingList>(true);
-        var allMatchingElements = matchingTables.SelectMany(mt => mt.matchingTables).ToList();
-        foreach (var matchingElement in allMatchingElements)
-        {
-            if (matchingElement.renderer != null)
-            {
-                matchingElement.renderer.sprite = null;
-                matchingElement.renderer.maskInteraction = SpriteMaskInteraction.None;
-                matchingElement.renderer.color = Color.white;
-                matchingElement.ItemPath = "";
-                matchingElement.Color = Color.white;
-            }
-        }
-        foreach (var matchingElement in allMatchingElements)
-        {
-            var matchingTypeElement = DebugList.FirstOrDefault(ie => 
-            (ie.UnitType == matchingElement.UnitType)
-            && (ie.PartType == matchingElement.PartType)
-            //&& ie.Index == matchingElement.Index
-            && (ie.Dir == matchingElement.Dir)
-            && (ie.Structure == matchingElement.Structure) 
-            && ie.PartSubType == matchingElement.PartSubType
-            );
-            //Debug.Log(matchingTypeElement != null);
-            if (matchingTypeElement != null)
-            {
-                var LoadSprite = LoadSpriteFromMultiple(matchingTypeElement.ItemPath , matchingTypeElement.Structure);
-                matchingElement.renderer.sprite = LoadSprite;
-                matchingElement.renderer.maskInteraction = (SpriteMaskInteraction)matchingTypeElement.MaskIndex;
-                matchingElement.renderer.color = matchingTypeElement.Color; 
-                matchingElement.ItemPath = matchingTypeElement.ItemPath;
-                matchingElement.MaskIndex = matchingTypeElement.MaskIndex;
-                matchingElement.Color = matchingTypeElement.Color;
-                //Debug.Log( matchingTypeElement.PartType + "/" + matchingTypeElement.Color);
-            }
-        }
-
-
-        previewUnit.ImageElement = DebugList;
-
-        
-        //애니메이션 경로 체크
-        if(previewUnit.spumPackages.Count > 0){
-            bool clipPathExists = true;
-            var ClipList = previewUnit.spumPackages.SelectMany(package => package.SpumAnimationData).ToList();
-            
-            foreach (var clip in ClipList)
-            {
-                clipPathExists = ValidateAnimationClips(clip);
-                if(!clipPathExists){
-                    // 패키지 네임 // 애니메이션 타입 // 애니메이션 이름
-                    var dataArray = clip.ClipPath.Split("/");
-
-                    var PackageDataName = dataArray[0];
-                    if(PackageDataName.Equals("Addons")){
-                        PackageDataName = dataArray[1];
-                    }
-                    var PackageNameExist = SpritePackageNameList.Contains(PackageDataName);
-                    if(!PackageNameExist)
-                    {
-                        //Debug.Log("MissingPackage");
-                        MissingPackageNames.Add(PackageDataName);
-                    }
-                    var PackageName = PackageNameExist ? PackageDataName : "";
-                    var ClipName = dataArray[dataArray.Length-1];
-                    var ExtractList = ExtractTextureData(PackageName, clip.UnitType, clip.StateType, ClipName);
-                    var data = ExtractList.FirstOrDefault();
-                    if(data != null){
-                    Debug.Log($" Package {PackageNameExist} {PackageName} {ClipName} {data.Name} {data.Path}");
-                        
-                        clip.ClipPath = data.Path;
-                    }
-                }
-            }
-
-        }else{
-            //애니메이션 데이터 초기화
-            previewUnit.spumPackages = GetSpumLegacyData();
-        }
-    }
     public bool ValidateAnimationClips(SpumAnimationClip clipData)
     {
         bool clipPathExists = true;
@@ -964,11 +896,6 @@ public class SPUM_Manager : MonoBehaviour
         return clipPathExists;
     }
     
-    public SPUM_Prefabs SaveConvertPrefabs(SPUM_Prefabs asset)
-    {
-        return fileHandler.SaveConvertPrefabs(asset, this);
-        // 코어의 수정 작업
-    }
     public List<PreviewMatchingElement> SetLegacyHorseData(){
         string PackageName = "Legacy";
         string UnitType = "Horse";
@@ -1042,47 +969,6 @@ public class SPUM_Manager : MonoBehaviour
         }
         return ListElement;
     }
-    public List<PreviewMatchingElement> ReSyncSpumElementDataList(List<PreviewMatchingElement> List)
-    {
-        // 패키지 이름 존재 여부 2버전
-        // 패키지 이름이 없으면 불가능 오브젝트로 이동동
-        var ModifiyList = new List<PreviewMatchingElement>();
-        foreach (var oldData in List)
-        {
-            var dataArray = oldData.ItemPath.Split("/");
-
-            var PackageDataName = dataArray[0];
-            if(PackageDataName.Equals("Addons")){
-                PackageDataName = dataArray[1];
-            }
-            var PackageNameExist = SpritePackageNameList.Contains(PackageDataName);
-            if(!PackageNameExist)
-            {
-                //Debug.Log("MissingPackage");
-                MissingPackageNames.Add(PackageDataName);
-            }
-            var PackageName = PackageNameExist ? PackageDataName : "";
-            var PartName = dataArray[dataArray.Length-1];
-            var ExtractList = ExtractTextureData(PackageName, oldData.UnitType, oldData.PartType, PartName);
-            var data = ExtractList.FirstOrDefault();
-            //Debug.Log($" Package" + oldData.PartType + "/" + PartName);
-            if(data != null){
-            //Debug.Log($" Package {PackageNameExist} {PackageName} {PartName} {data.Name} {data.Path}");
-                if(oldData.PartType.Equals("Weapons"))
-                {
-                    var PathArray = data.Path.Split("/");
-                    string PartType = System.Text.RegularExpressions.Regex.Replace(PathArray[PathArray.Length-2],@"[^a-zA-Z가-힣\s]", "");
-                    oldData.PartSubType = PartType;
-                }
-                
-                oldData.ItemPath = data.Path;
-                oldData.Color = oldData.Color.Equals(Color.clear) ? Color.white : oldData.Color;
-                ModifiyList.Add(oldData);
-            }
-        }
-        return ModifiyList;
-    }
-
     public List<SpumTextureData> ExtractTextureData(string packageName, string unitType, string partType, string textureName)
     {
         var query = spumPackages.AsEnumerable();
@@ -1094,10 +980,10 @@ public class SPUM_Manager : MonoBehaviour
 
         return query
             .SelectMany(package => package.SpumTextureData)
-            .Where(texture => 
-                texture.UnitType == unitType &&
-                texture.PartType == partType &&
-                texture.Name == textureName)
+            .Where(texture =>
+                string.Equals(texture.UnitType, unitType, StringComparison.OrdinalIgnoreCase) &&
+                string.Equals(texture.PartType, partType, StringComparison.OrdinalIgnoreCase) &&
+                string.Equals(texture.Name, textureName, StringComparison.OrdinalIgnoreCase))
             .ToList();
     }
     public List<SpumAnimationClip> ExtractAnimationData(string packageName, string unitType, string partType, string clipeName)
@@ -1132,7 +1018,7 @@ public class SPUM_Manager : MonoBehaviour
     public Sprite LoadSpriteFromMultiple(string path, string spriteName)
     {
         Sprite[] sprites = Resources.LoadAll<Sprite>(path);
-        
+
         if (sprites == null || sprites.Length == 0)
         {
             Debug.LogWarning($"No sprites found at path: {path}");
