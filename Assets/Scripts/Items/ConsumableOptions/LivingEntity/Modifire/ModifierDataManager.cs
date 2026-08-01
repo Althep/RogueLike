@@ -171,6 +171,10 @@ public class ModifierDataManager : AsyncDataManager<ModifierDataManager>
     // 개별 ModifierData 조회 (ModifierFactory나 ModifierPooler에서 호출)
     public ModifierData GetModifierData(string id)
     {
+        if(modifierDatas.GetValueOrDefault(id) == null)
+        {
+            Debug.LogError($"ModifierDataManager: ID {id}에 해당하는 ModifierData가 존재하지 않습니다.");
+        }
         return modifierDatas.GetValueOrDefault(id);
     }
 

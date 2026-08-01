@@ -89,6 +89,7 @@ public class StartItemData
             {
                 slotItems[slot].Add(itemKey);
             }
+            
         }
     }
 }

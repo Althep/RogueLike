@@ -58,7 +58,7 @@ public class ItemSlotListCell : SelectSubCell, IPoolUI
         foreach (string key in itemKeys)
         {
             GameObject go = uiManager.Get_PoolUI(UIDefines.UI_PrefabType.MainSelect, myContents);
-            go.transform.SetAsLastSibling();
+            
             if (go.TryGetComponent<ItemSelectCell>(out ItemSelectCell cell))
             {
                 if (cell is IPoolUI && !myPools.Contains(cell))

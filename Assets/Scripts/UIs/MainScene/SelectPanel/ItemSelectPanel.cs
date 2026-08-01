@@ -121,7 +121,6 @@ public class ItemSelectPanel : SelectSubPanel
             foreach (SlotType slot in jobItems.slotItems.Keys)
             {
                 List<string> itemName = jobItems.slotItems[slot];
-
                 foreach (string key in itemName)
                 {
                     if (itemDatas[key] is EquipItem equip)
