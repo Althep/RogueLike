@@ -246,4 +246,6 @@ public class StartDataManager : AsyncDataManager<StartDataManager>
         }
         Debug.Log("Banned jobs processed");
     }
+
+    
 }

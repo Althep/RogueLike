@@ -125,7 +125,8 @@ public class ModifierDataManager : AsyncDataManager<ModifierDataManager>
             
             string id = idObj.ToString();
             string optionKey = optionKeyobj.ToString();
-            
+            Debug.Log($"OptionKey: {optionKey}, ID: {id} 추가 시작");
+
             // 1. 개별 ModifierData 파싱 및 저장
             ModifierData modData = new ModifierData();
             modData.ParseFromCsv(row);
@@ -161,6 +162,7 @@ public class ModifierDataManager : AsyncDataManager<ModifierDataManager>
             if (!optionIds[optionKey].Contains(id))
             {
                 optionIds[optionKey].Add(id);
+                Debug.Log($"OptionKey: {optionKey}, ID: {id} 추가 완료");
             }
             
             await Utils.WaitYield(i);

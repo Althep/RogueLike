@@ -14,7 +14,9 @@ public class ModifierManager : MonoBehaviour
     public static ModifierManager instance;
     ModifierFactory modifierFactory;
     ModifierPooler modifierPooler;
+    [NonSerialized]
     public StartDataManager startDataManager;
+    [NonSerialized]
     public ModifierDataManager modifierDataManager;
     string bandJobDataName = "BanedJob";
     string statRaceDataName = "RaceTrait_Stat";
@@ -25,11 +27,13 @@ public class ModifierManager : MonoBehaviour
 
     }
 
-    private async UniTask Awake()
+
+    private void Awake()
     {
-        await Init();
+        Init().Forget();
 
     }
+
     public async UniTask Init()
     {
         if(ModifierManager.instance == null)
@@ -46,17 +50,12 @@ public class ModifierManager : MonoBehaviour
         {
             modifierDataManager = await ModifierDataManager.CreateAsync();
         }
+
         if (modifierPooler == null)
         {
             modifierPooler = new ModifierPooler();
             modifierPooler.Set_ModifierManager(this, modifierFactory, modifierDataManager);
         }
-        /*
-        if(startDataManager == null)
-        {
-            startDataManager = new StartDataManager();
-            startDataManager.Init();
-        }*/
     }
 
     public ModifierFactory GetModifierFactory()

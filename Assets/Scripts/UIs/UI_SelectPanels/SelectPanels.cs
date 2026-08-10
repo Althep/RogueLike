@@ -17,7 +17,7 @@ public class SelectPanels : UI_GridSelect
     [SerializeField] UI_ConfirmPanel confirmPanel;
     //[SerializeField] GameObject selectViewObj;
     public ModifierController checker = new ModifierController();
-    
+
     // [수정] 미리보기(착용 제한 검사 등)를 위해 풀에서 가져온 임시 모디파이어 객체들 보관
     public List<ModifierOption> previewOptions = new List<ModifierOption>();
 
@@ -29,8 +29,8 @@ public class SelectPanels : UI_GridSelect
     private void Awake()
     {
         myInputType = Defines.InputType.GridUI;
-        
-        if(SelectObj == null)
+
+        if (SelectObj == null)
         {
             SelectObj = UIManager.instance.Get_PoolUI(UIDefines.UI_PrefabType.SelectView, this.gameObject);
         }
@@ -48,7 +48,7 @@ public class SelectPanels : UI_GridSelect
     }
     void Init()
     {
-        if(uiManager == null)
+        if (uiManager == null)
         {
             uiManager = GameManager.instance.Get_UIManager();
         }
@@ -89,7 +89,7 @@ public class SelectPanels : UI_GridSelect
     {
         return _grid.Count;
     }
-    
+
     // [수정] 종족이 선택될 때 풀링 옵션 갱신
     public void OnRaceSelected(Races race)
     {
@@ -160,7 +160,7 @@ public class SelectPanels : UI_GridSelect
     public override void ChangeSelection(Vector2Int direction)
     {
         if (_grid == null || _grid.Count == 0) return;
-        if(direction.x != 0)
+        if (direction.x != 0)
         {
             _currentRow = 0;
         }
@@ -169,7 +169,7 @@ public class SelectPanels : UI_GridSelect
             _currentRow -= direction.y;
         }
         _currentCol += direction.x;
-        _currentCol = Mathf.Clamp(_currentCol, 0, _grid.Count-1);
+        _currentCol = Mathf.Clamp(_currentCol, 0, _grid.Count - 1);
         if (_currentRow >= _grid[_currentCol].Count)
         {
             _currentRow = 0;
@@ -177,7 +177,7 @@ public class SelectPanels : UI_GridSelect
         _currentRow = Mathf.Clamp(_currentRow, 0, _grid[_currentCol].Count);
 
         UI_Base selected = _grid[_currentCol][_currentRow];
-        if(!(selected is UI_Buttons buttons))
+        if (!(selected is UI_Buttons buttons))
         {
             selected.Excute();
         }
@@ -201,7 +201,7 @@ public class SelectPanels : UI_GridSelect
         }
     }
 
-    
+
     public override void ExecuteSelectedMenu()
     {
         CurrentSelected?.Excute();
@@ -214,12 +214,12 @@ public class SelectPanels : UI_GridSelect
 
     private async UniTaskVoid SetUpAndDungeonLoad()
     {
-        await AddItemsAsync();
+        Add_Items();
         Debug.Log("아이템 추가 완료");
         await LoadDungeonSceneAsync();
     }
 
-    public async UniTask AddItemsAsync()
+    public void Add_Items()
     {
         Dictionary<SlotType, string> selectedItem = itemSelect.selectItems;
         ItemManager itemManager = GameManager.instance.Get_ItemManager();
@@ -229,20 +229,19 @@ public class SelectPanels : UI_GridSelect
             Debug.Log("ItemManager Null");
             return;
         }
-        
+
         List<string> items = new List<string>();
         foreach (string name in selectedItem.Values)
         {
             items.Add(name);
         }
 
-        for(int i = 0; i<items.Count; i++)
+        for (int i = 0; i < items.Count; i++)
         {
             ItemBase item = itemManager.ItemMake(items[i]);
             playerEntity.AddItem(item);
         }
 
-        await UniTask.Yield();
     }
 
     private async UniTask LoadDungeonSceneAsync()
@@ -250,7 +249,7 @@ public class SelectPanels : UI_GridSelect
         Debug.Log("던전 씬 비동기 로드 시작!");
         await SceneController.Instance.PrePostAwaits(null, Defines.Scenes.DungeonScene, CreateNewDungeon);
         Debug.Log("던전 씬 로드 완료. 던전 생성 시작.");
-        
+
     }
 
     private async UniTask CreateNewDungeon()
@@ -261,7 +260,7 @@ public class SelectPanels : UI_GridSelect
     {
         List<List<UI_Base>> data = confirmPanel.Get_GridData();
         Debug.Log("Call Add ConfirmPanel");
-        for (int i = 0; i<data.Count; i++)
+        for (int i = 0; i < data.Count; i++)
         {
             if (_grid.Contains(data[i]))
             {
@@ -275,7 +274,7 @@ public class SelectPanels : UI_GridSelect
     {
         InputManager.instance.CloseInputUI(this);
     }
-    
+
     // [수정] 안전망: UI가 꺼질 때 고아 객체들 풀로 돌려보내기
     private void OnDisable()
     {
@@ -289,5 +288,62 @@ public class SelectPanels : UI_GridSelect
     public override void CloseUI()
     {
         //base.CloseUI();
+    }
+
+    public void Create_Character()
+    {
+        Add_RaceMutates();
+        Add_JobMutates();
+        Add_Items();
+    }
+    private void Add_RaceMutates()
+    {
+        Races race = raceSelect.selectRace;
+
+        StartDataManager dm = GameManager.instance.Get_DataManager().startDataManager;
+
+        PlayerEntity player = GameManager.instance.Get_PlayerEntity();
+        List<string> raceOptionKey = new();
+        if (dm.raceModDatas.ContainsKey(race))
+        {
+            raceOptionKey = dm.raceModDatas[race].optionKeys;
+        }
+
+        if (raceOptionKey.Count == 0)
+            return;
+
+
+        for (int i = 0; i < raceOptionKey.Count; i++)
+        {
+            ModifierOption opt = ModifierManager.instance.Get_ModifierOption(raceOptionKey[i]);
+            if (opt != null)
+            {
+                player.Add_Mutation(opt);
+                Debug.Log($"Add Race Mutate: {opt.optionKey}");
+            }
+        }
+    }
+
+    private void Add_JobMutates()
+    {
+        Jobs job = jobSelect.selectJob;
+        StartDataManager dm = GameManager.instance.Get_DataManager().startDataManager;
+        PlayerEntity player = GameManager.instance.Get_PlayerEntity();
+        List<string> jobOptionKey = new();
+        if (dm.jobStartDatas.ContainsKey(job))
+        {
+            jobOptionKey = dm.jobStartDatas[job].optionKeys;
+        }
+        if (jobOptionKey.Count == 0)
+            return;
+
+        for (int i = 0; i < jobOptionKey.Count; i++)
+        {
+            ModifierOption opt = ModifierManager.instance.Get_ModifierOption(jobOptionKey[i]);
+            if (opt != null)
+            {
+                player.Add_Mutation(opt);
+            }
+        }
     }
 }

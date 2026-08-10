@@ -42,3 +42,5 @@ Race_MaxHp,MaxHp,FALSE,Passive,50,StatModifier
 Job_Str,Str,FALSE,Passive,50,StatModifier
 Job_Dex,Dex,FALSE,Passive,50,StatModifier
 Job_Int,Int,FALSE,Passive,50,StatModifier
+Race_Sound,Sound,FALSE,Passive,50,StatModifier
+Race_MoveSpeed,MoveSpeed,FALSE,Passive,50,StatModifier
