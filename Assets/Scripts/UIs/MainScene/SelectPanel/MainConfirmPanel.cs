@@ -31,7 +31,6 @@ public class MainConfirmPanel : UI_ConfirmPanel
 
     async UniTask DungeonLoadFunc()
     {
-        selectPanel.Create_Character();
         //await selectPanel.AddItemsAsync();
         await sceneController.PrePostAwaits( null, Defines.Scenes.DungeonScene, dungeonManager.GenerateDungeon);
     }

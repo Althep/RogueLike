@@ -75,17 +75,25 @@ public class ModifierFactory
     // 하위 Modifier들을 가져와 조립하는 역할만 수행
     public void AssembleOption(ModifierOption option, string optionKey)
     {
-        if(modifierDataManager == null)
+        Debug.Log($"[ModifierFactory] AssembleOption 호출: {optionKey}");
+        if (modifierDataManager == null)
         {
             Debug.Log("모디파이어 데이터 매니저 X") ;
         }
+        ModifierOptionData optionData = modifierDataManager.GetModifierOptionData(optionKey);
         List<string> modIds = modifierDataManager.Get_ModifierOptionKeys(optionKey);
 
-        if (modIds == null || modIds.Count == 0)
+        if(modIds == null)
         {
             Debug.LogWarning($"[ModifierFactory] {optionKey}에 해당하는 모디파이어옵션 ID가 없습니다.");
             return;
         }
+        if(modIds.Count == 0)
+        {
+            Debug.LogWarning($"[ModifierFactory] {optionKey}에 해당하는 모디파이어옵션 ID의 카운트 0.");
+            return;
+        }
+
 
         if(modifierPooler == null)
         {
@@ -103,6 +111,7 @@ public class ModifierFactory
             if (newMod != null)
             {
                 option.myMods.Add(newMod);
+                Debug.Log($"[ModifierFactory] AssembleOption: {optionKey}에 Modifier 추가: {newMod}");
             }
         }
     }

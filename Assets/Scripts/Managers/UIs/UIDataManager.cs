@@ -69,19 +69,18 @@ public class UIDataManager : AsyncDataManager<UIDataManager>
             if (!_UIBinds.ContainsKey(uiName))
             {
                 _UIBinds.Add(uiName, uiBase.gameObject);
-                Debug.Log($"{uiName} 바인딩 완료");
+                //Debug.Log($"{uiName} 바인딩 완료");
             }
 
         }
 
         foreach (var input in allInputs)
         {
-            Debug.Log(11);
             string uiName = input.name;
             if (!_UIBinds.ContainsKey(uiName))
             {
                 _UIBinds.Add(uiName,input.gameObject);
-                Debug.Log($"{uiName} 바인딩 완료");
+                //Debug.Log($"{uiName} 바인딩 완료");
             }
         }
         Debug.Log($"총 {_UIBinds.Count}개의 UI 바인딩 완료");

@@ -26,7 +26,7 @@ public class Modifier : IPoolScript
     }
     public virtual void SetData(ModifierData modData)
     {
-        id = modData.id;
+        id = modData.modifierId;
         triggerType = modData.triggerType;
         stat = modData.stat;
         priority = modData.priority;
@@ -47,7 +47,7 @@ public class Modifier : IPoolScript
 
     public virtual void Reset()
     {
-        id = null;
+        //id = null;
         triggerType = ModifierTriggerType.Passive;
         stat = StatType.Accuracy;
         priority = 0;

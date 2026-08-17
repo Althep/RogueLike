@@ -2,8 +2,8 @@ ID,OptionKey,ModifierID,Value,Job,DeskKey
 Warrior_Str,Warrior_Str,Job_Str,2,Warrior,String_Mod_Str
 Warrior_Dex,Warrior_Dex,Job_Dex,1,Warrior,String_Mod_Dex
 Warrior_Int,Warrior_Int,Job_Int,-3,Warrior,String_Mod_Int
-Hunter_Stat,Hunter_Stat,Job_Dex,2,Hunter,String_Mod_Dex
-Hunter_Stat,Hunter_Stat,Job_Int,-2,Hunter,String_Mod_Int
+Hunter_Dex,Hunter_Dex,Job_Dex,2,Hunter,String_Mod_Dex
+Hunter_Int,Hunter_Int,Job_Int,-2,Hunter,String_Mod_Int
 Rogue_Str,Rogue_Str,Job_Str,1,Rogue,String_Mod_Str
 Rogue_Dex,Rogue_Dex,Job_Dex,1,Rogue,String_Mod_Dex
 Rogue_Int,Rogue_Int,Job_Int,-2,Rogue,String_Mod_Int

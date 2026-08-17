@@ -1,6 +1,6 @@
 ID,Name,OptionKey,Weight,Tier
 CurePotion,CurePotion,Potion_CureOption,3,1
-HealingPotion,HealingPotion,Potion_Healing,1,1
+HealingPotion,HealingPotion,Potion_HealingOption,1,1
 PoisonPotion,PoisonPotion,Potion_PoisonOption,1,1
 ConfusePotion,DizzyPotion,Potion_ConfuseOption,1,2
 StrengthPotion,StrengthPotion,Potion_StrengthBuff,1,2

@@ -84,7 +84,7 @@ public class MonsterDataManager : AsyncDataManager<MonsterDataManager>
             }
             monsterStat.SetTileType(TileType.Monster);
             monsterStats.Add(monsterStat.GetId(), monsterStat);
-            Debug.Log($" 몬스터 ID : {monsterStat.GetId()} 등록 완료");
+            //Debug.Log($" 몬스터 ID : {monsterStat.GetId()} 등록 완료");
         }
         
     }

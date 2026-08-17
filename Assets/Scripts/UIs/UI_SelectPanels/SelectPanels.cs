@@ -249,6 +249,7 @@ public class SelectPanels : UI_GridSelect
         Debug.Log("던전 씬 비동기 로드 시작!");
         await SceneController.Instance.PrePostAwaits(null, Defines.Scenes.DungeonScene, CreateNewDungeon);
         Debug.Log("던전 씬 로드 완료. 던전 생성 시작.");
+        Create_Character();
 
     }
 
@@ -292,9 +293,12 @@ public class SelectPanels : UI_GridSelect
 
     public void Create_Character()
     {
+        Debug.Log("Create Character");  
         Add_RaceMutates();
         Add_JobMutates();
         Add_Items();
+        Debug.Log("Create Character Complete");
+
     }
     private void Add_RaceMutates()
     {

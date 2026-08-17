@@ -9,10 +9,19 @@ public class ModifierOptionData
 {
     public string optionKey;
     public List<ModifierData> modDatas = new List<ModifierData>();
-
+    public string descKey;
     public void ParseFromCSV(Dictionary<string,object> row)
     {
-        Utils.TrySetValue(row, "OptionKey", ref optionKey);
+        Utils.TrySetValue(row, "OptionKey", ref optionKey);  
+        Utils.TrySetValue(row, "DescKey", ref descKey);
+    }
+
+    public void AddModifierData(ModifierData modData)
+    {
+        if (!modDatas.Contains(modData))
+        {
+            modDatas.Add(modData);
+        }
     }
 }
 
@@ -75,6 +84,18 @@ public class ModifierData
         Utils.TryConvertEnum(row, "ItemTargetType",ref itemTargetType);
         Utils.TrySetValue(row, "UnEquipable", ref unEquipable);
     }
+
+    public void SetValueForOption(Dictionary<string,object> originData)
+    {
+        Utils.TrySetValue(originData, "ID", ref id);
+        Utils.TrySetValue(originData, "ModifierID", ref modifierId);
+        Utils.TrySetValue(originData, "OptionKey", ref optionKey);
+        Utils.TrySetValue(originData, "IsMulti", ref isMulti);
+        Utils.TrySetValue(originData, "Value", ref value);
+        Utils.TrySetValue(originData, "Priority", ref priority);
+        Utils.TrySetValue(originData,"KeyOder", ref keyOder);
+
+    }
 }
 
 public class ModifierDataManager : AsyncDataManager<ModifierDataManager>
@@ -127,33 +148,35 @@ public class ModifierDataManager : AsyncDataManager<ModifierDataManager>
             string optionKey = optionKeyobj.ToString();
             Debug.Log($"OptionKey: {optionKey}, ID: {id} 추가 시작");
 
-            // 1. 개별 ModifierData 파싱 및 저장
-            ModifierData modData = new ModifierData();
-            modData.ParseFromCsv(row);
-            
-            // 베이스 모디파이어(Mod_ 파일에서 로드됨)의 정보를 병합
-            if (!string.IsNullOrEmpty(modData.modifierId) && modifierBases.ContainsKey(modData.modifierId))
+            if(!modifierOptionGroups.ContainsKey(optionKey))
             {
-                Modifier baseMod = modifierBases[modData.modifierId];
-                modData.modifierType = baseMod.modifierType;
-                modData.stat = baseMod.stat;
-                modData.triggerType = baseMod.triggerType;
+                modifierOptionGroups.Add(optionKey, new ModifierOptionData());
             }
 
-            if (!modifierDatas.ContainsKey(id))
+            ModifierOptionData optionGroup = modifierOptionGroups[optionKey];
+            optionGroup.ParseFromCSV(row);
+            if (optionGroup.modDatas.Any(md => md.id == id))
+            {
+                Debug.LogError($"중복된 ModifierData ID: {id} 발견 (OptionKey: {optionKey})");
+                continue;
+            }
+
+            ModifierData modData = new ModifierData();
+
+            modData.ParseFromCsv(row);
+
+            if(!optionGroup.optionKey.Contains(modData.optionKey))
+            {
+                Debug.LogError($"OptionKey 불일치: {optionGroup.optionKey} vs {modData.optionKey}");
+            }
+            optionGroup.AddModifierData(modData);
+            // 1. 개별 ModifierData 파싱 및 저장
+
+            if(!modifierDatas.ContainsKey(id))
             {
                 modifierDatas.Add(id, modData);
             }
-
-            // 2. OptionKey 기준으로 ModifierOptionData 그룹핑
-            if (!modifierOptionGroups.ContainsKey(optionKey))
-            {
-                ModifierOptionData newOptionGroup = new ModifierOptionData();
-                newOptionGroup.ParseFromCSV(row); // OptionKey 세팅
-                modifierOptionGroups.Add(optionKey, newOptionGroup);
-            }
-            modifierOptionGroups[optionKey].modDatas.Add(modData);
-
+            
             // 3. OptionKey에 대한 ID 리스트 매핑 (호환성 유지용)
             if (!optionIds.ContainsKey(optionKey))
             {
@@ -181,7 +204,7 @@ public class ModifierDataManager : AsyncDataManager<ModifierDataManager>
     }
 
     // 옵션 그룹(ModifierOptionData) 조회
-    public ModifierOptionData GetModifierOptionGroup(string optionKey)
+    public ModifierOptionData GetModifierOptionData(string optionKey)
     {
         return modifierOptionGroups.GetValueOrDefault(optionKey);
     }

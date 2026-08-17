@@ -1,4 +1,4 @@
-using UnityEngine;
+ï»¿using UnityEngine;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -19,7 +19,7 @@ public class ModifierController
 
 
     private Dictionary<ModifierTriggerType, bool> dirtyFlags = new Dictionary<ModifierTriggerType, bool>();
-    // Áö¿¬ °»½Å(Lazy Evaluation)À» À§ÇÑ ´õÆ¼ ÇÃ·¡±×
+    // ì§€ì—° ê°±ì‹ (Lazy Evaluation)ì„ ìœ„í•œ ë”í‹° í”Œë˜ê·¸
 
     LivingEntity myEntity;
 
@@ -31,14 +31,19 @@ public class ModifierController
 
         foreach (ModifierTriggerType type in triggers)
         {
-            if (!contexts.ContainsKey(type))
-            {
-                contexts.Add(type, new ModifierContext(myEntity));
-                contexts[type].InitContext(type);
-                dirtyFlags.Add(type, false);
-            }
+            InitContext(entity, type);
         }
         SetMyEntity(entity);
+    }
+
+    private void InitContext(LivingEntity entity, ModifierTriggerType trigger)
+    {
+        if (!contexts.ContainsKey(trigger))
+        {
+            contexts.Add(trigger, new ModifierContext(entity));
+            contexts[trigger].InitContext(trigger);
+            dirtyFlags.Add(trigger, false);
+        }
     }
 
     public void SetMyEntity(LivingEntity entity)
@@ -47,7 +52,7 @@ public class ModifierController
     }
 
     // ==========================================
-    // 1. ¸ğµğÆÄÀÌ¾î Ãß°¡/Á¦°Å (ÇÃ·¡±×¸¸ º¯°æ)
+    // 1. ëª¨ë””íŒŒì´ì–´ ì¶”ê°€/ì œê±° (í”Œë˜ê·¸ë§Œ ë³€ê²½)
     // ==========================================
     public void EquipItem(EquipItem equip)
     {
@@ -59,7 +64,7 @@ public class ModifierController
             for (int i = 0; i < equipModifiers.Count; i++) AddEquipment(equipModifiers[i]);
         }
 
-        if (equipAddOptions != null) // ¾ÈÀüÀåÄ¡!
+        if (equipAddOptions != null) // ì•ˆì „ì¥ì¹˜!
         {
             for (int i = 0; i < equipAddOptions.Count; i++) AddEquipment(equipAddOptions[i]);
         }
@@ -91,7 +96,7 @@ public class ModifierController
         targetDict[trigger].Add(mod);
         targetDict[trigger].Sort((a, b) => a.priority.CompareTo(b.priority));
 
-        // Àç°è»ê ¾øÀÌ ÇÃ·¡±×¸¸ ¿À¿°
+        // ì¬ê³„ì‚° ì—†ì´ í”Œë˜ê·¸ë§Œ ì˜¤ì—¼
         dirtyFlags[trigger] = true;
         //myEntity.OnStatOrModifierChange();
         OnModifierChanged?.Invoke(mod);
@@ -108,14 +113,14 @@ public class ModifierController
 
     public void ConsumeOneTimeActions(ModifierTriggerType trigger)
     {
-        // ÇØ´ç Æ®¸®°Å(¿¹: Attack)ÀÇ ÄÁÅØ½ºÆ®¸¦ °¡Á®¿É´Ï´Ù.
+        // í•´ë‹¹ íŠ¸ë¦¬ê±°(ì˜ˆ: Attack)ì˜ ì»¨í…ìŠ¤íŠ¸ë¥¼ ê°€ì ¸ì˜µë‹ˆë‹¤.
         if (contexts.TryGetValue(trigger, out ModifierContext context))
         {
-            // 1È¸¼º ¾×¼Ç(isConsumable == true)¸¸ ÇÉ¼ÂÀ¸·Î °ñ¶ó¼­ Á¦°ÅÇÕ´Ï´Ù.
+            // 1íšŒì„± ì•¡ì…˜(isConsumable == true)ë§Œ í•€ì…‹ìœ¼ë¡œ ê³¨ë¼ì„œ ì œê±°í•©ë‹ˆë‹¤.
             int removedCount = context.modifierActions.RemoveAll(a => a.isConsumable);
 
-            // [ÇÙ½É] ¸¸¾à ¹º°¡ Áö¿öÁ³´Ù¸é, ±×¸©ÀÇ »óÅÂ°¡ º¯ÇÑ °ÍÀÌ¹Ç·Î 
-            // ´ÙÀ½¹ø È£Ãâ ½Ã Àç°è»êµÇµµ·Ï ´õÆ¼ ÇÃ·¡±×¸¦ ´Ù½Ã ¿À¿°(true)½ÃÅµ´Ï´Ù!
+            // [í•µì‹¬] ë§Œì•½ ë­”ê°€ ì§€ì›Œì¡Œë‹¤ë©´, ê·¸ë¦‡ì˜ ìƒíƒœê°€ ë³€í•œ ê²ƒì´ë¯€ë¡œ 
+            // ë‹¤ìŒë²ˆ í˜¸ì¶œ ì‹œ ì¬ê³„ì‚°ë˜ë„ë¡ ë”í‹° í”Œë˜ê·¸ë¥¼ ë‹¤ì‹œ ì˜¤ì—¼(true)ì‹œí‚µë‹ˆë‹¤!
             if (removedCount > 0)
             {
                 dirtyFlags[trigger] = true;
@@ -156,7 +161,7 @@ public class ModifierController
     }
 
     // ==========================================
-    // 2. ÄÁÅØ½ºÆ® È¹µæ (ÆĞ½Ãºê Áö¿¬ °»½Å Ã³¸®)
+    // 2. ì»¨í…ìŠ¤íŠ¸ íšë“ (íŒ¨ì‹œë¸Œ ì§€ì—° ê°±ì‹  ì²˜ë¦¬)
     // ==========================================
     ModifierContext Get_Context(ModifierTriggerType trigger)
     {
@@ -166,20 +171,21 @@ public class ModifierController
             context.InitContext(trigger);
             contexts.Add(trigger, context);
             dirtyFlags[trigger] = true;
+            Debug.Log($"[ModifierController] Get_Context: {trigger}ì— ëŒ€í•œ ì»¨í…ìŠ¤íŠ¸ ìƒì„±");
         }
 
-        // [ÆĞ½Ãºê Àü¿ë] Ä³½Ì ·ÎÁ÷: ½ºÅÈ ¿ä±¸ ½ÃÁ¡¿¡ ´õÆ¼ ÇÃ·¡±×°¡ true¸é ´Ü ÇÑ ¹ø¸¸ °è»ê
+        // [íŒ¨ì‹œë¸Œ ì „ìš©] ìºì‹± ë¡œì§: ìŠ¤íƒ¯ ìš”êµ¬ ì‹œì ì— ë”í‹° í”Œë˜ê·¸ê°€ trueë©´ ë‹¨ í•œ ë²ˆë§Œ ê³„ì‚°
         if (trigger == ModifierTriggerType.Passive)
         {
             if (dirtyFlags.TryGetValue(trigger, out bool isDirty) && isDirty)
             {
                 context.Clear();
+
+                // ì´ì œ ì´ ë‚´ë¶€ì—ì„œ Get_Contextë¥¼ ë‹¤ì‹œ í˜¸ì¶œí•´ë„ isDirtyê°€ falseì´ë¯€ë¡œ ë¬´í•œ ì¬ê·€ì— ë¹ ì§€ì§€ ì•ŠìŠµë‹ˆë‹¤.
                 RefreshPassiveModifiers();
-                dirtyFlags[trigger] = false; // Ä³½Ì ¿Ï·á
             }
         }
-
-        return context;
+        return contexts[trigger];
     }
 
     private void RefreshPassiveModifiers()
@@ -196,12 +202,17 @@ public class ModifierController
             foreach (var modifier in list)
             {
                 modifier.Apply(myEntity);
+                Debug.Log($"[ModifierController] ApplyPassivesFrom: {modifier.id} ì ìš©ë¨");
             }
+        }
+        if(dirtyFlags.TryGetValue(ModifierTriggerType.Passive, out bool isDirty) && isDirty)
+        {
+            dirtyFlags[ModifierTriggerType.Passive] = false;
         }
     }
 
     // ==========================================
-    // 3. ¾×Æ¼ºê ¹ßµ¿ (¸Å ÀÌº¥Æ®¸¶´Ù ÃÊ±âÈ­ ÈÄ ÀåÀü)
+    // 3. ì•¡í‹°ë¸Œ ë°œë™ (ë§¤ ì´ë²¤íŠ¸ë§ˆë‹¤ ì´ˆê¸°í™” í›„ ì¥ì „)
     // ==========================================
     public ModifierContext GetUpdatedContext(ModifierTriggerType type)
     {
@@ -213,12 +224,12 @@ public class ModifierController
         {
             context.Clear();
 
-            // 1. Àåºñ, º¯ÀÌ, ¹öÇÁ¿¡¼­ ¾×Æ¼ºê ½ºÅ³µéÀ» ¾ÈÀüÇÏ°Ô ÀåÀü¸¸ ÇÕ´Ï´Ù.
+            // 1. ì¥ë¹„, ë³€ì´, ë²„í”„ì—ì„œ ì•¡í‹°ë¸Œ ìŠ¤í‚¬ë“¤ì„ ì•ˆì „í•˜ê²Œ ì¥ì „ë§Œ í•©ë‹ˆë‹¤.
             ApplyActiveModifiersFrom(mutation, type);
             ApplyActiveModifiersFrom(equips, type);
             ApplyActiveModifiersFrom(buffs, type);
 
-            // 2. »èÁ¦µÇ´Â°Ô ¾øÀ¸¹Ç·Î ¹«Á¶°Ç Ä³½Ì ¿Ï·á(false) Ã³¸®ÇÕ´Ï´Ù.
+            // 2. ì‚­ì œë˜ëŠ”ê²Œ ì—†ìœ¼ë¯€ë¡œ ë¬´ì¡°ê±´ ìºì‹± ì™„ë£Œ(false) ì²˜ë¦¬í•©ë‹ˆë‹¤.
             dirtyFlags[type] = false;
         }
 
@@ -234,7 +245,7 @@ public class ModifierController
         {
             foreach (var modifier in list)
             {
-                modifier.Apply(myEntity); // context.modifierActions¿¡ ¾×¼Ç Add
+                modifier.Apply(myEntity); // context.modifierActionsì— ì•¡ì…˜ Add
             }
         }
 
@@ -242,7 +253,7 @@ public class ModifierController
     }
 
     // ==========================================
-    // 4. ¾ÆÀÌÅÛ ÀåÂø Á¦ÇÑ (¾ÈÀüÇÑ ´Ü¶ô Æò°¡ Àû¿ë)
+    // 4. ì•„ì´í…œ ì¥ì°© ì œí•œ (ì•ˆì „í•œ ë‹¨ë½ í‰ê°€ ì ìš©)
     // ==========================================
     public bool IsRestricted(ItemBase item, ModifierTriggerType trigger)
     {
@@ -288,7 +299,7 @@ public class ModifierController
 
                 if (isMatch)
                 {
-                    // [¼öÁ¤µÈ ºÎºĞ] myEntity¿¡ ApplyÇÏÁö ¸»°í, tempContextÀÇ Á¦ÇÑ ¼öÄ¡¸¸ Á¶ÀÛ!
+                    // [ìˆ˜ì •ëœ ë¶€ë¶„] myEntityì— Applyí•˜ì§€ ë§ê³ , tempContextì˜ ì œí•œ ìˆ˜ì¹˜ë§Œ ì¡°ì‘!
                     if (itemModi.isMulti)
                     {
                         if (!tempContext.multifle.ContainsKey(itemModi.stat)) tempContext.multifle.Add(itemModi.stat, 0f);
@@ -305,7 +316,7 @@ public class ModifierController
     }
 
     // ==========================================
-    // ±âÅ¸ À¯Æ¿¸®Æ¼ ¹× ¼¼ÀÌºê/·Îµå
+    // ê¸°íƒ€ ìœ í‹¸ë¦¬í‹° ë° ì„¸ì´ë¸Œ/ë¡œë“œ
     // ==========================================
     public void Reset_Mutations() => ResetModifiers(mutation);
     public void Reset_Buffs() => ResetModifiers(buffs);
@@ -381,6 +392,6 @@ public class ModifierController
             }
         }
         mutation.Clear();
-        //¸ğµğÆÄÀÌ¾î ¸®¼Â , Àåºñ´Â UnEquipÀÛ¼º ÈÄ ¸ğµÎ UnEquipÇÏ±â
+        //ëª¨ë””íŒŒì´ì–´ ë¦¬ì…‹ , ì¥ë¹„ëŠ” UnEquipì‘ì„± í›„ ëª¨ë‘ UnEquipí•˜ê¸°
     }
 }

@@ -496,7 +496,7 @@ public class MapManager : MonoBehaviour
             potentials = GetPotentialPos(center, monsters.Count + roofs);
             if (roofs > 10)
             {
-                Debug.Log("몬스터 젠 시킬 공간이 존재하지않음!");
+                Debug.LogError("몬스터 젠 시킬 공간이 존재하지않음!");
                 break;
             }
         }
@@ -511,7 +511,7 @@ public class MapManager : MonoBehaviour
         {
             if (i >= shuffledPos.Count) break;
 
-            Debug.Log($"Suffled position : {shuffledPos[i]}");
+            //Debug.Log($"Suffled position : {shuffledPos[i]}");
             monsters[i].transform.position = new Vector3(shuffledPos[i].x, shuffledPos[i].y, -1);
             TileType tileType = monsters[i].GetMyType();
             Vector2Int shuppfleRandomPos = shuffledPos[i];
