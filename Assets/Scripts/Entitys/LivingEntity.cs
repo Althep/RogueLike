@@ -70,6 +70,9 @@ public class LivingEntity : MapEntity
     #endregion
 
     #region [3] 모디파이어 및 상태 이상 (Modifiers & Buffs)
+
+    public ModifierContext Get_Context(ModifierTriggerType trigger) => modifierController.Get_Context(trigger);
+
     public virtual void Add_Equip(Modifier modifier) => modifierController.AddEquipment(modifier);
 
     public virtual void Add_Buff(Modifier modifier)
@@ -86,7 +89,7 @@ public class LivingEntity : MapEntity
     }
 
     public virtual void Add_Mutation(ModifierOption modifier) => modifierController.AddMutation(modifier);
-    public ModifierContext GetContext(ModifierTriggerType trigger) => modifierController.GetUpdatedContext(trigger);
+    public ModifierContext GetUpdatedContext(ModifierTriggerType trigger) => modifierController.GetUpdatedContext(trigger);
 
     public void Remove_BuffModifier(Modifier modifier) => modifierController.RemoveBuff(modifier);
     public void Remove_BuffModifier(ModifierOption modifier) => modifierController.RemoveBuff(modifier);

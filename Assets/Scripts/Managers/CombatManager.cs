@@ -55,8 +55,8 @@ public class CombatManager : MonoBehaviour
     {
         info.Clear();
 
-        ModifierContext attackerContext = attacker.GetContext(ModifierTriggerType.OnAttack);
-        ModifierContext targetContext = target.GetContext(ModifierTriggerType.OnHited);
+        ModifierContext attackerContext = attacker.GetUpdatedContext(ModifierTriggerType.OnAttack);
+        ModifierContext targetContext = target.GetUpdatedContext(ModifierTriggerType.OnHited);
 
         int roll = UnityEngine.Random.Range(1, 21);
         isCrit = roll == 20;//크리티컬 계산 상시 명중
@@ -102,8 +102,8 @@ public class CombatManager : MonoBehaviour
     public bool TryHit(LivingEntity attacker, LivingEntity target, out bool isCritical)
     {
         int roll = UnityEngine.Random.Range(1, 21);
-        var atk = attacker.GetContext(ModifierTriggerType.OnAttack).stats;
-        var def = target.GetContext(ModifierTriggerType.OnAttack).stats;
+        var atk = attacker.GetUpdatedContext(ModifierTriggerType.OnAttack).stats;
+        var def = target.GetUpdatedContext(ModifierTriggerType.OnHited).stats;
         
         float levelFactor = 1f + attacker.Get_MyData().GetLevel() * 0.06f;
 
@@ -143,7 +143,7 @@ public class CombatManager : MonoBehaviour
     {
         Dictionary<StatType, float> attackerData = attacker.CalculateContext(ModifierTriggerType.OnAttack);
         Dictionary<StatType, float> targetData = target.CalculateContext(ModifierTriggerType.OnHited);
-        ModifierContext attackerContext = attacker.GetContext(ModifierTriggerType.OnAttack);
+        ModifierContext attackerContext = attacker.GetUpdatedContext(ModifierTriggerType.OnAttack);
         
         DamageType damageType = attackerContext.damageType;
         

@@ -21,10 +21,46 @@ public class ModifierOptionData
         if (!modDatas.Contains(modData))
         {
             modDatas.Add(modData);
+            Debug.Log($"ModifierOptionData: OptionKey {optionKey}에 ModifierData ID {modData.id} 추가 완료");
         }
     }
 }
+public class ModifierBaseData
+{
+    public string id;
+    public string stringValue;
+    public bool isMulti;
+    public int priority;
+    public ModifierType modifierType;
+    public StatType stat;
+    public ModifierTriggerType triggerType;
+    
+    public ItemTargetType itemTargetType;//전체에 타겟 or 특정카테고리에 만ex)방어구,무기 단ex)투구,갑옷
+    public ItemCategory itemCategory;
+    public Enum itemSpecificType;
 
+    public void ParseFromCSV(Dictionary<string, object> row)
+    {
+        Utils.TrySetValue(row, "ID", ref id);
+        Utils.TrySetValue(row, "StringValue", ref stringValue);
+        Utils.TrySetValue(row, "IsMulti", ref isMulti);
+        Utils.TrySetValue(row, "Priority", ref priority);
+        Utils.TryConvertEnum(row, "ModifierType", ref modifierType);
+        Utils.TryConvertEnum(row, "Stat", ref stat);
+        Utils.TryConvertEnum(row, "TriggerType", ref triggerType);
+        switch (itemTargetType)
+        {
+            case ItemTargetType.Category:
+                break;
+            case ItemTargetType.Specific:
+                itemSpecificType = Utils.Get_ItemSpecificType(row["ItemSpecificType"].ToString());
+                break;
+            default:
+                break;
+        }
+        Utils.TryConvertEnum(row, "ItemCategory", ref itemTargetType);
+    }
+}
 public class ModifierData
 {
     //베이스 정보
@@ -52,6 +88,8 @@ public class ModifierData
     public ItemCategory itemCategory;
     public ItemTargetType itemTargetType;//전체에 타겟 or 특정카테고리에 만ex)방어구,무기 단ex)투구,갑옷
     public bool unEquipable;
+
+    
     // 아이템을 낄 때나, 액션 등을 발동할때 로직에서 확인해서 사용합니다.
     // (아이템 모듈등 자신이 아닌 초기 로드 시에 파싱되는 기본 데이터이므로 메모리 누수를 방지합니다)
 
@@ -83,6 +121,7 @@ public class ModifierData
         Utils.TryConvertEnum(row, "ItemCategory",ref itemCategory);
         Utils.TryConvertEnum(row, "ItemTargetType",ref itemTargetType);
         Utils.TrySetValue(row, "UnEquipable", ref unEquipable);
+        Debug.Log($"ModifierData ParseFromCsv 완료: ID={id}, ModifierID={modifierId}, OptionKey={optionKey}, IsMulti={isMulti}, Value={value}, Priority={priority}, DescKey={descKey}, KeyOder={keyOder}");
     }
 
     public void SetValueForOption(Dictionary<string,object> originData)
@@ -105,7 +144,7 @@ public class ModifierDataManager : AsyncDataManager<ModifierDataManager>
     
     // 개별 ModifierData 캐싱 (ID 기준) - ModifierPooler 등에서 개별 접근 시 사용
     private Dictionary<string, ModifierData> modifierDatas = new();
-    
+
     private Dictionary<string, List<string>> optionIds = new();
     
     // Mod_ 파일을 읽어 저장하는 Base Modifier 인스턴스들
@@ -133,6 +172,41 @@ public class ModifierDataManager : AsyncDataManager<ModifierDataManager>
         {
             List<Dictionary<string, object>> originData = Utils.TextAssetParse(asset);
             await ReadAllModifierGroups(originData);
+        }
+    }
+
+    public void ReadModifierBase(List<Dictionary<string, object>> originData)
+    {
+        if (modFactory == null)
+        {
+            modFactory = ModifierFactory._instance;
+        }
+        for (int i = 0; i < originData.Count; i++)
+        {
+            var row = originData[i];
+            if (!row.TryGetValue("ID", out object idObj))
+            {
+                Debug.LogError("ID 불러오기 실패");
+                continue;
+            }
+            string id = idObj.ToString();
+            if (modifierBases.ContainsKey(id))
+            {
+                Debug.LogError($"Id 중복: {id}");
+                continue;
+            }
+
+            if (!row.TryGetValue("ModifierType", out object modTypeObj))
+            {
+                Debug.LogError($"모디파이어 타입 누락 (ID: {id})");
+                continue;
+            }
+
+            ModifierType modType = Utils.ConvertToEnum<ModifierType>(modTypeObj.ToString());
+
+            Modifier mod = modFactory.CreateNewModifierToType(modType);
+            mod.SetBaseData(originData[i]);
+            modifierBases.Add(id, mod);
         }
     }
 
@@ -215,38 +289,18 @@ public class ModifierDataManager : AsyncDataManager<ModifierDataManager>
     }
 
     // Mod_ 파일을 읽어서 베이스 모디파이어 팩토리에 인스턴스화하여 저장
-    public void ReadModifierBase(List<Dictionary<string,object>> originData)
+    
+
+    public Modifier Get_ModifierBase(string id)
     {
-        if(modFactory == null)
+        if(modifierBases.TryGetValue(id, out Modifier mod))
         {
-            modFactory = ModifierFactory._instance;
+            return mod;
         }
-        for(int i = 0; i< originData.Count; i++)
+        else
         {
-            var row = originData[i];
-            if(!row.TryGetValue("ID", out object idObj))
-            {
-                Debug.LogError("ID 불러오기 실패");
-                continue;
-            }
-            string id = idObj.ToString();
-            if (modifierBases.ContainsKey(id))
-            {
-                Debug.LogError($"Id 중복: {id}");
-                continue;
-            }
-
-            if (!row.TryGetValue("ModifierType", out object modTypeObj))
-            {
-                Debug.LogError($"모디파이어 타입 누락 (ID: {id})");
-                continue;
-            }
-
-            ModifierType modType = Utils.ConvertToEnum<ModifierType>(modTypeObj.ToString());
-            
-            Modifier mod = modFactory.CreateNewModifierToType(modType);
-            mod.SetBaseData(originData[i]);
-            modifierBases.Add(id, mod);
+            Debug.LogError($"ModifierDataManager: ID {id}에 해당하는 ModifierBase가 존재하지 않습니다.");
+            return null;
         }
-    }
+    }   
 }

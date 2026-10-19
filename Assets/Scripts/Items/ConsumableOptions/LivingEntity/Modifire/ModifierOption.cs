@@ -10,11 +10,11 @@ public class ModifierOption : IPoolScript
     public string descKey;
 
 
-    public void Apply(LivingEntity target)
+    public void Apply(LivingEntity entity)
     {
         foreach (Modifier modifier in myMods)
         {
-            modifier.Apply(target);
+            modifier.Apply(entity);
         }
     }
 

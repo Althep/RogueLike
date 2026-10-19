@@ -84,6 +84,7 @@ public class ModifierController
         dirtyFlags[ModifierTriggerType.OnEquip] = true;
         GetUpdatedContext(ModifierTriggerType.OnEquip);
     }
+
     private void AddModifierInternal(Dictionary<ModifierTriggerType,List<Modifier>> targetDict, Modifier mod)
     {
         ModifierTriggerType trigger = mod.triggerType;
@@ -100,6 +101,11 @@ public class ModifierController
         dirtyFlags[trigger] = true;
         //myEntity.OnStatOrModifierChange();
         OnModifierChanged?.Invoke(mod);
+
+        if(trigger == ModifierTriggerType.Passive)
+        {
+            RefreshPassiveModifiers();
+        }
     }
 
     private void RemoveModifierOptionInternal(Dictionary<ModifierTriggerType, List<Modifier>> targetDict, ModifierOption modifier)
@@ -108,7 +114,6 @@ public class ModifierController
         {
             RemoveModifiernInternal(targetDict, modifier.myMods[i]);
         }
-        
     }
 
     public void ConsumeOneTimeActions(ModifierTriggerType trigger)
@@ -160,10 +165,11 @@ public class ModifierController
         ModifierManager.instance.Return_Modifier(modifier);
     }
 
+
     // ==========================================
     // 2. 컨텍스트 획득 (패시브 지연 갱신 처리)
     // ==========================================
-    ModifierContext Get_Context(ModifierTriggerType trigger)
+    public ModifierContext Get_Context(ModifierTriggerType trigger)
     {
         if (!contexts.TryGetValue(trigger, out ModifierContext context))
         {
@@ -174,17 +180,6 @@ public class ModifierController
             Debug.Log($"[ModifierController] Get_Context: {trigger}에 대한 컨텍스트 생성");
         }
 
-        // [패시브 전용] 캐싱 로직: 스탯 요구 시점에 더티 플래그가 true면 단 한 번만 계산
-        if (trigger == ModifierTriggerType.Passive)
-        {
-            if (dirtyFlags.TryGetValue(trigger, out bool isDirty) && isDirty)
-            {
-                context.Clear();
-
-                // 이제 이 내부에서 Get_Context를 다시 호출해도 isDirty가 false이므로 무한 재귀에 빠지지 않습니다.
-                RefreshPassiveModifiers();
-            }
-        }
         return contexts[trigger];
     }
 
@@ -201,7 +196,9 @@ public class ModifierController
         {
             foreach (var modifier in list)
             {
-                modifier.Apply(myEntity);
+                ModifierTriggerType trigger = modifier.triggerType;
+                ModifierContext context = Get_Context(trigger);
+                modifier.Apply(myEntity); // 패시브 모디파이어 적용
                 Debug.Log($"[ModifierController] ApplyPassivesFrom: {modifier.id} 적용됨");
             }
         }
@@ -217,8 +214,6 @@ public class ModifierController
     public ModifierContext GetUpdatedContext(ModifierTriggerType type)
     {
         ModifierContext context = Get_Context(type);
-
-        if (type == ModifierTriggerType.Passive) return context;
 
         if (dirtyFlags.TryGetValue(type, out bool isDirty) && isDirty)
         {

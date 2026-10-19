@@ -69,27 +69,32 @@ public class ModifierPooler
             Debug.LogWarning("[ModifierPooler] 유효하지 않은 모디파이어 ID입니다!");
             return null;
         }
-
-        // 1. 비활성 큐와 활성 리스트가 없으면 초기화
-        if (!inactiveModifiers.ContainsKey(id))
+        if(modifierDataManager == null)
         {
-            inactiveModifiers[id] = new Queue<IPoolScript>();
+            modifierDataManager = modifierManager.modifierDataManager;
         }
-        if (!activeModifiers.ContainsKey(id))
+        ModifierData modData = modifierDataManager.GetModifierData(id);
+        
+        string baseID = modData.modifierId;
+        // 1. 비활성 큐와 활성 리스트가 없으면 초기화
+        if (!inactiveModifiers.ContainsKey(baseID))
         {
-            activeModifiers[id] = new List<IPoolScript>();
+            inactiveModifiers[baseID] = new Queue<IPoolScript>();
+        }
+        if (!activeModifiers.ContainsKey(baseID))
+        {
+            activeModifiers[baseID] = new List<IPoolScript>();
         }
 
         // 2. 큐가 비어 있으면 새로 생성해서 큐에 삽입
-        if (inactiveModifiers[id].Count == 0)
+        if (inactiveModifiers[baseID].Count == 0)
         {
-            CreateNew(id);
+            CreateNewBase(baseID);
         }
 
         // 3. 큐에서 하나 꺼내서 활성 리스트로 이동
-        IPoolScript value = inactiveModifiers[id].Dequeue();
+        IPoolScript value = inactiveModifiers[baseID].Dequeue();
         Modifier mod = value as Modifier;
-
         // [Fix] ReturnModifier에서 Reset() 호출로 인해 데이터가 날아가므로 재초기화
         if (modifierDataManager == null)
         {
@@ -97,30 +102,34 @@ public class ModifierPooler
         }
         if (modifierDataManager != null)
         {
-            ModifierData modData = modifierDataManager.GetModifierData(id);
             if (modData != null)
             {
                 mod.SetData(modData);
             }
+            Modifier baseMod = modifierDataManager.Get_ModifierBase(modData.modifierId);
+            if (baseMod != null)
+            {
+                mod.Set_BaseModData(baseMod);
+            }   
         }
 
-        activeModifiers[id].Add(value);
+        activeModifiers[baseID].Add(value);
 
         return mod;
     }
 
-    IPoolScript CreateNew(string id)
+    IPoolScript CreateNewBase(string baseID)
     {
         if(modifierDataManager == null)
         {
             modifierDataManager = modifierManager.modifierDataManager;
         }   
-        Modifier newMod = modifierFactory.CreateNewModifier(id); //새로운 모디파이어 생성
-        ModifierData modData = modifierDataManager.GetModifierData(id); //데이터 가져오기
-        
-        newMod.SetData(modData); // 데이터세팅
-        
-        inactiveModifiers[id].Enqueue(newMod); // 방금 생성한 객체를 큐에 바로 적재
+        Modifier newMod = modifierFactory.CreateNewModifier(baseID); //새로운 모디파이어 생성
+        //ModifierData modData = modifierDataManager.GetModifierData(id); //데이터 가져오기
+        Modifier baseMod = modifierDataManager.Get_ModifierBase(baseID);
+        //newMod.SetData(modData); // 데이터세팅
+        newMod.Set_BaseModData(baseMod); // 베이스 모디파이어 세팅
+        inactiveModifiers[baseID].Enqueue(newMod); // 방금 생성한 객체를 큐에 바로 적재
         return newMod;
     }
 
@@ -183,7 +192,7 @@ public class ModifierPooler
         Modifier modifier = script as Modifier;
         if (modifier == null) return;
 
-        string id = modifier.id;
+        string id = modifier.baseID;
 
         // 1. 활성 리스트에서 제거
         if (activeModifiers.ContainsKey(id))

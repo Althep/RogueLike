@@ -80,6 +80,12 @@ public class ModifierFactory
         {
             Debug.Log("모디파이어 데이터 매니저 X") ;
         }
+        if(optionKey == null)
+        {
+            Debug.LogWarning($"[ModifierFactory] AssembleOption 호출 시 optionKey가 null입니다.");
+            return;
+        }
+
         ModifierOptionData optionData = modifierDataManager.GetModifierOptionData(optionKey);
         List<string> modIds = modifierDataManager.Get_ModifierOptionKeys(optionKey);
 
@@ -105,15 +111,40 @@ public class ModifierFactory
 
         // 풀러를 통해 개별 Modifier 객체들을 가져와서 현재 옵션 그룹에 조립
         // 개별 Modifier를 가져올 때 풀러를 호출하는 것은 단방향 생명주기이므로 안전함
-        foreach(var id in modIds)
+
+        for(int i = 0; i < optionData.modDatas.Count; i++)
         {
+            string baseId = optionData.modDatas[i].modifierId;
+            ModifierData modData = optionData.modDatas[i];
+            Debug.Log("[ModifierFactory] AssembleOption: " + optionKey + "에 Modifier 추가 시도: " + baseId); 
+            if (baseId == null)
+            {
+                Debug.LogWarning($"[ModifierFactory] AssembleOption 호출 시 {optionKey}에 해당하는 모디파이어옵션 ID가 null입니다.");
+                continue;
+            }   
+            Modifier mod = modifierPooler.GetModifier(baseId);
+            Modifier baseMod = modifierDataManager.Get_ModifierBase(baseId);
+            mod.SetData(modData);
+            mod.Set_BaseModData(baseMod);
+            option.myMods.Add(mod);
+        }
+        /*
+        foreach (var id in modIds)
+        {
+            Debug.Log("[ModifierFactory] AssembleOption: " + optionKey + "에 Modifier 추가 시도: " + id); 
+            ModifierData modData = optionData.modDatas.Find(m => m.id == id);
+            if (id == null)
+            {
+                Debug.LogWarning($"[ModifierFactory] AssembleOption 호출 시 {optionKey}에 해당하는 모디파이어옵션 ID가 null입니다.");
+                continue;
+            }   
             Modifier newMod = modifierPooler.GetModifier(id);
             if (newMod != null)
             {
                 option.myMods.Add(newMod);
                 Debug.Log($"[ModifierFactory] AssembleOption: {optionKey}에 Modifier 추가: {newMod}");
             }
-        }
+        }*/
     }
 
     // 템플릿 기반 복사 생성 로직 (필요 시 사용)

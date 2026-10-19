@@ -40,6 +40,7 @@ public class PlayerInfoPanel : MonoBehaviour
     void Start()
     {
         OnStart();
+        UpdateAllUIs();
     }
 
     public void OnLevelUp()
@@ -69,6 +70,7 @@ public class PlayerInfoPanel : MonoBehaviour
 
     public void UpdateAllUIs()
     {
+        Debug.Log("UI 수신: 레벨업 연출 및 텍스트 갱신 시작");
         // 모든 스탯 UI 한 번에 새로고침
         OnStatChange(StatType.HP);
         OnStatChange(StatType.MaxHP);
@@ -78,6 +80,7 @@ public class PlayerInfoPanel : MonoBehaviour
         OnStatChange(StatType.Dex);
         OnStatChange(StatType.Int);
         // 레벨 및 경험치 관련 UI 한 번에 새로고침
+        
         OnLevelUp();
     }
 
@@ -115,6 +118,7 @@ public class PlayerInfoPanel : MonoBehaviour
     void UpdateStatUI(StatType type, PlayerStatUI statUI, int value)
     {
         statUI.Set_Value(type, value);
+        Debug.Log($"UI 수신: {type} 스탯 변경 감지, 값 갱신: {value}");
     }
 
     public void UpdateGageUI(StatType Maxtype, StatType currentType,PlayerGageUI gageUI,int maxValue, int currentValue)

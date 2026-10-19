@@ -6,6 +6,7 @@ using static Defines;
 
 public class ModifierContext
 {
+    public LivingEntity owner;
     public ModifierTriggerType triggerType; // 발동조건
     public Dictionary<StatType,float> stats; // 각 능력치
     public Dictionary<StatType, float> multifle;
@@ -14,10 +15,9 @@ public class ModifierContext
     public ModifierType ModifierType;
     public DamageType damageType = DamageType.Physical;
     private static readonly StatType[] allStatTypes = Utils.Get_Enums<StatType>();
-    private LivingEntity myEntity;
-    public ModifierContext(LivingEntity myEntity)
+    public ModifierContext(LivingEntity owner)
     {
-        this.myEntity = myEntity;
+        this.owner = owner;
     }
     public void InitContext(ModifierTriggerType trigger)
     {
@@ -44,10 +44,14 @@ public class ModifierContext
     {
         for(int i = 0; i<modifierActions.Count; i++)
         {
-            if (myEntity == null)
+            if (owner == null)
                 return;
-            modifierActions[i].Excute(myEntity);
+            modifierActions[i].Excute(owner);
         }
+    }
+    public LivingEntity GetOwner()
+    {
+        return owner;
     }
     public void Clear()
     {

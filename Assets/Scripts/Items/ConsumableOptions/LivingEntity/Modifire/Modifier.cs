@@ -3,6 +3,7 @@ using System;
 using UnityEngine;
 using System.Collections.Generic;
 using System.Linq;
+using UnityEditor.Tilemaps;
 public class Modifier : IPoolScript
 {
     public PoolScriptType poolType;
@@ -13,6 +14,7 @@ public class Modifier : IPoolScript
     public bool isMulti;
     public float value;
     public string stringValue;
+    public string baseID;
     public ModifierType modifierType;
 
     public PoolScriptType GetScriptType()
@@ -33,6 +35,15 @@ public class Modifier : IPoolScript
         isMulti = modData.isMulti;
         value = modData.value;
         modifierType = modData.modifierType;
+    }
+    public virtual void Set_BaseModData(Modifier mod)
+    {
+        stat = mod.stat;
+        stringValue = mod.stringValue;
+        isMulti = mod.isMulti;
+        triggerType = mod.triggerType;
+        priority = mod.priority;
+        modifierType = mod.modifierType;
     }
     public virtual void Copy(Modifier newOne)
     {
@@ -74,14 +85,7 @@ public class Modifier : IPoolScript
     }
 
     public virtual void SetBaseData(Dictionary<string,object> originData)
-    {/*
-        public string id;
-    public ModifierTriggerType triggerType;
-    public StatType stat;
-    public int priority;
-    public bool isMulti;
-    public float value;
-    public ModifierType modifierType;*/
+    {
         Utils.TrySetValue(originData, "ID", ref id);
         Utils.TryConvertEnum(originData,"ModifierTrigger",ref triggerType);
         Utils.TrySetValue(originData, "Priority", ref priority);
@@ -115,7 +119,8 @@ public class StatModifier : Modifier
     }
     public override void Apply(LivingEntity entity)
     {
-        ModifierContext context = entity.GetContext(triggerType);
+        ModifierContext context = entity.Get_Context(triggerType);
+
         if (isMulti)
         {
             if (!context.multifle.ContainsKey(this.stat))
@@ -146,6 +151,11 @@ public class StatModifier : Modifier
     {
         base.Reset();
     }
+    public override void Set_BaseModData(Modifier mod)
+    {
+        base.Set_BaseModData(mod);
+        Utils.StringToEnum(mod.stringValue, ref stat);
+    }
     public override void SetBaseData(Dictionary<string, object> originData)
     {
         base.SetBaseData(originData);
@@ -172,7 +182,6 @@ public class BuffModifier : Modifier
         int applyDuration = (this.duration > 0) ? this.duration : UnityEngine.Random.Range(minTime, maxTime + 1);
 
         EventManager.instance.AddBuff(entity, this, applyDuration);
-
         this.duration = 0;
     }
 
@@ -227,6 +236,7 @@ public class BuffModifier : Modifier
         myAction.stringValue = stringValue;
         myAction.SetValueToString();
     }
+    
     public override void SetBaseData(Dictionary<string, object> originData)
     {
         base.SetBaseData(originData);
@@ -244,7 +254,7 @@ public class DamageModifier : Modifier
     }
     public override void Apply(LivingEntity entity)
     {
-        ModifierContext context = entity.GetContext(triggerType);
+        ModifierContext context = entity.Get_Context(triggerType);
         if (CanEvoke())
         {
             if (isMulti)
@@ -298,7 +308,7 @@ public class ActionModifier: Modifier
     public int maxValue;
     public override void Apply(LivingEntity entity)
     {
-        ModifierContext context = entity.GetContext(triggerType);
+        ModifierContext context = entity.Get_Context(triggerType);
         List<ModifierAction> effects = context.modifierActions;
         bool isAlreadyExist = false;
 
@@ -417,7 +427,8 @@ public class ItemModifier : Modifier
     {
         if (Utils.ItemModifierCheck(this,entity.usingItem))
         {
-            ApplyModifiers(entity.GetContext(triggerType));
+            ModifierContext context = entity.Get_Context(triggerType);
+            ApplyModifiers(context);
         }
     }
     

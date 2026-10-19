@@ -2,6 +2,7 @@ using UnityEngine;
 using System;
 using System.Linq;
 using System.Collections.Generic;
+using static Defines;
 public static class EffectApplier
 {
     public static void ApplySynchronized(LivingEntity entity, List<Modifier> options)

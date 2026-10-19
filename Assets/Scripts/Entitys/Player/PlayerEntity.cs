@@ -101,7 +101,7 @@ public class PlayerEntity : LivingEntity
         {
             Modifier mod = modifier.myMods[i];
             base.Add_Mutation(modifier);
-            Debug.Log($"Add Mutation {mod.id} {mod.stat} {mod.value}");
+            Debug.Log($"돌연변이 추가 ID: {mod.id}  스탯 : {mod.stat} 값 : {mod.value}");
             if (mod.triggerType == ModifierTriggerType.Passive)
             {
                 OnStatChangedUI?.Invoke(mod.stat);
