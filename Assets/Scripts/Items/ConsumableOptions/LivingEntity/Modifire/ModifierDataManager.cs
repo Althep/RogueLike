@@ -1,146 +1,15 @@
+
+using static Defines;
 using UnityEngine;
 using Cysharp.Threading.Tasks;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using static Defines;
-
-public class ModifierOptionData
-{
-    public string optionKey;
-    public List<ModifierData> modDatas = new List<ModifierData>();
-    public string descKey;
-    public void ParseFromCSV(Dictionary<string,object> row)
-    {
-        Utils.TrySetValue(row, "OptionKey", ref optionKey);  
-        Utils.TrySetValue(row, "DescKey", ref descKey);
-    }
-
-    public void AddModifierData(ModifierData modData)
-    {
-        if (!modDatas.Contains(modData))
-        {
-            modDatas.Add(modData);
-            Debug.Log($"ModifierOptionData: OptionKey {optionKey}에 ModifierData ID {modData.id} 추가 완료");
-        }
-    }
-}
-public class ModifierBaseData
-{
-    public string id;
-    public string stringValue;
-    public bool isMulti;
-    public int priority;
-    public ModifierType modifierType;
-    public StatType stat;
-    public ModifierTriggerType triggerType;
-    
-    public ItemTargetType itemTargetType;//전체에 타겟 or 특정카테고리에 만ex)방어구,무기 단ex)투구,갑옷
-    public ItemCategory itemCategory;
-    public Enum itemSpecificType;
-
-    public void ParseFromCSV(Dictionary<string, object> row)
-    {
-        Utils.TrySetValue(row, "ID", ref id);
-        Utils.TrySetValue(row, "StringValue", ref stringValue);
-        Utils.TrySetValue(row, "IsMulti", ref isMulti);
-        Utils.TrySetValue(row, "Priority", ref priority);
-        Utils.TryConvertEnum(row, "ModifierType", ref modifierType);
-        Utils.TryConvertEnum(row, "Stat", ref stat);
-        Utils.TryConvertEnum(row, "TriggerType", ref triggerType);
-        switch (itemTargetType)
-        {
-            case ItemTargetType.Category:
-                break;
-            case ItemTargetType.Specific:
-                itemSpecificType = Utils.Get_ItemSpecificType(row["ItemSpecificType"].ToString());
-                break;
-            default:
-                break;
-        }
-        Utils.TryConvertEnum(row, "ItemCategory", ref itemTargetType);
-    }
-}
-public class ModifierData
-{
-    //베이스 정보
-    public ModifierType modifierType;
-    public StatType stat;
-    public ModifierTriggerType triggerType;
-    //옵션 정보
-    public string id;
-    public string modifierId;
-    public string optionKey;
-    public bool isMulti;
-    public float value;
-    public int priority;
-    public string descKey;
-    public int keyOder;
-
-    //액션 모디파이어 정보
-    public string stringValue,effectName;
-    //버프 모디파이어 정보
-
-    public int minDuration, maxDuration;
-    public BuffCategory buffCategory; //버프,디버프
-    public BuffType buffType;//액션 추가형, 스탯추가형
-    //아이템 모디파이어 정보
-    public ItemCategory itemCategory;
-    public ItemTargetType itemTargetType;//전체에 타겟 or 특정카테고리에 만ex)방어구,무기 단ex)투구,갑옷
-    public bool unEquipable;
-
-    
-    // 아이템을 낄 때나, 액션 등을 발동할때 로직에서 확인해서 사용합니다.
-    // (아이템 모듈등 자신이 아닌 초기 로드 시에 파싱되는 기본 데이터이므로 메모리 누수를 방지합니다)
-
-
-    //public int specificType;
-
-
-
-    // CSV 행(Row) 데이터를 통째로 받아 자신에게 맞는 빈칸을 채우는 파싱 함수
-    public void ParseFromCsv(Dictionary<string, object> row)
-    {
-        Utils.TrySetValue(row, "ID", ref id);
-        Utils.TrySetValue(row, "ModifierID", ref modifierId);
-        Utils.TrySetValue(row, "OptionKey", ref optionKey);
-        Utils.TrySetValue(row, "IsMulti", ref isMulti);
-        Utils.TrySetValue(row, "Value", ref value);
-        Utils.TrySetValue(row, "Priority", ref priority);
-        Utils.TrySetValue(row, "DescKey", ref descKey);
-        Utils.TrySetValue(row, "KeyOder", ref keyOder);
-        //액션
-        Utils.TrySetValue(row, "StringValue", ref stringValue);
-        Utils.TrySetValue(row, "effectName", ref effectName);
-        //버프
-        Utils.TrySetValue(row, "MinDuration", ref minDuration);
-        Utils.TrySetValue(row, "MaxDuration", ref maxDuration);
-        Utils.TryConvertEnum(row, "BuffCategory", ref buffCategory);
-        Utils.TryConvertEnum(row, "BuffType", ref buffType);
-        //아이템
-        Utils.TryConvertEnum(row, "ItemCategory",ref itemCategory);
-        Utils.TryConvertEnum(row, "ItemTargetType",ref itemTargetType);
-        Utils.TrySetValue(row, "UnEquipable", ref unEquipable);
-        Debug.Log($"ModifierData ParseFromCsv 완료: ID={id}, ModifierID={modifierId}, OptionKey={optionKey}, IsMulti={isMulti}, Value={value}, Priority={priority}, DescKey={descKey}, KeyOder={keyOder}");
-    }
-
-    public void SetValueForOption(Dictionary<string,object> originData)
-    {
-        Utils.TrySetValue(originData, "ID", ref id);
-        Utils.TrySetValue(originData, "ModifierID", ref modifierId);
-        Utils.TrySetValue(originData, "OptionKey", ref optionKey);
-        Utils.TrySetValue(originData, "IsMulti", ref isMulti);
-        Utils.TrySetValue(originData, "Value", ref value);
-        Utils.TrySetValue(originData, "Priority", ref priority);
-        Utils.TrySetValue(originData,"KeyOder", ref keyOder);
-
-    }
-}
-
 public class ModifierDataManager : AsyncDataManager<ModifierDataManager>
 {
-    // 옵션 그룹(ModifierOptionData) 단위 캐싱
-    private Dictionary<string, ModifierOptionData> modifierOptionGroups = new();
+    // 옵션 그룹(ModifierGroupData) 단위 캐싱
+    private Dictionary<string, ModifierGroupData> modifierOptionGroups = new();
+    
     
     // 개별 ModifierData 캐싱 (ID 기준) - ModifierPooler 등에서 개별 접근 시 사용
     private Dictionary<string, ModifierData> modifierDatas = new();
@@ -224,33 +93,31 @@ public class ModifierDataManager : AsyncDataManager<ModifierDataManager>
 
             if(!modifierOptionGroups.ContainsKey(optionKey))
             {
-                modifierOptionGroups.Add(optionKey, new ModifierOptionData());
+                ModifierGroupData newGroup = new ModifierGroupData();
+                modifierOptionGroups.Add(optionKey, newGroup);
+                newGroup.ParseFromCSV(row);
             }
 
-            ModifierOptionData optionGroup = modifierOptionGroups[optionKey];
-            optionGroup.ParseFromCSV(row);
-            if (optionGroup.modDatas.Any(md => md.id == id))
+            ModifierGroupData optionGroup = modifierOptionGroups[optionKey];
+
+            
+            if (optionGroup.modDatas.Any(md => md.valueId == id))
             {
                 Debug.LogError($"중복된 ModifierData ID: {id} 발견 (OptionKey: {optionKey})");
                 continue;
             }
 
-            ModifierData modData = new ModifierData();
+            ModifierValueData modValueData = new ModifierValueData();
 
-            modData.ParseFromCsv(row);
+            modValueData.ParseFromCsv(row);
 
-            if(!optionGroup.optionKey.Contains(modData.optionKey))
+            if(!optionGroup.valueKey.Contains(modValueData.optionKey))
             {
-                Debug.LogError($"OptionKey 불일치: {optionGroup.optionKey} vs {modData.optionKey}");
+                Debug.LogError($"OptionKey 불일치: {optionGroup.valueKey} vs {modValueData.optionKey}");
             }
-            optionGroup.AddModifierData(modData);
-            // 1. 개별 ModifierData 파싱 및 저장
 
-            if(!modifierDatas.ContainsKey(id))
-            {
-                modifierDatas.Add(id, modData);
-            }
-            
+            optionGroup.AddModifierData(modValueData);
+
             // 3. OptionKey에 대한 ID 리스트 매핑 (호환성 유지용)
             if (!optionIds.ContainsKey(optionKey))
             {
@@ -278,12 +145,12 @@ public class ModifierDataManager : AsyncDataManager<ModifierDataManager>
     }
 
     // 옵션 그룹(ModifierOptionData) 조회
-    public ModifierOptionData GetModifierOptionData(string optionKey)
+    public ModifierGroupData GetModifierGroupData(string optionKey)
     {
         return modifierOptionGroups.GetValueOrDefault(optionKey);
     }
 
-    public List<string> Get_ModifierOptionKeys(string optionKey)
+    public List<string> Get_ModifierGroupKeys(string optionKey)
     {
         return optionIds.GetValueOrDefault(optionKey, new List<string>());
     }

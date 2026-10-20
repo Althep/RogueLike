@@ -26,6 +26,13 @@ public class Modifier : IPoolScript
     {
         poolType = type;
     }
+    public virtual void SetModifierValue(ModifierValueData modifierValueData)
+    {
+        value = modifierValueData.value;
+        isMulti = modifierValueData.isMulti;
+        priority = modifierValueData.priority;
+        stringValue = modifierValueData.descKey;
+    }
     public virtual void SetData(ModifierData modData)
     {
         id = modData.modifierId;

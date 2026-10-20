@@ -335,12 +335,16 @@ public static class Defines
         None
 
     }
+    /*
     public enum WeaponType
     {
         ShortSword,
-        Sword
+        Sword,
+        Bow, 
+        Axe,
+        Blunt
     }
-
+    */
     public enum ItemCategory
     {
         Equipment,

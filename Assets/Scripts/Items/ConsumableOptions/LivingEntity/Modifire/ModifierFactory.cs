@@ -86,8 +86,8 @@ public class ModifierFactory
             return;
         }
 
-        ModifierOptionData optionData = modifierDataManager.GetModifierOptionData(optionKey);
-        List<string> modIds = modifierDataManager.Get_ModifierOptionKeys(optionKey);
+        ModifierGroupData optionData = modifierDataManager.GetModifierGroupData(optionKey);
+        List<string> modIds = modifierDataManager.Get_ModifierGroupKeys(optionKey);
 
         if(modIds == null)
         {
@@ -115,18 +115,18 @@ public class ModifierFactory
         for(int i = 0; i < optionData.modDatas.Count; i++)
         {
             string baseId = optionData.modDatas[i].modifierId;
-            ModifierData modData = optionData.modDatas[i];
+            Modifier modBase = modifierPooler.GetModifier(baseId);
             Debug.Log("[ModifierFactory] AssembleOption: " + optionKey + "에 Modifier 추가 시도: " + baseId); 
             if (baseId == null)
             {
                 Debug.LogWarning($"[ModifierFactory] AssembleOption 호출 시 {optionKey}에 해당하는 모디파이어옵션 ID가 null입니다.");
                 continue;
             }   
-            Modifier mod = modifierPooler.GetModifier(baseId);
-            Modifier baseMod = modifierDataManager.Get_ModifierBase(baseId);
-            mod.SetData(modData);
-            mod.Set_BaseModData(baseMod);
-            option.myMods.Add(mod);
+            ModifierValueData modifierValueData = optionData.modDatas[i];   
+            //Modifier mod = modifierPooler.GetModifier(baseId);
+            //Modifier baseMod = modifierDataManager.Get_ModifierBase(baseId);
+            modBase.SetData(modifierValueData);
+            option.myMods.Add(modBase);
         }
         /*
         foreach (var id in modIds)
