@@ -98,7 +98,10 @@ public class StatBuff : BuffAction
 
     public override Modifier GetMyModifier()
     {
-        modifier = (BuffModifier)ModifierManager.instance.GetModifierPooler().GetModifier(effectID);
+        // Value data is not injected here (effectID is an Act_ id; see report). Kept as before: base-only rent.
+#pragma warning disable 0618
+        modifier = (BuffModifier)ModifierManager.instance.GetModifierPooler().RentBaseOnly(effectID);
+#pragma warning restore 0618
         return modifier;
     }
     public override void Excute(LivingEntity target)

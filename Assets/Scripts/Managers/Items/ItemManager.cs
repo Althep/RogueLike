@@ -121,13 +121,6 @@ public class ItemManager :MonoBehaviour
                 Debug.LogError($"?? 범인 발견! ModifierManager가 {options[i].optionKey} 의  '{targetName}'(을)를 찾지 못했습니다. CSV 오타나 풀(Pool) 등록 상태를 확인하세요!");
                 continue; // 에러를 띄우고, 빈칸이 리스트에 들어가는 것을 막습니다.
             }
-            List<string> modKeys = ModifierManager.instance.Get_ModOptionKeys(targetName);
-
-            foreach(var key in modKeys)
-            {
-                Modifier mod = ModifierManager.instance.Get_Modifier(key);
-                modOption.AddNotIncludeMod(mod);
-            }
             equip.addOptions.Add(modOption);
             /*
             modi.value = options[i].value;
@@ -294,36 +287,17 @@ public class ItemManager :MonoBehaviour
 
                 foreach(var option in addOptions)
                 {
+                    // The option is assembled from data (all modifiers rented by value row).
+                    // The save only restores the saved values onto the matching modifiers; nothing is rented extra.
                     ModifierOption newOption = ModifierManager.instance.Get_ModifierOption(option.optionKey);
-                    foreach(var modSave in option.modifiers)
+                    if (newOption == null)
                     {
-                        Modifier mod = ModifierManager.instance.Get_Modifier(modSave.modifierId);
-
-                        if(mod != null)
-                        {
-                            mod.value = modSave.value;
-                            newOption.AddNotIncludeMod(mod);
-                        }
+                        Debug.LogWarning($"[LoadItem] saved option could not be assembled: {option.optionKey}");
+                        continue;
                     }
+                    newOption.RestoreSavedValues(option.modifiers);
                     equip.addOptions.Add(newOption);
                 }
-                /*
-                for (int i = 0; i < addOptions.Count; i++)
-                {
-                    // 앞서 만든 풀러를 통해 모디파이어 획득
-                    Modifier modi = ModifierManager.instance.Get_Modifier(addOptions[i].modifierId);
-
-                    // 방어 코드 3: 모디파이어를 정상적으로 가져왔는지 확인
-                    if (modi != null)
-                    {
-                        modi.value = addOptions[i].value;
-                        equip.addOptions.Add(modi);
-                    }
-                    else
-                    {
-                        Debug.LogWarning($"[LoadItem] 세이브된 모디파이어를 찾을 수 없습니다: {addOptions[i].modifierId}");
-                    }
-                }*/
             }
         }
 
@@ -337,6 +311,13 @@ public class ItemManager :MonoBehaviour
         {
             for(int i = 0; i<fieldItems[pos].Count; i++)
             {
+                // The item vanishes with the floor: return its option objects (equipment is not released here
+                // until the equip-time ownership of modifiers is settled).
+                ItemBase floorItem = fieldItems[pos][i].GetItem();
+                if (floorItem != null && !(floorItem is EquipItem))
+                {
+                    floorItem.ReleaseOptions();
+                }
                 fieldItems[pos][i].Return();
             }
         }

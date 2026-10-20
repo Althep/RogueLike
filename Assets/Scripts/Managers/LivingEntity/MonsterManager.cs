@@ -357,12 +357,14 @@ public class MonsterManager : MonoBehaviour
                 {
                     foreach(var option in savedData[i].modifiers)
                     {
+                        // The option is assembled from data; the save only restores saved values (no extra rent).
                         ModifierOption newOption = ModifierManager.instance.Get_ModifierOption(option.optionKey);
-                        foreach(ModifierSaveData mod in option.modifiers)
+                        if (newOption == null)
                         {
-                            Modifier modi = ModifierManager.instance.Get_Modifier(mod.modifierId);
-                            newOption.AddNotIncludeMod(modi);
+                            Debug.LogWarning($"[LoadMonster] saved mutation option could not be assembled: {option.optionKey}");
+                            continue;
                         }
+                        newOption.RestoreSavedValues(option.modifiers);
                         monsterEntity.Add_Mutation(newOption);
                     }
                 }
@@ -372,7 +374,23 @@ public class MonsterManager : MonoBehaviour
                     for(int j = 0; j<savedData[i].buffs.Count; j++)
                     {
                         BuffSaveData buffData = savedData[i].buffs[j];
-                        Modifier modi = ModifierManager.instance.Get_Modifier(buffData.modifierId);
+                        Modifier modi;
+                        if (!string.IsNullOrEmpty(buffData.valueId))
+                        {
+                            modi = ModifierManager.instance.Get_ModifierByValueId(buffData.valueId);
+                        }
+                        else
+                        {
+                            // old save (no valueId): only the base id is known
+#pragma warning disable 0618
+                            modi = ModifierManager.instance.GetModifierPooler().RentBaseOnly(buffData.modifierId);
+#pragma warning restore 0618
+                        }
+                        if (modi == null)
+                        {
+                            Debug.LogWarning($"[LoadMonster] saved buff could not be rented: {buffData.valueId} / {buffData.modifierId}");
+                            continue;
+                        }
                         int duration = buffData.leftDuration;
                         modi.value = buffData.value;
 

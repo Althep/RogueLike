@@ -80,13 +80,13 @@ public class ModifierManager : MonoBehaviour
     {
         return modifierPooler.GetModifierOption(id);
     }
-    public Modifier Get_Modifier(string id)
+    public Modifier Get_ModifierByValueId(string valueId)
     {
-        return modifierPooler.GetModifier(id);
+        return modifierPooler.RentByValueId(valueId);
     }
     public List<string> Get_ModOptionKeys(string id)
     {
-        return modifierDataManager.Get_ModifierOptionKeys(id);
+        return modifierDataManager.Get_ModifierGroupKeys(id);
     }
     public void Return_Modifier(Modifier modifier)
     {

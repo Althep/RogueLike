@@ -15,7 +15,7 @@ Buff_IceResist,StatBuff,FALSE,IceResist,OnUse,50,BuffModifier
 Buff_ThunderResist,StatBuff,FALSE,ThunderResist,OnUse,50,BuffModifier
 Buff_Regen,StatBuff,FALSE,Regen,OnUse,50,BuffModifier
 Buff_Evasion,StatBuff,FALSE,Evasion,OnUse,50,BuffModifier
-Buff_LifeSeal,LifeSteal,FALSE,LifeSeal,OnUse,50,BuffModifier
-Buff_Teleport,AddState,FALSE,Teleport,OnUse,50,BuffModifier
+Buff_LifeSteal,LifeSteal,FALSE,LifeSeal,OnUse,50,BuffModifier
+Buff_Telleport,AddState,FALSE,Teleport,OnUse,50,BuffModifier
 Buff_Blink,AddState,FALSE,Blink,OnUse,50,BuffModifier
 Buff_Ev,StatBuff,FALSE,Evasion,OnUse,50,BuffModifier

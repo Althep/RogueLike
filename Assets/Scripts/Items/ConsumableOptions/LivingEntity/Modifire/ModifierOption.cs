@@ -25,23 +25,13 @@ public class ModifierOption : IPoolScript
 
     public void Reset()
     {
-        optionKey = null;
-        descKey = null;
-        foreach (var mod in myMods)
-        {
-            mod.Return();
-        }
-        
+        // Delegates to the pool so options are returned exactly once, together with their modifiers.
+        Return();
     }
 
     public void Return()
     {
-        for(int i = 0; i<myMods.Count; i++)
-        {
-            myMods[i].Return();
-        }
-        myMods.Clear();
-        optionKey = null;
+        ModifierManager.instance.Return_ModifierOption(this);
     }
 
     public void SetScriptType(Defines.PoolScriptType type)
@@ -64,15 +54,70 @@ public class ModifierOption : IPoolScript
 
     public void AddNotIncludeMod(Modifier mod)
     {
-        if(!myMods.Any(m=> m.id!= mod.id))
+        if (mod == null) return;
+        for (int i = 0; i < myMods.Count; i++)
         {
-            myMods.Add(mod);
+            if (myMods[i].valueId == mod.valueId) return;
+        }
+        myMods.Add(mod);
+    }
+
+    // Load path: this option was already assembled from data (rented by value row).
+    // Overwrites only the saved runtime value on the modifier with the same valueId.
+    // Old saves without valueId fall back to the base id (same index first, then first match).
+    public void RestoreSavedValues(List<ModifierSaveData> saved)
+    {
+        if (saved == null) return;
+        for (int s = 0; s < saved.Count; s++)
+        {
+            ModifierSaveData save = saved[s];
+            Modifier target = null;
+            if (!string.IsNullOrEmpty(save.valueId))
+            {
+                for (int i = 0; i < myMods.Count; i++)
+                {
+                    if (myMods[i].valueId == save.valueId)
+                    {
+                        target = myMods[i];
+                        break;
+                    }
+                }
+            }
+            else if (!string.IsNullOrEmpty(save.modifierId))
+            {
+                if (s < myMods.Count && myMods[s].baseID == save.modifierId)
+                {
+                    target = myMods[s];
+                }
+                else
+                {
+                    for (int i = 0; i < myMods.Count; i++)
+                    {
+                        if (myMods[i].baseID == save.modifierId)
+                        {
+                            target = myMods[i];
+                            break;
+                        }
+                    }
+                }
+            }
+
+            if (target != null)
+            {
+                target.value = save.value;
+            }
+            else
+            {
+                Debug.LogWarning("[ModifierOption] saved modifier not found in option " + optionKey + ": " + save.valueId + " / " + save.modifierId);
+            }
         }
     }
 
     public ModifierOptionSaveData SaveData()
     {
         ModifierOptionSaveData newData = new ModifierOptionSaveData();
+        newData.optionKey = optionKey;
+        newData.modifiers = new List<ModifierSaveData>(myMods.Count);
 
         foreach(Modifier mod in myMods)
         {

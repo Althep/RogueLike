@@ -15,16 +15,33 @@ public class ModifierValueData
     public int priority;
     public string descKey;
     public int keyOder;
+    // CSV에 컬럼이 있을 때만 베이스 값을 덮어쓴다 (없으면 베이스 모디파이어 값 유지)
+    public bool hasIsMulti;
+    public bool hasPriority;
+
+    //버프 모디파이어 정보 (ModOption_Buff)
+    public string stringValue, effectName;
+    public int minDuration, maxDuration;
+    public BuffCategory buffCategory;
+    public BuffType buffType;
+
     public void ParseFromCsv(Dictionary<string, object> row)
     {
         Utils.TrySetValue(row, "ID", ref valueId);
         Utils.TrySetValue(row, "ModifierID", ref modifierId);
         Utils.TrySetValue(row, "OptionKey", ref optionKey);
-        Utils.TrySetValue(row, "IsMulti", ref isMulti);
+        hasIsMulti = Utils.TrySetValue(row, "IsMulti", ref isMulti);
         Utils.TrySetValue(row, "Value", ref value);
-        Utils.TrySetValue(row, "Priority", ref priority);
+        hasPriority = Utils.TrySetValue(row, "Priority", ref priority);
         Utils.TrySetValue(row, "DescKey", ref descKey);
         Utils.TrySetValue(row, "KeyOder", ref keyOder);
+        //버프
+        Utils.TrySetValue(row, "StringValue", ref stringValue);
+        Utils.TrySetValue(row, "effectName", ref effectName);
+        Utils.TrySetValue(row, "MinDuration", ref minDuration);
+        Utils.TrySetValue(row, "MaxDuration", ref maxDuration);
+        Utils.TryConvertEnum(row, "BuffCategory", ref buffCategory);
+        Utils.TryConvertEnum(row, "BuffType", ref buffType);
     }
 }
 public class ModifierGroupData

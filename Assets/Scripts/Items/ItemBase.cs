@@ -83,4 +83,21 @@ public abstract class ItemBase
         itemSaveData.itemCount = itemCount;
         return itemSaveData;
     }
+
+    // Returns every option object (and the modifiers it holds) to the pool.
+    // Call only when the item disappears for good (never when it only moves to an inventory).
+    public virtual void ReleaseOptions()
+    {
+        ReleaseOptionList(options);
+    }
+
+    protected static void ReleaseOptionList(List<ModifierOption> list)
+    {
+        if (list == null) return;
+        for (int i = 0; i < list.Count; i++)
+        {
+            ModifierManager.instance.Return_ModifierOption(list[i]);
+        }
+        list.Clear();
+    }
 }

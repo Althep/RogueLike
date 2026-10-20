@@ -10,6 +10,7 @@ public class ConsumableItem : ItemBase
     public override ItemBase Clone()
     {
         ConsumableItem newConsum = ItemManager.instance.ItemMake(name) as ConsumableItem;
+        newConsum.ReleaseOptions(); // return the options ItemMake rented; CopyBaseProperties replaces the list below
         CopyBaseProperties(newConsum); // 여기서 newConsum.options가 깊은 복사로 새로 생성됨!
         newConsum.consumableType = consumableType;
 

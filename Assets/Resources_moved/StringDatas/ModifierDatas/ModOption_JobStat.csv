@@ -1,4 +1,4 @@
-ID,OptionKey,ModifierID,Value,Job,DeskKey
+ID,OptionKey,ModifierID,Value,Job,DescKey
 Warrior_Str,Warrior_Str,Job_Str,2,Warrior,String_Mod_Str
 Warrior_Dex,Warrior_Dex,Job_Dex,1,Warrior,String_Mod_Dex
 Warrior_Int,Warrior_Int,Job_Int,-3,Warrior,String_Mod_Int

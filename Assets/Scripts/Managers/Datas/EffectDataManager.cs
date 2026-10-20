@@ -196,7 +196,9 @@ public class EffectDataManager : AsyncDataManager<EffectDataManager>
         copy.maxTime = origin.maxTime;
         if(copy is StatBuff buff && origin is StatBuff originBuff)
         {
-            buff.modifier = (BuffModifier)modifierPooler.GetModifier(originBuff.modifier.id);
+#pragma warning disable 0618
+            buff.modifier = (BuffModifier)modifierPooler.RentBaseOnly(originBuff.modifier.id);
+#pragma warning restore 0618
         }
         Debug.Log($"{id} Effect 카피 완료 반환");
         return copy;

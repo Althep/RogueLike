@@ -135,7 +135,15 @@ public class ModifierController
 
     public void AddBuff(ModifierOption modifier) => AddModifierOptionInternal(buffs, modifier);
     public void AddEquipment(ModifierOption modifier) => AddModifierOptionInternal(equips, modifier);
-    public void AddMutation(ModifierOption modifier) => AddModifierOptionInternal(mutation, modifier);
+    public void AddMutation(ModifierOption modifier)
+    {
+        AddModifierOptionInternal(mutation, modifier);
+        // keep the option so that MutateOptionSave() can save it (save/load of mutations)
+        if (modifier != null && modifier.optionKey != null && !mutationOptions.ContainsKey(modifier.optionKey))
+        {
+            mutationOptions.Add(modifier.optionKey, modifier);
+        }
+    }
 
     public void AddBuff(Modifier modifier) => AddModifierInternal(buffs, modifier);
     public void AddEquipment(Modifier modifier) => AddModifierInternal(equips, modifier);
@@ -144,7 +152,14 @@ public class ModifierController
 
     public void RemoveBuff(ModifierOption modifier) => RemoveModifierOptionInternal(buffs, modifier);
     public void RemoveEquipment(ModifierOption modifier) => RemoveModifierOptionInternal(equips, modifier);
-    public void RemoveMutate(ModifierOption modifier) => RemoveModifierOptionInternal(mutation, modifier);
+    public void RemoveMutate(ModifierOption modifier)
+    {
+        RemoveModifierOptionInternal(mutation, modifier);
+        if (modifier != null && modifier.optionKey != null)
+        {
+            mutationOptions.Remove(modifier.optionKey);
+        }
+    }
 
     public void RemoveBuff(Modifier modifier) => RemoveModifiernInternal(buffs, modifier);
     public void RemoveEquipment(Modifier modifier) => RemoveModifiernInternal(equips, modifier);
@@ -313,7 +328,11 @@ public class ModifierController
     // ==========================================
     // 기타 유틸리티 및 세이브/로드
     // ==========================================
-    public void Reset_Mutations() => ResetModifiers(mutation);
+    public void Reset_Mutations()
+    {
+        ResetModifiers(mutation);
+        mutationOptions.Clear();
+    }
     public void Reset_Buffs() => ResetModifiers(buffs);
     private void ResetModifiers(Dictionary<ModifierTriggerType, List<Modifier>> target) => target.Clear();
 
@@ -358,7 +377,8 @@ public class ModifierController
             BuffInstance buffInstance = buffInstances[i];
             BuffSaveData buffData = new BuffSaveData
             {
-                modifierId = buffInstance.modifier.id,
+                valueId = buffInstance.modifier.valueId,
+                modifierId = buffInstance.modifier.baseID,
                 value = buffInstance.modifier.value,
                 leftDuration = buffInstance.endTurn - TurnManager.instance.GlovalTurn
             };
@@ -387,6 +407,7 @@ public class ModifierController
             }
         }
         mutation.Clear();
+        mutationOptions.Clear();
         //모디파이어 리셋 , 장비는 UnEquip작성 후 모두 UnEquip하기
     }
 }

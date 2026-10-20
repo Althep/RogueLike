@@ -32,12 +32,14 @@ public struct ModifierOptionSaveData
 public struct ModifierSaveData
 {
     public float value;
-    public string modifierId;
+    public string valueId;     // value row id (ModOption_*.csv ID)
+    public string modifierId;  // base modifier id (Mod_*.csv ID)
 }
 public struct BuffSaveData
 {
     public float value;
-    public string modifierId;
+    public string valueId;     // value row id (ModOption_*.csv ID)
+    public string modifierId;  // base modifier id (Mod_*.csv ID)
     public int leftDuration;
 }
 public class ItemSaveData

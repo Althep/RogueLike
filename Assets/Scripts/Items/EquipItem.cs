@@ -25,27 +25,24 @@ public class EquipItem : ItemBase
         return equipmentType;
     }
 
+    public override void ReleaseOptions()
+    {
+        base.ReleaseOptions();
+        ReleaseOptionList(addOptions);
+    }
+
     public override ItemSaveData SaveData()
     {
         ItemSaveData itemSaveData = new ItemSaveData();
-
-        List<ModifierOptionSaveData> modifierOptionSaveData = new List<ModifierOptionSaveData>();
+        itemSaveData.itemId = id;
+        itemSaveData.itemCount = itemCount;
+        itemSaveData.addOptionsData = new List<ModifierOptionSaveData>(addOptions.Count);
 
         for(int i = 0; i<addOptions.Count; i++)
         {
             ModifierOptionSaveData modSaved = addOptions[i].SaveData();
             itemSaveData.addOptionsData.Add(modSaved);
         }
-        //List<ModifierSaveData> addOptions = new List<ModifierSaveData>(); // 장비의 추가 옵션
         return itemSaveData;
-        /*
-        for (int i = 0; i<addOptions.Count; i++)
-        {
-            addOptions.Add(this.addOptions[i].SaveData());
-        }
-        itemSaveData.itemCount = itemCount;
-        itemSaveData.itemId = id;
-        itemSaveData.addOptionsData = addOptions;
-        return itemSaveData;*/
     }
 }

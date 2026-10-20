@@ -7,7 +7,7 @@ Weapon_Inchant_Damage,Damage,FALSE,Passive,50,StatModifier
 Weapon_Inchant_Accurancy,Accuracy,FALSE,Passive,50,StatModifier
 Weapon_AttackSpeed,AttackSpeed,FALSE,Passive,50,StatModifier
 Weapon_MagicDamage,MagicDamage,FALSE,Passive,50,StatModifier
-Weapon_MagicAccurancy,MagicAccuracy,FALSE,Passive,50,StatModifier
+Weapon_MagicAccuracy,MagicAccuracy,FALSE,Passive,50,StatModifier
 Weapon_AttackRange,AttackRange,FALSE,Passive,50,StatModifier
 Weapon_SpellSpeed,SpellSpeed,FALSE,Passive,50,StatModifier
 Armor_Def,Defense,FALSE,Passive,50,StatModifier

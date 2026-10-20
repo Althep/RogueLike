@@ -15,7 +15,11 @@ public class Modifier : IPoolScript
     public float value;
     public string stringValue;
     public string baseID;
+    public string valueId;
+    public string descKey; // UI 표기용 스트링 키
     public ModifierType modifierType;
+    // true while the object sits in the pool (guards against duplicate returns)
+    public bool isInPool;
 
     public PoolScriptType GetScriptType()
     {
@@ -26,22 +30,20 @@ public class Modifier : IPoolScript
     {
         poolType = type;
     }
+    // 베이스 ID 풀에서 꺼낸 모디파이어에 밸류(수치) 데이터만 덮어쓴다
     public virtual void SetModifierValue(ModifierValueData modifierValueData)
     {
+        valueId = modifierValueData.valueId;
         value = modifierValueData.value;
-        isMulti = modifierValueData.isMulti;
-        priority = modifierValueData.priority;
-        stringValue = modifierValueData.descKey;
-    }
-    public virtual void SetData(ModifierData modData)
-    {
-        id = modData.modifierId;
-        triggerType = modData.triggerType;
-        stat = modData.stat;
-        priority = modData.priority;
-        isMulti = modData.isMulti;
-        value = modData.value;
-        modifierType = modData.modifierType;
+        descKey = modifierValueData.descKey;
+        if (modifierValueData.hasIsMulti)
+        {
+            isMulti = modifierValueData.isMulti;
+        }
+        if (modifierValueData.hasPriority)
+        {
+            priority = modifierValueData.priority;
+        }
     }
     public virtual void Set_BaseModData(Modifier mod)
     {
@@ -63,9 +65,14 @@ public class Modifier : IPoolScript
         newOne.value = this.value;
     }
 
+    // WARNING: id / baseID are the pool return key. Never clear them in Reset()
+    // (a past bug: returning with a cleared key sent objects to the wrong pool).
     public virtual void Reset()
     {
         //id = null;
+        valueId = null;
+        descKey = null;
+        stringValue = null;
         triggerType = ModifierTriggerType.Passive;
         stat = StatType.Accuracy;
         priority = 0;
@@ -75,7 +82,7 @@ public class Modifier : IPoolScript
 
     public ModifierSaveData SaveData()
     {
-        ModifierSaveData saveData = new ModifierSaveData {value = value, modifierId = id };
+        ModifierSaveData saveData = new ModifierSaveData {value = value, valueId = valueId, modifierId = baseID };
 
         return saveData;
     }
@@ -87,7 +94,7 @@ public class Modifier : IPoolScript
 
     public virtual void Return()
     {
-        Reset();
+        // Reset() is done by the pool (ModifierPooler.ReturnModifier) after the pool key is read.
         ModifierManager.instance.Return_Modifier(this);
     }
 
@@ -192,14 +199,21 @@ public class BuffModifier : Modifier
         this.duration = 0;
     }
 
-    public override void SetData(ModifierData modData)
+    public override void SetModifierValue(ModifierValueData modifierValueData)
     {
-        base.SetData(modData);
-        minTime = (int)modData.minDuration;
-        maxTime = (int)modData.maxDuration;
-        stringValue = modData.stringValue;
-        effectName = modData.effectName;
-        buffType = modData.buffType;
+        base.SetModifierValue(modifierValueData);
+        minTime = modifierValueData.minDuration;
+        maxTime = modifierValueData.maxDuration;
+        buffCategory = modifierValueData.buffCategory;
+        buffType = modifierValueData.buffType;
+        if (!string.IsNullOrEmpty(modifierValueData.stringValue))
+        {
+            stringValue = modifierValueData.stringValue;
+        }
+        if (!string.IsNullOrEmpty(modifierValueData.effectName))
+        {
+            effectName = modifierValueData.effectName;
+        }
     }
 
     void GetStats()
@@ -232,8 +246,10 @@ public class BuffModifier : Modifier
         minTime = 0;
         maxTime = 0;
         stringValue = null;
+        effectName = null;
         actionType = 0 ;
         buffCategory = 0;
+        buffType = default;
         duration = 0;
     }
     public void SetMyAction(ModifierAction modAction)
@@ -476,6 +492,8 @@ public class ItemModifier : Modifier
         base.Reset();
         itemTargetType = ItemTargetType.Category;
         itemCategory = ItemCategory.Consumable;
+        specificType = null;
+        Equipable = false;
     }
 
 }

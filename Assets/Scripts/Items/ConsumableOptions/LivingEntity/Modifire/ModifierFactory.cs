@@ -27,8 +27,8 @@ public class ModifierFactory
     // 1. 단일 Modifier 생성 (풀러에서 호출)
     public Modifier CreateNewModifier(string id)
     {
-        ModifierData modifierDatas = modifierDataManager.GetModifierData(id);
-        Modifier newMod = CreateNewModifierToType(modifierDatas.modifierType);
+        Modifier baseMod = modifierDataManager.Get_ModifierBase(id);
+        Modifier newMod = CreateNewModifierToType(baseMod.modifierType);
         return newMod;
     }
 
@@ -75,7 +75,7 @@ public class ModifierFactory
     // 하위 Modifier들을 가져와 조립하는 역할만 수행
     public void AssembleOption(ModifierOption option, string optionKey)
     {
-        Debug.Log($"[ModifierFactory] AssembleOption 호출: {optionKey}");
+        EditorLog($"[ModifierFactory] AssembleOption: {optionKey}");
         if (modifierDataManager == null)
         {
             Debug.Log("모디파이어 데이터 매니저 X") ;
@@ -89,7 +89,7 @@ public class ModifierFactory
         ModifierGroupData optionData = modifierDataManager.GetModifierGroupData(optionKey);
         List<string> modIds = modifierDataManager.Get_ModifierGroupKeys(optionKey);
 
-        if(modIds == null)
+        if(optionData == null || modIds == null)
         {
             Debug.LogWarning($"[ModifierFactory] {optionKey}에 해당하는 모디파이어옵션 ID가 없습니다.");
             return;
@@ -114,37 +114,26 @@ public class ModifierFactory
 
         for(int i = 0; i < optionData.modDatas.Count; i++)
         {
-            string baseId = optionData.modDatas[i].modifierId;
-            Modifier modBase = modifierPooler.GetModifier(baseId);
-            Debug.Log("[ModifierFactory] AssembleOption: " + optionKey + "에 Modifier 추가 시도: " + baseId); 
-            if (baseId == null)
+            ModifierValueData valueData = optionData.modDatas[i];
+            if (valueData.modifierId == null)
             {
-                Debug.LogWarning($"[ModifierFactory] AssembleOption 호출 시 {optionKey}에 해당하는 모디파이어옵션 ID가 null입니다.");
+                Debug.LogWarning($"[ModifierFactory] AssembleOption: value row {valueData.valueId} of {optionKey} has no modifierId.");
                 continue;
-            }   
-            ModifierValueData modifierValueData = optionData.modDatas[i];   
-            //Modifier mod = modifierPooler.GetModifier(baseId);
-            //Modifier baseMod = modifierDataManager.Get_ModifierBase(baseId);
-            modBase.SetData(modifierValueData);
-            option.myMods.Add(modBase);
-        }
-        /*
-        foreach (var id in modIds)
-        {
-            Debug.Log("[ModifierFactory] AssembleOption: " + optionKey + "에 Modifier 추가 시도: " + id); 
-            ModifierData modData = optionData.modDatas.Find(m => m.id == id);
-            if (id == null)
-            {
-                Debug.LogWarning($"[ModifierFactory] AssembleOption 호출 시 {optionKey}에 해당하는 모디파이어옵션 ID가 null입니다.");
-                continue;
-            }   
-            Modifier newMod = modifierPooler.GetModifier(id);
-            if (newMod != null)
-            {
-                option.myMods.Add(newMod);
-                Debug.Log($"[ModifierFactory] AssembleOption: {optionKey}에 Modifier 추가: {newMod}");
             }
-        }*/
+            // Rent by value row: pool key = base id, all value fields injected by the pool.
+            Modifier mod = modifierPooler.RentByValue(valueData);
+            if (mod == null)
+            {
+                continue;
+            }
+            option.myMods.Add(mod);
+        }
+    }
+
+    [System.Diagnostics.Conditional("UNITY_EDITOR")]
+    private static void EditorLog(string message)
+    {
+        Debug.Log(message);
     }
 
     // 템플릿 기반 복사 생성 로직 (필요 시 사용)
