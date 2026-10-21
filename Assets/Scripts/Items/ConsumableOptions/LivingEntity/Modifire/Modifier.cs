@@ -91,7 +91,9 @@ public class Modifier : IPoolScript
     {
 
     }
-
+    public virtual void Apply(ModifierContext context)
+    {
+    }
     public virtual void Return()
     {
         // Reset() is done by the pool (ModifierPooler.ReturnModifier) after the pool key is read.
@@ -152,7 +154,25 @@ public class StatModifier : Modifier
             context.stats[stat] += value;
         }
     }
-
+    public override void Apply(ModifierContext context)
+    {
+        if (isMulti)
+        {
+            if (!context.multifle.ContainsKey(this.stat))
+            {
+                context.multifle.Add(stat, 0f);
+            }
+            context.multifle[stat] += value;
+        }
+        else
+        {
+            if (!context.stats.ContainsKey(this.stat))
+            {
+                context.stats.Add(stat, 0);
+            }
+            context.stats[stat] += value;
+        }
+    }
     public override void Copy(Modifier newOne)
     {
         base.Copy(newOne);
