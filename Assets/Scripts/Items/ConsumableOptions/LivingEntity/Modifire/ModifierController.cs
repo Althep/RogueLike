@@ -79,7 +79,7 @@ public class ModifierController
         
     }
 
-    public void OnChangeEquipMent()
+    public void OnChangeEquipment()
     {
         dirtyFlags[ModifierTriggerType.OnEquip] = true;
         GetUpdatedContext(ModifierTriggerType.OnEquip);
@@ -112,7 +112,7 @@ public class ModifierController
     {
         for(int i = 0; i<modifier.myMods.Count; i++)
         {
-            RemoveModifiernInternal(targetDict, modifier.myMods[i]);
+            RemoveModifierInternal(targetDict, modifier.myMods[i]);
         }
     }
 
@@ -161,11 +161,11 @@ public class ModifierController
         }
     }
 
-    public void RemoveBuff(Modifier modifier) => RemoveModifiernInternal(buffs, modifier);
-    public void RemoveEquipment(Modifier modifier) => RemoveModifiernInternal(equips, modifier);
-    public void RemoveMutate(Modifier modifier) => RemoveModifiernInternal(mutation, modifier);
+    public void RemoveBuff(Modifier modifier) => RemoveModifierInternal(buffs, modifier);
+    public void RemoveEquipment(Modifier modifier) => RemoveModifierInternal(equips, modifier);
+    public void RemoveMutate(Modifier modifier) => RemoveModifierInternal(mutation, modifier);
 
-    public void RemoveModifiernInternal(Dictionary<ModifierTriggerType, List<Modifier>> targetDict, Modifier modifier)
+    public void RemoveModifierInternal(Dictionary<ModifierTriggerType, List<Modifier>> targetDict, Modifier modifier)
     {
         if (modifier == null || !targetDict.ContainsKey(modifier.triggerType)) return;
 
@@ -200,28 +200,36 @@ public class ModifierController
 
     private void RefreshPassiveModifiers()
     {
-        ApplyPassivesFrom(mutation);
-        ApplyPassivesFrom(equips);
-        ApplyPassivesFrom(buffs);
+        // AddModifierInternal에서 이미 dirtyFlags[Passive] = true로 설정됨.
+        // Clear 후 mutation/equips/buffs 순서로 1회 재적용한다(GetUpdatedContext와 같은 경로).
+        GetUpdatedContext(ModifierTriggerType.Passive);
+
+        // [이전 구현 - 주석 처리]
+        // 컨텍스트를 Clear하지 않고 모든 Passive 모디파이어를 다시 더해서
+        // Passive 값이 이중/누적으로 쌓이는 버그가 있어 위 방식으로 교체함.
+        // ApplyPassivesFrom(mutation);
+        // ApplyPassivesFrom(equips);
+        // ApplyPassivesFrom(buffs);
     }
 
-    private void ApplyPassivesFrom(Dictionary<ModifierTriggerType, List<Modifier>> targetDict)
-    {
-        if (targetDict.TryGetValue(ModifierTriggerType.Passive, out var list) && list.Count > 0)
-        {
-            foreach (var modifier in list)
-            {
-                ModifierTriggerType trigger = modifier.triggerType;
-                ModifierContext context = Get_Context(trigger);
-                modifier.Apply(myEntity); // 패시브 모디파이어 적용
-                Debug.Log($"[ModifierController] ApplyPassivesFrom: {modifier.id} 적용됨");
-            }
-        }
-        if(dirtyFlags.TryGetValue(ModifierTriggerType.Passive, out bool isDirty) && isDirty)
-        {
-            dirtyFlags[ModifierTriggerType.Passive] = false;
-        }
-    }
+    // [이전 구현 - 주석 처리] RefreshPassiveModifiers 교체로 더 이상 호출되지 않음(위 주석 참조).
+    // private void ApplyPassivesFrom(Dictionary<ModifierTriggerType, List<Modifier>> targetDict)
+    // {
+    //     if (targetDict.TryGetValue(ModifierTriggerType.Passive, out var list) && list.Count > 0)
+    //     {
+    //         foreach (var modifier in list)
+    //         {
+    //             ModifierTriggerType trigger = modifier.triggerType;
+    //             ModifierContext context = Get_Context(trigger);
+    //             modifier.Apply(myEntity); // 패시브 모디파이어 적용
+    //             Debug.Log($"[ModifierController] ApplyPassivesFrom: {modifier.id} 적용됨");
+    //         }
+    //     }
+    //     if(dirtyFlags.TryGetValue(ModifierTriggerType.Passive, out bool isDirty) && isDirty)
+    //     {
+    //         dirtyFlags[ModifierTriggerType.Passive] = false;
+    //     }
+    // }
 
     // ==========================================
     // 3. 액티브 발동 (매 이벤트마다 초기화 후 장전)
@@ -253,13 +261,27 @@ public class ModifierController
 
         if (targetDict.TryGetValue(type, out var list) && list.Count > 0)
         {
+            ModifierContext context = Get_Context(type);
             foreach (var modifier in list)
             {
-                modifier.Apply(myEntity); // context.modifierActions에 액션 Add
+                ApplyModifier(modifier, context); // context.modifierActions에 액션 Add
             }
         }
 
         return removedAny;
+    }
+
+    // 엔티티가 있으면 기존 동작(엔티티 경로), 없으면 컨텍스트 경로(프리뷰 checker)
+    private void ApplyModifier(Modifier modifier, ModifierContext context)
+    {
+        if (myEntity != null)
+        {
+            modifier.Apply(myEntity);
+        }
+        else
+        {
+            modifier.Apply(context);
+        }
     }
 
     // ==========================================
@@ -279,7 +301,7 @@ public class ModifierController
         if (hasMutation) CheckRestrictionModifiers(mutateList, item, tempContext);
         if (hasEquip) CheckRestrictionModifiers(equipList, item, tempContext);
 
-        foreach (var kvp in tempContext.multifle)
+        foreach (var kvp in tempContext.multiplier)
         {
             if (kvp.Value <= -1f)
                 return true;
@@ -312,8 +334,8 @@ public class ModifierController
                     // [수정된 부분] myEntity에 Apply하지 말고, tempContext의 제한 수치만 조작!
                     if (itemModi.isMulti)
                     {
-                        if (!tempContext.multifle.ContainsKey(itemModi.stat)) tempContext.multifle.Add(itemModi.stat, 0f);
-                        tempContext.multifle[itemModi.stat] += itemModi.value;
+                        if (!tempContext.multiplier.ContainsKey(itemModi.stat)) tempContext.multiplier.Add(itemModi.stat, 0f);
+                        tempContext.multiplier[itemModi.stat] += itemModi.value;
                     }
                     else
                     {
@@ -340,7 +362,7 @@ public class ModifierController
     public Dictionary<ModifierTriggerType, List<Modifier>> Get_Buffs() => buffs;
     public Dictionary<ModifierTriggerType, List<Modifier>> Get_Equips() => equips;
 
-    public List<ModifierSaveData> MutetionSave() => SaveModifierInternal(mutation);
+    public List<ModifierSaveData> MutationSave() => SaveModifierInternal(mutation);
     public List<ModifierOptionSaveData> MutateOptionSave() => SaveModifierOptionInternal(mutationOptions);
 
     private List<ModifierOptionSaveData> SaveModifierOptionInternal(Dictionary<string,ModifierOption> target)

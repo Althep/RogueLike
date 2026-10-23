@@ -9,7 +9,7 @@ public class ModifierContext
     public LivingEntity owner;
     public ModifierTriggerType triggerType; // 발동조건
     public Dictionary<StatType,float> stats; // 각 능력치
-    public Dictionary<StatType, float> multifle;
+    public Dictionary<StatType, float> multiplier;
     public List<ModifierAction> modifierActions = new List<ModifierAction>();
     public List<StatusEffect> statusEffect = new List<StatusEffect>();
     public ModifierType ModifierType;
@@ -27,9 +27,9 @@ public class ModifierContext
         {
             stats = new Dictionary<StatType, float>();
         }
-        if (multifle == null)
+        if (multiplier == null)
         {
-            multifle = new Dictionary<StatType, float>();
+            multiplier = new Dictionary<StatType, float>();
         }
         foreach (StatType type in types)
         {
@@ -37,10 +37,10 @@ public class ModifierContext
         }
         foreach (StatType type in types)
         {
-            multifle.Add(type, 0);
+            multiplier.Add(type, 0);
         }
     }
-    public void ExcuteModifierActions()
+    public void ExecuteModifierActions()
     {
         for(int i = 0; i<modifierActions.Count; i++)
         {
@@ -59,7 +59,7 @@ public class ModifierContext
         {
             StatType key = allStatTypes[i];
             stats[key] = 0;
-            multifle[key] = 0;
+            multiplier[key] = 0;
         }
         damageType = DamageType.Physical;
 

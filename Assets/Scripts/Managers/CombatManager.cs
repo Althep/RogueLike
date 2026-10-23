@@ -89,13 +89,13 @@ public class CombatManager : MonoBehaviour
 
             info.damage = damage;
 
-            attacker.ExcuteModifierActions(ModifierTriggerType.OnAttack);
+            attacker.ExecuteModifierActions(ModifierTriggerType.OnAttack);
 
             GetDamage(attacker, target, damage);
 
-            target.ExcuteModifierActions(ModifierTriggerType.OnHited);
+            target.ExecuteModifierActions(ModifierTriggerType.OnHited);
 
-            attacker.ExcuteModifierActions(ModifierTriggerType.AfterAttack);
+            attacker.ExecuteModifierActions(ModifierTriggerType.AfterAttack);
         }
         return damage;
     }

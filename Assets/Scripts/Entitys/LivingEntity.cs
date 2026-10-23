@@ -140,7 +140,7 @@ public class LivingEntity : MapEntity
         usingItem = null;
     }
 
-    public bool IsRistricted(ItemBase item, ModifierTriggerType trigger) => modifierController.IsRestricted(item, trigger);
+    public bool IsRestricted(ItemBase item, ModifierTriggerType trigger) => modifierController.IsRestricted(item, trigger);
 
     public void ItemCheck(Vector2Int pos)
     {
@@ -210,10 +210,10 @@ public class LivingEntity : MapEntity
 
     }
 
-    public void ExcuteModifierActions(ModifierTriggerType trigger)
+    public void ExecuteModifierActions(ModifierTriggerType trigger)
     {
         ModifierContext context = modifierController.GetUpdatedContext(trigger);
-        context.ExcuteModifierActions();
+        context.ExecuteModifierActions();
     }
 
     public virtual void OnDeadFunc()

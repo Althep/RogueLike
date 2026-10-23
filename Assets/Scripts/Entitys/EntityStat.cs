@@ -151,7 +151,7 @@ public class EntityStat
             {
                 float baseVal = baseStat[key];
                 float passAdd = passive.stats.TryGetValue(key, out float add) ? add : 0f;
-                float passMul = passive.multifle.TryGetValue(key, out float mul) ? mul : 0f;
+                float passMul = passive.multiplier.TryGetValue(key, out float mul) ? mul : 0f;
 
                 finalStat[key] = (baseVal + passAdd) * (1f + passMul);
             }
@@ -168,10 +168,10 @@ public class EntityStat
             float baseVal = baseStat[key];
 
             float passAdd = passive.stats.TryGetValue(key, out float pAdd) ? pAdd : 0f;
-            float passMul = passive.multifle.TryGetValue(key, out float pMul) ? pMul : 0f;
+            float passMul = passive.multiplier.TryGetValue(key, out float pMul) ? pMul : 0f;
 
             float ctxAdd = context.stats.TryGetValue(key, out float cAdd) ? cAdd : 0f;
-            float ctxMul = context.multifle.TryGetValue(key, out float cMul) ? cMul : 0f;
+            float ctxMul = context.multiplier.TryGetValue(key, out float cMul) ? cMul : 0f;
 
             // 공식: (기본값 + 패시브합 + 액티브합) * (1 + 패시브곱 + 액티브곱)
             activeStatCache[key] = (baseVal + passAdd + ctxAdd) * (1f + passMul + ctxMul);

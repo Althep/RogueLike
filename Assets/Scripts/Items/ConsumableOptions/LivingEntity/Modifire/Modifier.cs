@@ -3,7 +3,6 @@ using System;
 using UnityEngine;
 using System.Collections.Generic;
 using System.Linq;
-using UnityEditor.Tilemaps;
 public class Modifier : IPoolScript
 {
     public PoolScriptType poolType;
@@ -89,7 +88,8 @@ public class Modifier : IPoolScript
 
     public virtual void Apply(LivingEntity entity)
     {
-
+        if (entity == null) return;
+        Apply(entity.Get_Context(triggerType));
     }
     public virtual void Apply(ModifierContext context)
     {
@@ -112,12 +112,12 @@ public class Modifier : IPoolScript
 
 public class StatModifier : Modifier
 {
-    public StatModifier(string id, StatType stat, int value, float multifle, bool isMulty, int priority = 50)
+    public StatModifier(string id, StatType stat, int value, float multiplier, bool isMulti, int priority = 50)
     {
         this.id = id;
         this.stat = stat;
         this.value = value;
-        this.isMulti = isMulty;
+        this.isMulti = isMulti;
         this.priority = priority;
         modifierType = ModifierType.StatModifier;
     }
@@ -125,12 +125,12 @@ public class StatModifier : Modifier
     {
         modifierType = ModifierType.StatModifier;
     }
-    public void Set(string id, StatType stat, int value, float multifle, bool isMulty, int priority = 50)
+    public void Set(string id, StatType stat, int value, float multiplier, bool isMulti, int priority = 50)
     {
         this.id = id;
         this.stat = stat;
         this.value = value;
-        this.isMulti = isMulty;
+        this.isMulti = isMulti;
         this.priority = priority;
     }
     public override void Apply(LivingEntity entity)
@@ -139,11 +139,11 @@ public class StatModifier : Modifier
 
         if (isMulti)
         {
-            if (!context.multifle.ContainsKey(this.stat))
+            if (!context.multiplier.ContainsKey(this.stat))
             {
-                context.multifle.Add(stat, 0f);
+                context.multiplier.Add(stat, 0f);
             }
-            context.multifle[stat] += value;
+            context.multiplier[stat] += value;
         }
         else
         {
@@ -158,11 +158,11 @@ public class StatModifier : Modifier
     {
         if (isMulti)
         {
-            if (!context.multifle.ContainsKey(this.stat))
+            if (!context.multiplier.ContainsKey(this.stat))
             {
-                context.multifle.Add(stat, 0f);
+                context.multiplier.Add(stat, 0f);
             }
-            context.multifle[stat] += value;
+            context.multiplier[stat] += value;
         }
         else
         {
@@ -217,6 +217,12 @@ public class BuffModifier : Modifier
 
         EventManager.instance.AddBuff(entity, this, applyDuration);
         this.duration = 0;
+    }
+    public override void Apply(ModifierContext context)
+    {
+        LivingEntity owner = context?.owner;
+        if (owner == null) return;
+        Apply(owner);
     }
 
     public override void SetModifierValue(ModifierValueData modifierValueData)
@@ -302,11 +308,34 @@ public class DamageModifier : Modifier
         {
             if (isMulti)
             {
-                if (!context.multifle.ContainsKey(stat))
+                if (!context.multiplier.ContainsKey(stat))
                 {
-                    context.multifle.Add(stat, 0f);
+                    context.multiplier.Add(stat, 0f);
                 }
-                context.multifle[stat] += value;
+                context.multiplier[stat] += value;
+            }
+            else
+            {
+                if (!context.stats.ContainsKey(stat))
+                {
+                    context.stats.Add(stat, 0);
+                }
+                context.stats[stat] += value;
+            }
+        }
+    }
+    public override void Apply(ModifierContext context)
+    {
+        if (context == null) return;
+        if (CanEvoke())
+        {
+            if (isMulti)
+            {
+                if (!context.multiplier.ContainsKey(stat))
+                {
+                    context.multiplier.Add(stat, 0f);
+                }
+                context.multiplier[stat] += value;
             }
             else
             {
@@ -352,6 +381,36 @@ public class ActionModifier: Modifier
     public override void Apply(LivingEntity entity)
     {
         ModifierContext context = entity.Get_Context(triggerType);
+        List<ModifierAction> effects = context.modifierActions;
+        bool isAlreadyExist = false;
+
+        // 1. 리스트를 딱 한 번만 돌면서 확인합니다.
+        for (int i = 0; i < effects.Count; i++)
+        {
+            // 내 effectName과 똑같은 버프를 찾았다면?
+            if (effects[i] is BuffAction buff && buff.effectName == this.effectName)
+            {
+                // [수정] 기존 버프의 시간이 아닌, '새로 들어온 이 모디파이어'의 시간으로 갱신!
+                int newDuration = UnityEngine.Random.Range(this.minValue, this.maxValue + 1);
+                buff.SetDuration(newDuration);
+
+                isAlreadyExist = true; // 찾았다고 깃발(플래그)을 듦
+                break; // 이미 갱신했으니 남은 리스트는 더 볼 필요 없이 탈출!
+            }
+        }
+
+        // 2. 만약 리스트를 다 뒤졌는데도 못 찾았다면(새로운 효과라면) 추가합니다.
+        if (!isAlreadyExist)
+        {
+            if (action != null)
+            {
+                context.modifierActions.Add(action);
+            }
+        }
+    }
+    public override void Apply(ModifierContext context)
+    {
+        if (context == null) return;
         List<ModifierAction> effects = context.modifierActions;
         bool isAlreadyExist = false;
 
@@ -468,9 +527,27 @@ public class ItemModifier : Modifier
     }
     public override void Apply(LivingEntity entity)
     {
-        if (Utils.ItemModifierCheck(this,entity.usingItem))
+        if (entity == null || entity.usingItem == null)
+        {
+            Debug.Log($"[ItemModifier] {id}: usingItem is null, skip apply");
+            return;
+        }
+        if (Utils.ItemModifierCheck(this, entity.usingItem))
         {
             ModifierContext context = entity.Get_Context(triggerType);
+            ApplyModifiers(context);
+        }
+    }
+    public override void Apply(ModifierContext context)
+    {
+        ItemBase item = context?.owner?.usingItem;
+        if (item == null)
+        {
+            Debug.Log($"[ItemModifier] {id}: owner or usingItem is null, skip apply");
+            return;
+        }
+        if (Utils.ItemModifierCheck(this, item))
+        {
             ApplyModifiers(context);
         }
     }
@@ -481,11 +558,11 @@ public class ItemModifier : Modifier
     {
         if (isMulti)
         {
-            if (!context.multifle.ContainsKey(stat))
+            if (!context.multiplier.ContainsKey(stat))
             {
-                context.multifle.Add(stat, 0f);
+                context.multiplier.Add(stat, 0f);
             }
-            context.multifle[stat] += value;
+            context.multiplier[stat] += value;
         }
         else
         {
